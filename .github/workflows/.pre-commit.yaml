@@ -1,0 +1,34 @@
+name: pre-commit
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8.5'
+        architecture: 'x64'
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Run Pre-Commit
+      uses: pre-commit/action@v2.0.0
+
+    - name: Linting-Testing
+      run: |
+        pip install -r aioradio/requirements.txt
+        pylint aioradio/*.py aioradio/tests/*.py
+        pytest -vss --github=true --cov=aioradio  --cov-config=.coveragerc --cov-report html --cov-fail-under=70
