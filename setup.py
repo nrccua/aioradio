@@ -2,13 +2,17 @@
 
 from setuptools import setup
 
+with open('README.md', 'r') as fileobj:
+    long_description = fileobj.read()
+
 setup(name='aioradio',
-    version='0.8.0',
+    version='0.8.1',
     description='Generic asynchronous i/o python utilities for AWS services (SQS, S3, DynamoDB, Secrets Manager), Redis, MSSQL (pyodbc), JIRA and more',
-    long_description='Generic asynchronous i/o python utilities for AWS services (SQS, S3, DynamoDB, Secrets Manager), Redis, MSSQL (pyodbc), JIRA and more',
+    long_description=long_description,
     url='https://github.com/nrccua/aioradio',
     author='NRCCUA Architects',
     author_email='architecture@nrccua.org',
+    license="MIT",
     packages=[
         'aioradio',
         'aioradio/aws',
