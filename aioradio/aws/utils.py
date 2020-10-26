@@ -8,6 +8,7 @@
 import asyncio
 import logging
 from asyncio import sleep
+from copy import deepcopy
 from dataclasses import dataclass
 from dataclasses import field
 from time import time
@@ -41,20 +42,10 @@ class AwsServiceManager:
         if self.module not in modules:
             raise ValueError(f'module parameter must be one of the following: {modules}')
 
-        if self.regions:
-            self.service_dict = {
-                region: {
-                    'client': {'obj': None, 'session': None, 'busy': False},
-                    'resource': {'obj': None, 'session': None, 'busy': False},
-                    'active': 0
-                } for region in self.regions
-            }
-        else:
-            self.service_dict = {
-                'client': {'obj': None, 'session': None, 'busy': False},
-                'resource': {'obj': None, 'session': None, 'busy': False},
-                'active': 0
-            }
+        data = {'client': {'obj': None, 'session': None, 'busy': True}, 'active': 0}
+        if self.service == 'dynamodb':
+            data['resource'] = {'obj': None, 'session': None, 'busy': True}
+        self.service_dict = {region: deepcopy(data) for region in self.regions} if self.regions else data
 
         try:
             loop = asyncio.get_event_loop()
@@ -150,7 +141,7 @@ class AwsServiceManager:
             obj = self.service_dict[self.get_region(args, kwargs)] if self.regions else self.service_dict
 
             # Make sure aiobotocore or aioboto3 isn't busy
-            while obj['client']['busy'] or obj['resource']['busy']:
+            while obj['client']['busy'] or ('resource' in obj and obj['resource']['busy']):
                 await sleep(0.01)
 
             error = None
