@@ -20,7 +20,7 @@ SQS = AWS_SERVICE.service_dict
 async def create_queue(queue: str, region: str, attributes: Dict[str, str]) -> Dict[str, str]:
     '''Create SQS queue in region defined.'''
 
-    return await SQS[region]['client'].create_queue(QueueName=queue, Attributes=attributes)
+    return await SQS[region]['client']['obj'].create_queue(QueueName=queue, Attributes=attributes)
 
 
 @AWS_SERVICE.active
@@ -70,9 +70,9 @@ async def get_messages(
     """
 
     messages = []
-    resp = await SQS[region]['client'].get_queue_url(QueueName=queue)
+    resp = await SQS[region]['client']['obj'].get_queue_url(QueueName=queue)
     queue_url = resp['QueueUrl']
-    resp = await SQS[region]['client'].receive_message(
+    resp = await SQS[region]['client']['obj'].receive_message(
         QueueUrl=queue_url,
         WaitTimeSeconds=wait_time,
         MaxNumberOfMessages=max_messages,
@@ -115,9 +115,9 @@ async def send_messages(
     }
     '''
 
-    resp = await SQS[region]['client'].get_queue_url(QueueName=queue)
+    resp = await SQS[region]['client']['obj'].get_queue_url(QueueName=queue)
     queue_url = resp['QueueUrl']
-    result = await SQS[region]['client'].send_message_batch(QueueUrl=queue_url, Entries=entries)
+    result = await SQS[region]['client']['obj'].send_message_batch(QueueUrl=queue_url, Entries=entries)
 
     return result
 
@@ -148,9 +148,9 @@ async def delete_messages(
     }
     '''
 
-    resp = await SQS[region]['client'].get_queue_url(QueueName=queue)
+    resp = await SQS[region]['client']['obj'].get_queue_url(QueueName=queue)
     queue_url = resp['QueueUrl']
-    result = await SQS[region]['client'].delete_message_batch(QueueUrl=queue_url, Entries=entries)
+    result = await SQS[region]['client']['obj'].delete_message_batch(QueueUrl=queue_url, Entries=entries)
 
     return result
 
@@ -161,9 +161,9 @@ async def purge_messages(queue: str, region: str) -> str:
 
     error = ''
     try:
-        resp = await SQS[region]['client'].get_queue_url(QueueName=queue)
+        resp = await SQS[region]['client']['obj'].get_queue_url(QueueName=queue)
         queue_url = resp['QueueUrl']
-        await SQS[region]['client'].purge_queue(QueueUrl=queue_url)
+        await SQS[region]['client']['obj'].purge_queue(QueueUrl=queue_url)
     except ClientError as err:
         if err.response['Error']['Code'] == 'AWS.SimpleQueueService.PurgeQueueInProgress':
             error = err.response['Error']['Message']

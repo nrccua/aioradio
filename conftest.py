@@ -94,7 +94,7 @@ async def s3_client(session, region, s3_config, s3_server):
     kw = moto_config(s3_server)
     async with session.create_client('s3', region_name=region, config=s3_config, **kw) as client:
         real_client = S3['client']
-        S3['client'] = client
+        S3['client']['obj'] = client
         yield client
         S3['client'] = real_client
 
@@ -175,7 +175,7 @@ async def sqs_client(session, region, sqs_config, sqs_server):
     kw = moto_config(sqs_server)
     async with session.create_client('sqs', region_name=region, config=sqs_config, **kw) as client:
         real_client = SQS[region]['client']
-        SQS[region]['client'] = client
+        SQS[region]['client']['obj'] = client
         yield client
         SQS[region]['client'] = real_client
 
@@ -225,7 +225,7 @@ async def secrets_manager_client(session, region, secrets_manager_config, secret
     kw = moto_config(secrets_manager_server)
     async with session.create_client('secretsmanager', region_name=region, config=secrets_manager_config, **kw) as client:
         real_client = SECRETS[region]['client']
-        SECRETS[region]['client'] = client
+        SECRETS[region]['client']['obj'] = client
         yield client
         SECRETS[region]['client'] = real_client
 
@@ -262,7 +262,7 @@ async def dynamodb_session(dynamodb2_server):
 async def dynamodb_client(dynamodb_session, dynamodb_kw, region, dynamodb_config):
     async with dynamodb_session.client('dynamodb', config=dynamodb_config, **dynamodb_kw) as client:
         real_client = DYNAMO[region]['client']
-        DYNAMO[region]['client'] = client
+        DYNAMO[region]['client']['obj'] = client
         yield client
         DYNAMO[region]['client'] = real_client
 
@@ -271,7 +271,7 @@ async def dynamodb_client(dynamodb_session, dynamodb_kw, region, dynamodb_config
 async def dynamodb_resource(dynamodb_session, dynamodb_kw, region, dynamodb_config):
     async with dynamodb_session.resource('dynamodb', config=dynamodb_config, **dynamodb_kw) as resource:
         real_resource = DYNAMO[region]['resource']
-        DYNAMO[region]['resource'] = resource
+        DYNAMO[region]['resource']['obj'] = resource
         yield resource
         DYNAMO[region]['resource'] = real_resource
 

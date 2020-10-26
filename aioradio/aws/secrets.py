@@ -13,7 +13,7 @@ async def get_secret(secret_name: str, region: str) -> str:
     '''Get secret from AWS Secrets Manager.'''
 
     secret = ''
-    response = await SECRETS[region]['client'].get_secret_value(SecretId=secret_name)
+    response = await SECRETS[region]['client']['obj'].get_secret_value(SecretId=secret_name)
     if 'SecretString' in response:
         secret = response['SecretString']
     else:
