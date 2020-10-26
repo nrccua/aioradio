@@ -24,14 +24,14 @@ async def create_dynamo_table(
     error = ''
 
     try:
-        table = await DYNAMO[region]['client'].create_table(
+        table = await DYNAMO[region]['client']['obj'].create_table(
             TableName=table_name,
             AttributeDefinitions=attribute_definitions,
             KeySchema=key_schema,
             ProvisionedThroughput=provisioned_throughput
         )
         await table.meta.client.get_waiter('table_exists').wait(TableName=table_name)
-    except DYNAMO[region]['client'].exceptions.ResourceInUseException as err:
+    except DYNAMO[region]['client']['obj'].exceptions.ResourceInUseException as err:
         error = err.response['Error']['Message']
 
     return error
@@ -42,7 +42,7 @@ async def get_list_of_dynamo_tables(region: str) -> List[str]:
     '''Get list of Dynamo tables in a particular region.'''
 
     tables = []
-    result = await DYNAMO[region]['client'].list_tables()
+    result = await DYNAMO[region]['client']['obj'].list_tables()
     tables = result['TableNames']
 
     return tables
@@ -56,7 +56,7 @@ async def scan_dynamo(table_name: str, region: str, key: Any=None) -> List[Any]:
     scan_kwargs = {'FilterExpression': key} if key is not None else {}
 
     while True:
-        table = await DYNAMO[region]['resource'].Table(table_name)
+        table = await DYNAMO[region]['resource']['obj'].Table(table_name)
         resp = await table.scan(**scan_kwargs)
         result.extend(resp['Items'])
         if 'LastEvaluatedKey' not in resp:
@@ -71,7 +71,7 @@ async def put_item_in_dynamo(table_name: str, region: str, item: Dict[str, Any])
     '''Put item in dynamo table.'''
 
     result = {}
-    table = await DYNAMO[region]['resource'].Table(table_name)
+    table = await DYNAMO[region]['resource']['obj'].Table(table_name)
     result = await table.put_item(Item=item)
     return result
 
@@ -84,7 +84,7 @@ async def query_dynamo(table_name: str, region: str, key: Any):
     query_kwargs = {'KeyConditionExpression': key}
 
     while True:
-        table = await DYNAMO[region]['resource'].Table(table_name)
+        table = await DYNAMO[region]['resource']['obj'].Table(table_name)
         resp = await table.query(**query_kwargs)
         result.extend(resp['Items'])
         if 'LastEvaluatedKey' not in resp:
@@ -118,7 +118,7 @@ async def update_item_in_dynamo(
     if condition_expression:
         update_kwargs['ConditionExpression'] = condition_expression
 
-    table = await DYNAMO[region]['resource'].Table(table_name)
+    table = await DYNAMO[region]['resource']['obj'].Table(table_name)
     result = await table.update_item(**update_kwargs)
 
     return result
@@ -131,7 +131,7 @@ async def batch_write_to_dynamo(table_name: str, region: str, items: List[Dict[s
 
     batch_writer_successful = False
 
-    table = await DYNAMO[region]['resource'].Table(table_name)
+    table = await DYNAMO[region]['resource']['obj'].Table(table_name)
     async with table.batch_writer() as db_writer:
         for item in items:
             await db_writer.put_item(Item=item)
@@ -148,6 +148,6 @@ async def batch_get_items_from_dynamo(
         items: List[Dict[str, Any]]) -> Dict[str, Any]:
     '''Get batch of items from dynamo.'''
 
-    response = await DYNAMO[region]['resource'].batch_get_item(RequestItems={table_name: {'Keys': items}})
+    response = await DYNAMO[region]['resource']['obj'].batch_get_item(RequestItems={table_name: {'Keys': items}})
 
     return response

@@ -16,7 +16,7 @@ S3 = AWS_SERVICE.service_dict
 async def create_bucket(bucket: str) -> Dict[str, str]:
     '''Create an s3 bucket.'''
 
-    return await S3['client'].create_bucket(Bucket=bucket)
+    return await S3['client']['obj'].create_bucket(Bucket=bucket)
 
 
 @AWS_SERVICE.active
@@ -25,7 +25,7 @@ async def upload_file(bucket: str, filepath: str, s3_key: str) -> Dict[str, Any]
 
     response = {}
     with open(filepath, 'rb') as fileobj:
-        response = await S3['client'].put_object(Bucket=bucket, Key=s3_key, Body=fileobj.read())
+        response = await S3['client']['obj'].put_object(Bucket=bucket, Key=s3_key, Body=fileobj.read())
 
     return response
 
@@ -44,7 +44,7 @@ async def list_s3_objects(bucket: str, s3_prefix: str) -> List[str]:
     '''List objects in s3 path.'''
 
     arr = []
-    paginator = S3['client'].get_paginator('list_objects')
+    paginator = S3['client']['obj'].get_paginator('list_objects')
     async for result in paginator.paginate(Bucket=bucket, Prefix=s3_prefix):
         arr = [item['Key'] for item in result.get('Contents', [])]
 
@@ -56,7 +56,7 @@ async def get_object(bucket: str, s3_key: str) -> bytes:
     '''Directly download contents of s3 object.'''
 
     data = None
-    s3_object = await S3['client'].get_object(Bucket=bucket, Key=s3_key)
+    s3_object = await S3['client']['obj'].get_object(Bucket=bucket, Key=s3_key)
     async with s3_object["Body"] as stream:
         data = await stream.read()
 
@@ -67,6 +67,6 @@ async def get_object(bucket: str, s3_key: str) -> bytes:
 async def delete_s3_object(bucket: str, s3_prefix: str) -> Dict[str, Any]:
     '''Delete object(s) from s3.'''
 
-    response = await S3['client'].delete_object(Bucket=bucket, Key=s3_prefix)
+    response = await S3['client']['obj'].delete_object(Bucket=bucket, Key=s3_prefix)
 
     return response

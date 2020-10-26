@@ -42,9 +42,19 @@ class AwsServiceManager:
             raise ValueError(f'module parameter must be one of the following: {modules}')
 
         if self.regions:
-            self.service_dict = {r: {'active': 0, 'client': None, 'resource': None, 'session': None, 'busy': True} for r in self.regions}
+            self.service_dict = {
+                region: {
+                    'client': {'obj': None, 'session': None, 'busy': False},
+                    'resource': {'obj': None, 'session': None, 'busy': False},
+                    'active': 0
+                } for region in self.regions
+            }
         else:
-            self.service_dict = {'active': 0, 'client': None, 'resource': None, 'session': None, 'busy': True}
+            self.service_dict = {
+                'client': {'obj': None, 'session': None, 'busy': False},
+                'resource': {'obj': None, 'session': None, 'busy': False},
+                'active': 0
+            }
 
         try:
             loop = asyncio.get_event_loop()
@@ -76,6 +86,7 @@ class AwsServiceManager:
         '''Begin long running server establishing modules service_dict object.'''
 
         service_dict = self.service_dict if region is None else self.service_dict[region]
+        service_dict = service_dict[item]
         await self.establish_client_resource(service_dict, item, region=region)
 
         while True:
@@ -102,14 +113,14 @@ class AwsServiceManager:
         LOG.info(f'Atempting to {phrase} service object...')
         if reestablish:
             service_dict['busy'] = True
-            await service_dict[item].__aexit__(None, None, None)
+            await service_dict['obj'].__aexit__(None, None, None)
 
         if self.module == 'aiobotocore':
             service_dict['session'] = aiobotocore.get_session()
-            service_dict[item] = await service_dict['session'].create_client(**kwargs).__aenter__()
+            service_dict['obj'] = await service_dict['session'].create_client(**kwargs).__aenter__()
         elif self.module == 'aioboto3':
             func = aioboto3.client if item == 'client' else aioboto3.resource
-            service_dict[item] = await func(**kwargs).__aenter__()
+            service_dict['obj'] = await func(**kwargs).__aenter__()
 
         service_dict['busy'] = False
         LOG.info(f'Successfully {phrase} service object!')
@@ -139,7 +150,7 @@ class AwsServiceManager:
             obj = self.service_dict[self.get_region(args, kwargs)] if self.regions else self.service_dict
 
             # Make sure aiobotocore or aioboto3 isn't busy
-            while obj['busy']:
+            while obj['client']['busy'] or obj['resource']['busy']:
                 await sleep(0.01)
 
             error = None

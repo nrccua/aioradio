@@ -27,4 +27,10 @@ pre-commit:
 	cd aioradio; \
 	pre-commit run --all-files; \
 
+twine:
+	. env/bin/activate; \
+	python setup.py sdist bdist_wheel
+	twine upload dist/*
+	make setup
+
 all: install pre-commit lint test setup clean
