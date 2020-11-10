@@ -29,8 +29,7 @@ async def add_comment_to_jira(url: str, jira_user: str, jira_token: str, comment
     '''Add Jira comment to an existing issue.'''
 
     if not url.endswith('comment'):
-        msg = 'Check url value! ' \
-              'Good example is https://nrccua.atlassian.net/rest/api/2/issue/<jira_id>/comment'
+        msg = 'Check url value! Good example is https://nrccua.atlassian.net/rest/api/2/issue/<jira_id>/comment'
         raise ValueError(msg)
 
     return await post_jira_issue(

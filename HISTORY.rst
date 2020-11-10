@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.8.4 (2020-10-27)
+-----------------------
+
+* Add documentation and usage examples for onboarding new users from pypi and github pages.
+
+
 v0.8.3 (2020-10-26)
 -----------------------
 
