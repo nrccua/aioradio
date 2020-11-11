@@ -77,8 +77,7 @@ class AwsServiceManager:
         '''Begin long running server establishing modules service_dict object.'''
 
         service_dict = self.service_dict if region is None else self.service_dict[region]
-        service_dict = service_dict[item]
-        await self.establish_client_resource(service_dict, item, region=region)
+        await self.establish_client_resource(service_dict[item], item, region=region)
 
         while True:
             # sleep for defined interval
@@ -89,7 +88,7 @@ class AwsServiceManager:
             while service_dict['active'] and (time() - start) < 300:
                 await sleep(0.001)
 
-            await self.establish_client_resource(service_dict, item=item, region=region, reestablish=True)
+            await self.establish_client_resource(service_dict[item], item=item, region=region, reestablish=True)
 
     async def establish_client_resource(self, service_dict, item, region=None, reestablish=False):
         '''Establish the AioSession client or resource, then re-establish every self.sleep_interval seconds.'''
