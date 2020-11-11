@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.8.5 (2020-11-11)
+-----------------------
+
+* Fix bug with accessing active keyword incorrectly in aws/utils.py aio_server function.
+
+
 v0.8.4 (2020-10-27)
 -----------------------
 
