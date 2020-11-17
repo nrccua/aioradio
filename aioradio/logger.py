@@ -2,16 +2,12 @@
 for cleaner datadog logging.'''
 
 # pylint: disable=too-few-public-methods
-# pylint: disable=too-many-arguments
-# pylint: disable=too-many-instance-attributes
 
 import logging
-import os
 import sys
 from datetime import datetime
 from typing import List
 
-from ddtrace import tracer
 from pythonjsonlogger import jsonlogger
 
 
@@ -45,8 +41,7 @@ class DatadogLogger():
             main_logger='',
             datadog_loggers=List[str],
             log_level=logging.INFO,
-            log_format="%(timestamp)d %(level)d %(name)d %(message)d",
-            use_ddtrace=True
+            log_format="%(timestamp)d %(level)d %(name)d %(message)d"
     ):
 
         self.logger = logging.getLogger(main_logger)
@@ -54,13 +49,6 @@ class DatadogLogger():
         self.log_level = log_level
         self.datadog_loggers = set(datadog_loggers) if datadog_loggers else []
         self.format = log_format
-
-        if use_ddtrace:
-            tracer.configure(
-                hostname=os.getenv('DD_AGENT_HOST', ''),
-                port=os.getenv('DD_TRACE_AGENT_PORT', '')
-            )
-
         self.add_handlers()
 
     def add_handlers(self):
@@ -73,3 +61,4 @@ class DatadogLogger():
             handler.setLevel(self.log_level)
             handler.setFormatter(formatter)
             logger.addHandler(handler)
+            logger.propagate = False

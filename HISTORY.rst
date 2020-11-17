@@ -3,6 +3,13 @@ History
 =======
 
 
+v0.9.0 (2020-11-17)
+-----------------------
+
+* Set logger.propogate to False after adding handler.
+* Remove use_ddtrace logic from DatadogLogger.
+
+
 v0.8.5 (2020-11-11)
 -----------------------
 
