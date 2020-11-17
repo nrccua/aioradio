@@ -47,7 +47,7 @@ class DatadogLogger():
         self.logger = logging.getLogger(main_logger)
         self.logger.setLevel(log_level)
         self.log_level = log_level
-        self.datadog_loggers = set(datadog_loggers) if datadog_loggers else []
+        self.datadog_loggers = set(datadog_loggers + ['ddtrace']) if datadog_loggers else ['ddtrace']
         self.format = log_format
         self.add_handlers()
 

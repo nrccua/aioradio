@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.9.1 (2020-11-17)
+-----------------------
+
+* Add ddtrace logger to DatadogLogger by default saving the user having to pass this info on their side.
+
+
 v0.9.0 (2020-11-17)
 -----------------------
 
