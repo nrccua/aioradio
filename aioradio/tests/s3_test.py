@@ -9,6 +9,7 @@ import pytest
 from aioradio.aws.s3 import delete_s3_object
 from aioradio.aws.s3 import download_file
 from aioradio.aws.s3 import get_object
+from aioradio.aws.s3 import get_s3_file_attributes
 from aioradio.aws.s3 import list_s3_objects
 from aioradio.aws.s3 import upload_file
 
@@ -66,3 +67,10 @@ async def test_get_object():
 
     result = await get_object(bucket=S3_BUCKET, s3_key=f'{S3_PREFIX}/hello_world.txt')
     assert result is not None
+
+
+async def test_get_file_attributes():
+    '''Test retrieving s3 object attributes.'''
+
+    result = await get_s3_file_attributes(bucket=S3_BUCKET, s3_key=f'{S3_PREFIX}/hello_world.txt')
+    assert result['ContentLength'] == 22

@@ -52,6 +52,16 @@ async def list_s3_objects(bucket: str, s3_prefix: str) -> List[str]:
 
 
 @AWS_SERVICE.active
+async def get_s3_file_attributes(bucket: str, s3_key: str) -> Dict[str, Any]:
+    '''Get s3 objects metadata attributes.'''
+
+    s3_object = await S3['client']['obj'].get_object(Bucket=bucket, Key=s3_key)
+    del s3_object['Body']
+
+    return s3_object
+
+
+@AWS_SERVICE.active
 async def get_object(bucket: str, s3_key: str) -> bytes:
     '''Directly download contents of s3 object.'''
 

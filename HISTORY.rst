@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.9.3 (2020-12-03)
+-----------------------
+
+* Add functions (get_ftp_file_attributes & get_s3_file_attributes) to retrieve metadata on files in FTP and S3.
+
+
 v0.9.2 (2020-12-03)
 -----------------------
 
