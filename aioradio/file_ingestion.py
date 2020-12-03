@@ -234,4 +234,10 @@ async def write_file_to_ftp(
         await sleep(1)
 
     # return file attributes
+    return await get_ftp_file_attributes(conn, service_name, ftp_path)
+
+
+async def get_ftp_file_attributes(conn: SMBConnection, service_name: str, ftp_path: str):
+    '''GET FTP file attributes.'''
+
     return conn.getAttributes(service_name=service_name, path=ftp_path)
