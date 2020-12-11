@@ -40,13 +40,18 @@ async def download_file(bucket: str, filepath: str, s3_key: str) -> None:
 
 
 @AWS_SERVICE.active
-async def list_s3_objects(bucket: str, s3_prefix: str) -> List[str]:
+async def list_s3_objects(bucket: str, s3_prefix: str, with_attributes: bool=False) -> List[str]:
     '''List objects in s3 path.'''
 
     arr = []
     paginator = S3['client']['obj'].get_paginator('list_objects')
     async for result in paginator.paginate(Bucket=bucket, Prefix=s3_prefix):
-        arr = [item['Key'] for item in result.get('Contents', [])]
+        arr = []
+        for item in result.get('Contents', []):
+            if with_attributes:
+                arr.append(item)
+            else:
+                arr.append(item['Key'])
 
     return arr
 

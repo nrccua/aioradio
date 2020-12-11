@@ -37,11 +37,11 @@ async def test_pyodbc_query_fetchone_and_fetchall(github_action):
     emails = [i.strip() for i in row[0].lower().split(';')] if row is not None else []
 
     expected_emails = [
+        'amy.huey@nrccua.org',
         'bridgetk@nrccua.org',
         'kris@nrccua.org',
         'ryan.thompson@nrccua.org',
-        'tim.reichard@nrccua.org',
-        'tucker.hickey@nrccua.org'
+        'tim.reichard@nrccua.org'
     ]
     assert sorted(emails) == expected_emails
 

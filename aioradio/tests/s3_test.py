@@ -48,6 +48,9 @@ async def test_s3_upload_file(tmpdir_factory):
     await upload_file(bucket=S3_BUCKET, filepath=path, s3_key=s3_key)
     assert s3_key in await list_s3_objects(bucket=S3_BUCKET, s3_prefix=S3_PREFIX)
 
+    result = await list_s3_objects(bucket=S3_BUCKET, s3_prefix=S3_PREFIX, with_attributes=True)
+    assert 'LastModified' in result[0]
+
 
 async def test_s3_download_file(tmpdir_factory):
     '''Test uploading file to s3.'''
