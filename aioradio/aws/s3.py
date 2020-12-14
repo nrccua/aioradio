@@ -46,7 +46,6 @@ async def list_s3_objects(bucket: str, s3_prefix: str, with_attributes: bool=Fal
     arr = []
     paginator = S3['client']['obj'].get_paginator('list_objects')
     async for result in paginator.paginate(Bucket=bucket, Prefix=s3_prefix):
-        arr = []
         for item in result.get('Contents', []):
             if with_attributes:
                 arr.append(item)

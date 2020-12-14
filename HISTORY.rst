@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.9.5 (2020-12-14)
+-----------------------
+
+* Fix bug with reseting list during paginate of list_objects.
+
+
 v0.9.4 (2020-12-11)
 -----------------------
 
