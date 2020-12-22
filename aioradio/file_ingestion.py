@@ -1,4 +1,4 @@
-'''Generic functions related to working with files or the file system.'''
+"""Generic functions related to working with files or the file system."""
 
 # pylint: disable=invalid-name
 # pylint: disable=too-many-arguments
@@ -10,29 +10,37 @@ import re
 import time
 import zipfile
 from asyncio import sleep
-from concurrent.futures import as_completed
-from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
-from datetime import timezone
-from datetime import tzinfo
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timezone, tzinfo
 from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import List
+from types import coroutine
+from typing import Any, Dict, List
 
 import mandrill
 from smb.base import SharedFile
-from smb.SMBConnection import SMBConnection
 from smb.smb_structs import OperationFailure
+from smb.SMBConnection import SMBConnection
 
 DIRECTORY = Path(__file__).parent.absolute()
 
 
-def async_wrapper(func):
-    '''Decorator to run functions using async. Found this handy to use with DAG tasks.'''
+def async_wrapper(func: coroutine) -> Any:
+    """Decorator to run functions using async. Found this handy to use with DAG
+    tasks.
 
-    def wrapper(*args, **kwargs):
-        '''Decorator wrapper.'''
+    Args:
+        func (coroutine): async coroutine
+
+    Returns:
+        Any: any
+    """
+
+    def wrapper(*args, **kwargs) -> Any:
+        """Decorator wrapper.
+
+        Returns:
+            Any: any
+        """
 
         loop = asyncio.get_event_loop()
         return loop.run_until_complete(func(*args, **kwargs))
@@ -40,11 +48,23 @@ def async_wrapper(func):
     return wrapper
 
 
-def async_wrapper_using_new_loop(func):
-    '''Decorator to run functions using async. Found this handy to use with DAG tasks.'''
+def async_wrapper_using_new_loop(func: coroutine) -> Any:
+    """Decorator to run functions using async. Found this handy to use with DAG
+    tasks.
 
-    def wrapper(*args, **kwargs):
-        '''Decorator wrapper.'''
+    Args:
+        func (coroutine): async coroutine
+
+    Returns:
+        Any: any
+    """
+
+    def wrapper(*args, **kwargs) -> Any:
+        """Decorator wrapper.
+
+        Returns:
+            Any: any
+        """
 
         return asyncio.run(func(*args, **kwargs))
 
@@ -52,12 +72,23 @@ def async_wrapper_using_new_loop(func):
 
 
 async def async_process_manager(
-        function: asyncio.coroutine,
+        function: coroutine,
         list_of_kwargs: List[Dict[str, Any]],
         chunk_size: int,
         use_threads=True) -> List[Any]:
-    '''Process manager to run fixed number of functions, usually the same function expressed as
-    coroutines in an array.  Use case is sending many http requests or iterating files.'''
+    """Process manager to run fixed number of functions, usually the same
+    function expressed as coroutines in an array.  Use case is sending many
+    http requests or iterating files.
+
+    Args:
+        function (coroutine): async coroutine
+        list_of_kwargs (List[Dict[str, Any]]): list of kwargs to pass into function
+        chunk_size (int): number of functions to run concurrently
+        use_threads (bool, optional): should threads be used. Defaults to True
+
+    Returns:
+        List[Any]: List of function results
+    """
 
     results = []
     if use_threads:
@@ -74,7 +105,15 @@ async def async_process_manager(
 
 
 async def unzip_file(filepath: str, directory: str) -> List[str]:
-    '''Unzip supplied filepath in the supplied directory returning list of filenames.'''
+    """Unzip supplied filepath in the supplied directory.
+
+    Args:
+        filepath (str): filepath to unzip
+        directory (str): directory to write unzipped files
+
+    Returns:
+        List[str]: List of filenames
+    """
 
     zipped = zipfile.ZipFile(filepath)
 
@@ -92,10 +131,19 @@ async def unzip_file_get_filepaths(
         directory: str,
         include_extensions: List[str] = None,
         exclude_extensions: List[str] = None) -> List[str]:
-    '''Get all the filepaths after unzipping supplied filepath in the supplied directory.
-    If the zipfile contains zipfiles, those files will also be unzipped. If include_extensions
-    is supplied then add those file types to the result. If exclude_extensions is supplied
-    then skip adding those filepaths to the result.'''
+    """Get all the filepaths after unzipping supplied filepath in the supplied
+    directory. If the zipfile contains zipfiles, those files will also be
+    unzipped.
+
+    Args:
+        filepath (str): [description]
+        directory (str): [description]
+        include_extensions (List[str], optional): list of file types to add to result, if None add all. Defaults to None.
+        exclude_extensions (List[str], optional): list of file types to exclude from result. Defaults to None.
+
+    Returns:
+        List[str]: [description]
+    """
 
     paths = []
     zipfile_filepaths = [filepath]
@@ -123,10 +171,16 @@ async def unzip_file_get_filepaths(
     return paths
 
 
-async def get_current_datetime_from_timestamp(
-        dt_format: str = '%Y-%m-%d %H_%M_%S.%f',
-        time_zone: tzinfo = timezone.utc) -> str:
-    '''Get the datetime from the timestamp in the format and timezone desired.'''
+async def get_current_datetime_from_timestamp(dt_format: str = '%Y-%m-%d %H_%M_%S.%f', time_zone: tzinfo = timezone.utc) -> str:
+    """Get the datetime from the timestamp in the format and timezone desired.
+
+    Args:
+        dt_format (str, optional): date format desired. Defaults to '%Y-%m-%d %H_%M_%S.%f'.
+        time_zone (tzinfo, optional): timezone desired. Defaults to timezone.utc.
+
+    Returns:
+        str: current datetime
+    """
 
     return datetime.fromtimestamp(time.time(), time_zone).strftime(dt_format)
 
@@ -139,7 +193,19 @@ async def send_emails_via_mandrill(
         template_name: str,
         template_content: List[Dict[str, Any]] = None
         ) -> Any:
-    '''Send emails via Mailchimp mandrill API.'''
+    """Send emails via Mailchimp mandrill API.
+
+    Args:
+        mandrill_api_key (str): mandrill API key
+        emails (List[str]): receipt emails
+        subject (str): email subject
+        global_merge_vars (List[Dict[str, Any]]): List of dicts used to dynamically populated email template with data
+        template_name (str): mandrill template name
+        template_content (List[Dict[str, Any]], optional): mandrill template content. Defaults to None.
+
+    Returns:
+        Any: any
+    """
 
     message = {
         'to': [{'email': email} for email in emails],
@@ -164,7 +230,21 @@ async def establish_ftp_connection(
         port: int = 139,
         use_ntlm_v2: bool = True,
         is_direct_tcp: bool = False) -> SMBConnection:
-    '''Establish FTP connection'''
+    """Establish FTP connection.
+
+    Args:
+        user (str): ftp username
+        pwd (str): ftp password
+        name (str): connection name
+        server (str): ftp server
+        dns (str): DNS
+        port (int, optional): port. Defaults to 139.
+        use_ntlm_v2 (bool, optional): use NTLMv1 (False) or NTLMv2(True) authentication algorithm. Defaults to True.
+        is_direct_tcp (bool, optional): if NetBIOS over TCP (False) or SMB over TCP (True) is used for communication. Defaults to False.
+
+    Returns:
+        SMBConnection: SMB connection object
+    """
 
     conn = SMBConnection(
         username=user,
@@ -185,7 +265,19 @@ async def list_ftp_objects(
         exclude_directories: bool = False,
         exclude_files: bool = False,
         regex_pattern: str = None) -> List[SharedFile]:
-    '''List all files and directories in an FTP directory.'''
+    """List all files and directories in an FTP directory.
+
+    Args:
+        conn (SMBConnection): SMB connection object
+        service_name (str): FTP service name
+        ftp_path (str): FTP directory path
+        exclude_directories (bool, optional): directories to exclude. Defaults to False.
+        exclude_files (bool, optional): files to exclude. Defaults to False.
+        regex_pattern (str, optional): regex pattern to use to filter search. Defaults to None.
+
+    Returns:
+        List[SharedFile]: List of files with their attribute info
+    """
 
     results = []
     for item in conn.listPath(service_name, ftp_path):
@@ -200,7 +292,16 @@ async def list_ftp_objects(
 
 
 async def delete_ftp_file(conn: SMBConnection, service_name: str, ftp_path: str) -> bool:
-    '''Remove a file from FTP and verify deletion.'''
+    """Remove a file from FTP and verify deletion.
+
+    Args:
+        conn (SMBConnection): SMB connection object
+        service_name (str): FTP service name
+        ftp_path (str): FTP directory path
+
+    Returns:
+        bool: deletion status
+    """
 
     status = False
     conn.deleteFiles(service_name, ftp_path)
@@ -217,7 +318,17 @@ async def write_file_to_ftp(
         service_name: str,
         ftp_path: str,
         local_filepath) -> SharedFile:
-    '''Write file to FTP creating missing FTP directories if necessary.'''
+    """Write file to FTP creating missing FTP directories if necessary.
+
+    Args:
+        conn (SMBConnection): SMB connection object
+        service_name (str): FTP service name
+        ftp_path (str): FTP directory path
+        local_filepath ([type]): local filepath
+
+    Returns:
+        SharedFile: ftp file attribute info
+    """
 
     # steps to create missing directories
     path = ''
@@ -237,7 +348,16 @@ async def write_file_to_ftp(
     return await get_ftp_file_attributes(conn, service_name, ftp_path)
 
 
-async def get_ftp_file_attributes(conn: SMBConnection, service_name: str, ftp_path: str):
-    '''GET FTP file attributes.'''
+async def get_ftp_file_attributes(conn: SMBConnection, service_name: str, ftp_path: str) -> SharedFile:
+    """GET FTP file attributes.
+
+    Args:
+        conn (SMBConnection): SMB connection object
+        service_name (str): FTP service name
+        ftp_path (str): FTP directory path
+
+    Returns:
+        SharedFile: ftp file attribute info
+    """
 
     return conn.getAttributes(service_name=service_name, path=ftp_path)

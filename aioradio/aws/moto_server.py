@@ -1,4 +1,4 @@
-'''moto server for pytesting aws services.'''
+"""moto server for pytesting aws services."""
 
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=unused-variable
@@ -6,16 +6,15 @@
 import asyncio
 import functools
 import logging
+import os
 import socket
 import threading
 import time
-import os
 
 # Third Party
 import aiohttp
 import moto.server
 import werkzeug.serving
-
 
 HOST = '127.0.0.1'
 
@@ -23,12 +22,19 @@ _PYCHARM_HOSTED = os.environ.get('PYCHARM_HOSTED') == '1'
 _CONNECT_TIMEOUT = 90 if _PYCHARM_HOSTED else 10
 
 
-def get_free_tcp_port(release_socket: bool = False):
-    '''Get an available TCP port.'''
+def get_free_tcp_port(release_socket: bool = False) -> tuple:
+    """Get an available TCP port.
+
+    Args:
+        release_socket (bool, optional): release socket. Defaults to False.
+
+    Returns:
+        tuple: socket and port
+    """
 
     sckt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sckt.bind((HOST, 0))
-    addr, port = sckt.getsockname()
+    _, port = sckt.getsockname()
     if release_socket:
         sckt.close()
         return port
@@ -37,8 +43,11 @@ def get_free_tcp_port(release_socket: bool = False):
 
 
 class MotoService:
-    """ Will Create MotoService. Service is ref-counted so there will only be one per process.
-    Real Service will be returned by `__aenter__`."""
+    """Will Create MotoService.
+
+    Service is ref-counted so there will only be one per process. Real
+    Service will be returned by `__aenter__`.
+    """
 
     _services = dict()  # {name: instance}
     _main_app: moto.server.DomainDispatcherApplication = None
@@ -59,8 +68,12 @@ class MotoService:
         self._server = None
 
     @property
-    def endpoint_url(self):
-        '''Get the server endpoint url.'''
+    def endpoint_url(self) -> str:
+        """Get the server endpoint url.
+
+        Returns:
+            str: url
+        """
 
         return f'http://{self._ip_address}:{self._port}'
 

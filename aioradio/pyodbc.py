@@ -1,11 +1,9 @@
-'''Pyodbc functions for connecting and send queries.'''
+"""Pyodbc functions for connecting and send queries."""
 
 # pylint: disable=c-extension-no-member
 
 import os
-from typing import Any
-from typing import List
-from typing import Union
+from typing import Any, List, Union
 
 import pyodbc
 
@@ -17,8 +15,15 @@ UNIXODBC_DRIVER_PATHS = [
 ]
 
 
-async def get_unixodbc_driver_path(paths) -> Union[str, None]:
-    '''Check the file system for the unixodbc driver.'''
+async def get_unixodbc_driver_path(paths: List[str]) -> Union[str, None]:
+    """Check the file system for the unixodbc driver.
+
+    Args:
+        paths (List[str]): List of filepaths
+
+    Returns:
+        Union[str, None]: driver path
+    """
 
     driver_path = None
     for path in paths:
@@ -29,12 +34,22 @@ async def get_unixodbc_driver_path(paths) -> Union[str, None]:
     return driver_path
 
 
-async def establish_pyodbc_connection(
-        host: str,
-        user: str,
-        pwd: str,
-        driver: str = None) -> pyodbc.Connection:
-    '''Acquire and return pyodbc.Connection object else raise FileNotFoundError.'''
+async def establish_pyodbc_connection(host: str, user: str, pwd: str, driver: str = None) -> pyodbc.Connection:
+    """Acquire and return pyodbc.Connection object else raise
+    FileNotFoundError.
+
+    Args:
+        host (str): hostname
+        user (str): username
+        pwd (str): password
+        driver (str, optional): unixodbc driver. Defaults to None.
+
+    Raises:
+        FileNotFoundError: unable to locate unixodbc driver
+
+    Returns:
+        pyodbc.Connection: database connection object
+    """
 
     if driver is None:
         verified_driver = await get_unixodbc_driver_path(UNIXODBC_DRIVER_PATHS)
@@ -48,8 +63,17 @@ async def establish_pyodbc_connection(
         f'DRIVER={verified_driver};SERVER={host};PORT=1433;UID={user};PWD={pwd};TDS_Version=8.0')
 
 
-async def pyodbc_query_fetchone(conn: pyodbc.Connection, query: str) -> List[Any]:
-    '''Execute pyodbc query and fetchone, see https://github.com/mkleehammer/pyodbc/wiki/Cursor'''
+async def pyodbc_query_fetchone(conn: pyodbc.Connection, query: str) -> Union[List[Any], None]:
+    """Execute pyodbc query and fetchone, see
+    https://github.com/mkleehammer/pyodbc/wiki/Cursor.
+
+    Args:
+        conn (pyodbc.Connection): database connection object
+        query (str): sql query
+
+    Returns:
+        Union[List[Any], None]: list of one result
+    """
 
     cursor = conn.cursor()
     result = cursor.execute(query).fetchone()
@@ -57,8 +81,17 @@ async def pyodbc_query_fetchone(conn: pyodbc.Connection, query: str) -> List[Any
     return result
 
 
-async def pyodbc_query_fetchall(conn: pyodbc.Connection, query: str) -> List[Any]:
-    '''Execute pyodbc query and fetchone, see https://github.com/mkleehammer/pyodbc/wiki/Cursor'''
+async def pyodbc_query_fetchall(conn: pyodbc.Connection, query: str) -> Union[List[Any], None]:
+    """Execute pyodbc query and fetchone, see
+    https://github.com/mkleehammer/pyodbc/wiki/Cursor.
+
+    Args:
+        conn (pyodbc.Connection): database connection object
+        query (str): sql query
+
+    Returns:
+        Union[List[Any], None]: list of one to many results
+    """
 
     cursor = conn.cursor()
     result = cursor.execute(query).fetchall()

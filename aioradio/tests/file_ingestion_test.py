@@ -1,4 +1,4 @@
-'''pytest file_ingestion script'''
+"""pytest file_ingestion script."""
 
 # pylint: disable=broad-except
 # pylint: disable=c-extension-no-member
@@ -7,18 +7,16 @@
 import logging
 import os
 import time
-from datetime import timedelta
-from datetime import timezone
+from datetime import timedelta, timezone
 
 import pytest
 
-from aioradio.file_ingestion import delete_ftp_file
-from aioradio.file_ingestion import establish_ftp_connection
-from aioradio.file_ingestion import get_current_datetime_from_timestamp
-from aioradio.file_ingestion import list_ftp_objects
-from aioradio.file_ingestion import send_emails_via_mandrill
-from aioradio.file_ingestion import unzip_file_get_filepaths
-from aioradio.file_ingestion import write_file_to_ftp
+from aioradio.file_ingestion import (delete_ftp_file, establish_ftp_connection,
+                                     get_current_datetime_from_timestamp,
+                                     list_ftp_objects,
+                                     send_emails_via_mandrill,
+                                     unzip_file_get_filepaths,
+                                     write_file_to_ftp)
 
 LOG = logging.getLogger(__name__)
 pytestmark = pytest.mark.asyncio
@@ -33,7 +31,7 @@ CREDS = {
 
 
 async def test_unzip_file_get_filepaths(request, tmpdir_factory):
-    '''Test unzip_file_get_filepaths.'''
+    """Test unzip_file_get_filepaths."""
 
     filepath = os.path.join(request.fspath.dirname, 'test_data', 'test_file_ingestion.zip')
     temp_directory = str(tmpdir_factory.mktemp("data"))
@@ -52,7 +50,7 @@ async def test_unzip_file_get_filepaths(request, tmpdir_factory):
 
 
 async def test_get_current_datetime_from_timestamp():
-    '''Test get_current_datetime_from_timestamp.'''
+    """Test get_current_datetime_from_timestamp."""
 
     datetime_utc = await get_current_datetime_from_timestamp()
     assert len(datetime_utc) == 26
@@ -67,7 +65,7 @@ async def test_get_current_datetime_from_timestamp():
 
 
 async def test_send_emails_via_mandrill():
-    '''Test send_emails_via_mandrill.'''
+    """Test send_emails_via_mandrill."""
 
     pytest.skip("Skip sending emails via mandrill.")
 
@@ -89,7 +87,7 @@ async def test_send_emails_via_mandrill():
 
 
 async def test_write_file_to_ftp(github_action, request):
-    '''Test write_file_to_ftp.'''
+    """Test write_file_to_ftp."""
 
     if github_action:
         pytest.skip('Skip test_write_file_to_ftp when running via Github Action')
@@ -119,7 +117,7 @@ async def test_write_file_to_ftp(github_action, request):
 
 
 async def test_list_ftp_objects(github_action):
-    '''Test test_list_ftp_objects.'''
+    """Test test_list_ftp_objects."""
 
     if github_action:
         pytest.skip('Skip test_list_ftp_objects when running via Github Action')
@@ -142,7 +140,7 @@ async def test_list_ftp_objects(github_action):
 
 
 async def test_list_ftp_objects_with_regex(github_action):
-    '''Test test_list_ftp_objects with regex.'''
+    """Test test_list_ftp_objects with regex."""
 
     if github_action:
         pytest.skip('Skip test_list_ftp_objects_with_regex when running via Github Action')
@@ -167,7 +165,7 @@ async def test_list_ftp_objects_with_regex(github_action):
 
 
 async def test_delete_ftp_file(github_action):
-    '''Test delete_ftp_file.'''
+    """Test delete_ftp_file."""
 
     if github_action:
         pytest.skip('Skip test_list_ftp_objects_with_regex when running via Github Action')

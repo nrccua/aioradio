@@ -1,5 +1,5 @@
 
-'''Generic async utility functions.'''
+"""Generic async utility functions."""
 
 # pylint: disable=broad-except
 # pylint: disable=logging-fstring-interpolation
@@ -9,10 +9,10 @@ import asyncio
 import logging
 from asyncio import sleep
 from copy import deepcopy
-from dataclasses import dataclass
-from dataclasses import field
+from dataclasses import dataclass, field
 from time import time
-from typing import List
+from types import coroutine
+from typing import Any, Dict, List
 
 import aioboto3
 import aiobotocore
@@ -23,7 +23,7 @@ LOG = logging.getLogger(__name__)
 
 @dataclass
 class AwsServiceManager:
-    '''AWS Service Manager'''
+    """AWS Service Manager."""
 
     service: str
     module: str = 'aiobotocore'
@@ -32,8 +32,6 @@ class AwsServiceManager:
     scheduler: aiojobs._scheduler = None
 
     def __post_init__(self):
-        '''Post constructor.'''
-
         services = ['s3', 'sqs', 'secretsmanager', 'dynamodb']
         if self.service not in services:
             raise ValueError(f'service parameter must be one of the following: {services}')
@@ -60,7 +58,7 @@ class AwsServiceManager:
         self.scheduler.close()
 
     async def create_scheduler(self):
-        '''Schedule jobs.'''
+        """Schedule jobs."""
 
         self.scheduler = await aiojobs.create_scheduler()
         if self.regions:
@@ -73,10 +71,15 @@ class AwsServiceManager:
             if self.module == 'aioboto3':
                 await self.scheduler.spawn(self.aio_server(item='resource'))
 
-    async def aio_server(self, item, region=None):
-        '''Begin long running server establishing modules service_dict object.'''
+    async def aio_server(self, item: str, region: str=''):
+        """Begin long running server establishing modules service_dict object.
 
-        service_dict = self.service_dict if region is None else self.service_dict[region]
+        Args:
+            item (str): either 'client' or 'resource' depending on the aws service and python package
+            region (str, optional): AWS region. Defaults to ''.
+        """
+
+        service_dict = self.service_dict if region == '' else self.service_dict[region]
         await self.establish_client_resource(service_dict[item], item, region=region)
 
         while True:
@@ -90,11 +93,19 @@ class AwsServiceManager:
 
             await self.establish_client_resource(service_dict[item], item=item, region=region, reestablish=True)
 
-    async def establish_client_resource(self, service_dict, item, region=None, reestablish=False):
-        '''Establish the AioSession client or resource, then re-establish every self.sleep_interval seconds.'''
+    async def establish_client_resource(self, service_dict: Dict[str, Any], item: str, region: str='', reestablish: bool=False):
+        """Establish the AioSession client or resource, then re-establish every
+        self.sleep_interval seconds.
+
+        Args:
+            service_dict (Dict[str, Any]): dict containing info about the service requested
+            item (str): either 'client' or 'resource' depending on the aws service and python package
+            region (str, optional): AWS region. Defaults to ''.
+            reestablish (bool, optional): should async context manager be reinstantiated. Defaults to False.
+        """
 
         kwargs = {'service_name': self.service, 'verify': False}
-        if region is None:
+        if region == '':
             phrase = f're-establish {self.service}' if reestablish else f'establish {self.service}'
         else:
             kwargs['region_name'] = region
@@ -115,10 +126,18 @@ class AwsServiceManager:
         service_dict['busy'] = False
         LOG.info(f'Successfully {phrase} service object!')
 
-    def get_region(self, args, kwargs):
-        '''Attempt to detect the region from the kwargs or args.'''
+    def get_region(self, args: List[Any], kwargs: Dict[str, Any]) -> str:
+        """Attempt to detect the region from the kwargs or args.
 
-        region = None
+        Args:
+            args (List[Any]): list of arguments
+            kwargs (Dict[str, Any]): Dict of keyword arguments
+
+        Returns:
+            str: AWS region
+        """
+
+        region = ''
 
         if 'region' in kwargs:
             region = kwargs['region']
@@ -130,12 +149,27 @@ class AwsServiceManager:
 
         return region
 
-    def active(self, func):
-        '''Decorator to keep track of currently running functions, allowing the AioSession client
-        to only be re-establish when the count is zero to avoid functions using a stale client.'''
+    def active(self, func: coroutine) -> Any:
+        """Decorator to keep track of currently running functions, allowing the
+        AioSession client to only be re-establish when the count is zero to
+        avoid functions using a stale client.
 
-        async def wrapper(*args, **kwargs):
-            '''Decorator wrapper.'''
+        Args:
+            func (coroutine): async coroutine
+
+        Returns:
+            Any: any
+        """
+
+        async def wrapper(*args, **kwargs) -> Any:
+            """Decorator wrapper.
+
+            Raises:
+                error: some general error during function execution
+
+            Returns:
+                Any: any
+            """
 
             obj = self.service_dict[self.get_region(args, kwargs)] if self.regions else self.service_dict
 
@@ -143,6 +177,7 @@ class AwsServiceManager:
             while obj['client']['busy'] or ('resource' in obj and obj['resource']['busy']):
                 await sleep(0.01)
 
+            result = None
             error = None
             obj['active'] += 1
             try:
