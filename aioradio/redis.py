@@ -1,19 +1,16 @@
-'''aioradio redis cache script.'''
+"""aioradio redis cache script."""
 
 # pylint: disable=c-extension-no-member
 # pylint: disable=too-many-instance-attributes
 
 import asyncio
 import hashlib
-from dataclasses import dataclass
-from dataclasses import field
-from typing import Any
-from typing import Dict
-from typing import List
+from dataclasses import dataclass, field
+from typing import Any, Dict, List
 
 import aioredis
-from fakeredis.aioredis import create_redis_pool as fake_redis_pool
 import orjson
+from fakeredis.aioredis import create_redis_pool as fake_redis_pool
 
 HASH_ALGO_MAP = {
     'SHA1': hashlib.sha1,
@@ -30,7 +27,7 @@ HASH_ALGO_MAP = {
 
 @dataclass
 class Redis:
-    '''class dealing with aioredis functions.'''
+    """class dealing with aioredis functions."""
 
     config: Dict[str, Any] = field(default_factory=dict)
     pool: aioredis.Redis = field(init=False, repr=False)
@@ -54,9 +51,7 @@ class Redis:
     # used exclusively for pytest
     fakeredis: bool = False
 
-    def __post_init__(self) -> None:
-        '''Post constructor'''
-
+    def __post_init__(self):
         if self.fakeredis:
             self.pool = asyncio.get_event_loop().run_until_complete(fake_redis_pool())
         else:
@@ -69,13 +64,19 @@ class Redis:
                 self.pool = loop.run_until_complete(
                     aioredis.create_redis_pool(primary_endpoint, minsize=self.pool_minsize, maxsize=self.pool_maxsize))
 
-    def __del__(self) -> None:
-        '''Teardown function'''
-
+    def __del__(self):
         self.pool.close()
 
-    async def get_one_item(self, cache_key: str, use_json: bool=None) -> str:
-        '''Check if an item is cached in redis.'''
+    async def get_one_item(self, cache_key: str, use_json: bool=None) -> Any:
+        """Check if an item is cached in redis.
+
+        Args:
+            cache_key (str): redis cache key
+            use_json (bool, optional): convert json value to object. Defaults to None.
+
+        Returns:
+            Any: any
+        """
 
         if use_json is None:
             use_json = self.use_json
@@ -87,8 +88,16 @@ class Redis:
 
         return value
 
-    async def get_many_items(self, items: List[str], use_json: bool=None) -> List[str]:
-        '''Check if many items are cached in redis.'''
+    async def get_many_items(self, items: List[str], use_json: bool=None) -> List[Any]:
+        """Check if many items are cached in redis.
+
+        Args:
+            items (List[str]): list of redis cache keys
+            use_json (bool, optional): convert json values to objects. Defaults to None.
+
+        Returns:
+            List[Any]: list of objects
+        """
 
         if use_json is None:
             use_json = self.use_json
@@ -100,8 +109,15 @@ class Redis:
 
         return values
 
-    async def set_one_item(self, cache_key: str, cache_value: str, expire: int=None, use_json: bool=None) -> None:
-        '''Set one key-value pair in redis.'''
+    async def set_one_item(self, cache_key: str, cache_value: str, expire: int=None, use_json: bool=None):
+        """Set one key-value pair in redis.
+
+        Args:
+            cache_key (str): redis cache key
+            cache_value (str): redis cache value
+            expire (int, optional): cache expiration. Defaults to None.
+            use_json (bool, optional): set object to json before writing to cache. Defaults to None.
+        """
 
         if expire is None:
             expire = self.expire
@@ -114,15 +130,31 @@ class Redis:
 
         await self.pool.set(cache_key, cache_value, expire=expire)
 
-    async def delete_one_item(self, cache_key: str) -> None:
-        '''Delete key from redis.'''
+    async def delete_one_item(self, cache_key: str) -> int:
+        """Delete key from redis.
+
+        Args:
+            cache_key (str): redis cache key
+
+        Returns:
+            int: 1 if key is found and deleted else 0
+        """
 
         return await self.pool.delete(cache_key)
 
     async def build_cache_key(self, payload: Dict[str, Any], separator='|', use_hashkey: bool=None) -> str:
-        '''If you'd like to build a cache key from a dictionary object this is the function for you.
-        This funciton will concatenate and normalize key-values from an unnested dict, taking
-        care of sorting the keys and each of their values (if a list).'''
+        """build a cache key from a dictionary object. Concatenate and
+        normalize key-values from an unnested dict, taking care of sorting the
+        keys and each of their values (if a list).
+
+        Args:
+            payload (Dict[str, Any]): dict object to use to build cache key
+            separator (str, optional): character to use as a separator in the cache key. Defaults to '|'.
+            use_hashkey (bool, optional): use a hashkey for the cache key. Defaults to None.
+
+        Returns:
+            str: [description]
+        """
 
         if use_hashkey is None:
             use_hashkey = self.use_hashkey

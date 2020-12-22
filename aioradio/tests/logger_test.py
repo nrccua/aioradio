@@ -1,4 +1,4 @@
-'''pytest logger'''
+"""pytest logger."""
 
 import logging
 
@@ -10,7 +10,7 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_datadog_logger():
-    '''Check if the logger has json formatted messages.'''
+    """Check if the logger has json formatted messages."""
 
     logger = DatadogLogger(
         main_logger='pytest2',

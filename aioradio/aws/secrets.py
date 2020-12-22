@@ -1,4 +1,4 @@
-'''Generic async AWS functions for Secrets Manager.'''
+"""Generic async AWS functions for Secrets Manager."""
 
 import base64
 
@@ -10,7 +10,15 @@ SECRETS = AWS_SERVICE.service_dict
 
 @AWS_SERVICE.active
 async def get_secret(secret_name: str, region: str) -> str:
-    '''Get secret from AWS Secrets Manager.'''
+    """Get secret from AWS Secrets Manager.
+
+    Args:
+        secret_name (str): secret name
+        region (str): AWS region
+
+    Returns:
+        str: secret value
+    """
 
     secret = ''
     response = await SECRETS[region]['client']['obj'].get_secret_value(SecretId=secret_name)

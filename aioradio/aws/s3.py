@@ -1,9 +1,7 @@
-'''Generic async AWS functions for S3.'''
+"""Generic async AWS functions for S3."""
 
 import logging
-from typing import Any
-from typing import Dict
-from typing import List
+from typing import Any, Dict, List
 
 from aioradio.aws.utils import AwsServiceManager
 
@@ -14,14 +12,30 @@ S3 = AWS_SERVICE.service_dict
 
 @AWS_SERVICE.active
 async def create_bucket(bucket: str) -> Dict[str, str]:
-    '''Create an s3 bucket.'''
+    """Create an s3 bucket.
+
+    Args:
+        bucket (str): s3 bucket
+
+    Returns:
+        Dict[str, str]: response of operation
+    """
 
     return await S3['client']['obj'].create_bucket(Bucket=bucket)
 
 
 @AWS_SERVICE.active
 async def upload_file(bucket: str, filepath: str, s3_key: str) -> Dict[str, Any]:
-    '''Upload file to s3.'''
+    """Upload file to s3.
+
+    Args:
+        bucket (str): s3 bucket
+        filepath (str): local filepath to upload
+        s3_key (str): destination s3 key for uploaded file
+
+    Returns:
+        Dict[str, Any]: response of operation
+    """
 
     response = {}
     with open(filepath, 'rb') as fileobj:
@@ -31,8 +45,14 @@ async def upload_file(bucket: str, filepath: str, s3_key: str) -> Dict[str, Any]
 
 
 @AWS_SERVICE.active
-async def download_file(bucket: str, filepath: str, s3_key: str) -> None:
-    '''Download file to s3.'''
+async def download_file(bucket: str, filepath: str, s3_key: str):
+    """Download file to s3.
+
+    Args:
+        bucket (str): s3 bucket
+        filepath (str): local filepath for downloaded file
+        s3_key (str): s3 key to download
+    """
 
     with open(filepath, 'wb') as fileobj:
         data = await get_object(bucket=bucket, s3_key=s3_key)
@@ -41,7 +61,16 @@ async def download_file(bucket: str, filepath: str, s3_key: str) -> None:
 
 @AWS_SERVICE.active
 async def list_s3_objects(bucket: str, s3_prefix: str, with_attributes: bool=False) -> List[str]:
-    '''List objects in s3 path.'''
+    """List objects in s3 path.
+
+    Args:
+        bucket (str): s3 bucket
+        s3_prefix (str): s3 prefix
+        with_attributes (bool, optional): return all file attributes in addition to s3 keys. Defaults to False.
+
+    Returns:
+        List[str]: [description]
+    """
 
     arr = []
     paginator = S3['client']['obj'].get_paginator('list_objects')
@@ -57,7 +86,15 @@ async def list_s3_objects(bucket: str, s3_prefix: str, with_attributes: bool=Fal
 
 @AWS_SERVICE.active
 async def get_s3_file_attributes(bucket: str, s3_key: str) -> Dict[str, Any]:
-    '''Get s3 objects metadata attributes.'''
+    """Get s3 objects metadata attributes.
+
+    Args:
+        bucket (str): s3 bucket
+        s3_key (str): s3 key
+
+    Returns:
+        Dict[str, Any]: response of operation
+    """
 
     s3_object = await S3['client']['obj'].get_object(Bucket=bucket, Key=s3_key)
     del s3_object['Body']
@@ -67,7 +104,15 @@ async def get_s3_file_attributes(bucket: str, s3_key: str) -> Dict[str, Any]:
 
 @AWS_SERVICE.active
 async def get_object(bucket: str, s3_key: str) -> bytes:
-    '''Directly download contents of s3 object.'''
+    """Directly download contents of s3 object.
+
+    Args:
+        bucket (str): s3 bucket
+        s3_key (str): s3 key
+
+    Returns:
+        bytes: streaming of s3 key as data bytes
+    """
 
     data = None
     s3_object = await S3['client']['obj'].get_object(Bucket=bucket, Key=s3_key)
@@ -79,7 +124,15 @@ async def get_object(bucket: str, s3_key: str) -> bytes:
 
 @AWS_SERVICE.active
 async def delete_s3_object(bucket: str, s3_prefix: str) -> Dict[str, Any]:
-    '''Delete object(s) from s3.'''
+    """Delete object(s) from s3.
+
+    Args:
+        bucket (str): s3 bucket
+        s3_prefix (str): s3 prefix
+
+    Returns:
+        Dict[str, Any]: response of operation
+    """
 
     response = await S3['client']['obj'].delete_object(Bucket=bucket, Key=s3_prefix)
 

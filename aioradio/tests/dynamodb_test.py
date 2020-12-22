@@ -1,20 +1,17 @@
-'''pytest dynamodb'''
+"""pytest dynamodb."""
 
-from random import randint
 from decimal import Decimal
+from random import randint
 from uuid import uuid4
 
 import pytest
-from boto3.dynamodb.conditions import Attr
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Attr, Key
 
-from aioradio.aws.dynamodb import batch_get_items_from_dynamo
-from aioradio.aws.dynamodb import batch_write_to_dynamo
-from aioradio.aws.dynamodb import get_list_of_dynamo_tables
-from aioradio.aws.dynamodb import put_item_in_dynamo
-from aioradio.aws.dynamodb import query_dynamo
-from aioradio.aws.dynamodb import scan_dynamo
-from aioradio.aws.dynamodb import update_item_in_dynamo
+from aioradio.aws.dynamodb import (batch_get_items_from_dynamo,
+                                   batch_write_to_dynamo,
+                                   get_list_of_dynamo_tables,
+                                   put_item_in_dynamo, query_dynamo,
+                                   scan_dynamo, update_item_in_dynamo)
 
 # ****************************************
 # DO NOT CHANGE THE DB_TABLE OR REGION
@@ -26,21 +23,22 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_dynamodb_create_table(create_table):
-    '''Test creating a DynamoDB table.'''
+    """Test creating a DynamoDB table."""
 
     result = await create_table(table_name=DB_TABLE)
     assert result == DB_TABLE
 
 
 async def test_dynamodb_get_list_of_tables():
-    '''Test getting list of DynamoDB tables and our created table is in the list.'''
+    """Test getting list of DynamoDB tables and our created table is in the
+    list."""
 
     assert DB_TABLE in await get_list_of_dynamo_tables(region=REGION)
 
 
 @pytest.mark.parametrize('fice', ['XXXXXX', '012345', '999999'])
 async def test_dynamo_put_item(fice):
-    '''Test writing an item to DynamoDB table.'''
+    """Test writing an item to DynamoDB table."""
 
     item = {
         'fice': fice,
@@ -59,7 +57,7 @@ async def test_dynamo_put_item(fice):
 
 
 async def test_dynamo_update_item():
-    '''Test updating a nested value within an item.'''
+    """Test updating a nested value within an item."""
 
     result = await update_item_in_dynamo(
         table_name=DB_TABLE,
@@ -83,7 +81,7 @@ async def test_dynamo_update_item():
 
 
 async def test_dynamo_write_batch():
-    '''Test writing a batch of items to DynamoDB.'''
+    """Test writing a batch of items to DynamoDB."""
 
     items = []
     for fice in ['000000', '911911', '102779']:
@@ -103,7 +101,7 @@ async def test_dynamo_write_batch():
 
 
 async def test_batch_get_items_from_dynamo():
-    '''Test getting batch of items from dynamo.'''
+    """Test getting batch of items from dynamo."""
 
     items = [{'fice': fice} for fice in ['000000', '911911', '102779']]
     results = await batch_get_items_from_dynamo(table_name=DB_TABLE, region=REGION, items=items)
@@ -113,7 +111,7 @@ async def test_batch_get_items_from_dynamo():
 
 
 async def test_dynamo_query():
-    '''Test querying data from dynamoDB.'''
+    """Test querying data from dynamoDB."""
 
     key_condition_expression = Key('fice').eq('XXXXXX')
     result = await query_dynamo(table_name=DB_TABLE, region=REGION, key=key_condition_expression)
@@ -121,7 +119,7 @@ async def test_dynamo_query():
 
 
 async def test_dynamo_scan_table():
-    '''Test scanning DynamoDB table.'''
+    """Test scanning DynamoDB table."""
 
     filter_expression = Attr('data.unique_id.records').between(-10, -1)
     result = await scan_dynamo(table_name=DB_TABLE, region=REGION, key=filter_expression)

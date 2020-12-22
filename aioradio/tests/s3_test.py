@@ -1,4 +1,4 @@
-'''pytest s3'''
+"""pytest s3."""
 
 # pylint: disable=logging-fstring-interpolation
 
@@ -6,13 +6,9 @@ import logging
 
 import pytest
 
-from aioradio.aws.s3 import delete_s3_object
-from aioradio.aws.s3 import download_file
-from aioradio.aws.s3 import get_object
-from aioradio.aws.s3 import get_s3_file_attributes
-from aioradio.aws.s3 import list_s3_objects
-from aioradio.aws.s3 import upload_file
-
+from aioradio.aws.s3 import (delete_s3_object, download_file, get_object,
+                             get_s3_file_attributes, list_s3_objects,
+                             upload_file)
 
 LOG = logging.getLogger(__name__)
 
@@ -24,14 +20,17 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_s3_creating_bucket(create_bucket):
-    '''Create the mock S3 bucket.'''
+    """Create the mock S3 bucket."""
 
     result = await create_bucket(region_name='us-east-1', bucket_name=S3_BUCKET)
     assert result == S3_BUCKET
 
 
 async def test_s3_upload_file(tmpdir_factory):
-    '''Test uploading file to s3. In addition will test deleting a file and listing objects.'''
+    """Test uploading file to s3.
+
+    In addition will test deleting a file and listing objects.
+    """
 
     filename = 'hello_world.txt'
     path = str(tmpdir_factory.mktemp('upload').join(filename))
@@ -53,7 +52,7 @@ async def test_s3_upload_file(tmpdir_factory):
 
 
 async def test_s3_download_file(tmpdir_factory):
-    '''Test uploading file to s3.'''
+    """Test uploading file to s3."""
 
     filename = 'hello_world.txt'
     path = str(tmpdir_factory.mktemp('download').join(filename))
@@ -66,14 +65,14 @@ async def test_s3_download_file(tmpdir_factory):
 
 
 async def test_get_object():
-    '''Test get_object from s3.'''
+    """Test get_object from s3."""
 
     result = await get_object(bucket=S3_BUCKET, s3_key=f'{S3_PREFIX}/hello_world.txt')
     assert result is not None
 
 
 async def test_get_file_attributes():
-    '''Test retrieving s3 object attributes.'''
+    """Test retrieving s3 object attributes."""
 
     result = await get_s3_file_attributes(bucket=S3_BUCKET, s3_key=f'{S3_PREFIX}/hello_world.txt')
     assert result['ContentLength'] == 22

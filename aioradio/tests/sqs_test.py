@@ -1,4 +1,4 @@
-'''pytest sqs'''
+"""pytest sqs."""
 
 # pylint: disable=c-extension-no-member
 
@@ -8,10 +8,8 @@ from uuid import uuid4
 import orjson
 import pytest
 
-from aioradio.aws.sqs import delete_messages
-from aioradio.aws.sqs import get_messages
-from aioradio.aws.sqs import purge_messages
-from aioradio.aws.sqs import send_messages
+from aioradio.aws.sqs import (delete_messages, get_messages, purge_messages,
+                              send_messages)
 
 QUEUE = 'pytest'
 REGION = 'us-east-2'
@@ -21,7 +19,7 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_sqs_creating_queue(sqs_queue_url):
-    '''Create mock SQS queue.'''
+    """Create mock SQS queue."""
 
     queue_url = await sqs_queue_url(region_name=REGION, queue_name=QUEUE)
     assert queue_url
@@ -29,13 +27,13 @@ async def test_sqs_creating_queue(sqs_queue_url):
 
 @pytest.mark.xfail
 async def test_sqs_non_existing_queue():
-    '''Test purging all messages from SQS queue that does not exist.'''
+    """Test purging all messages from SQS queue that does not exist."""
 
     await purge_messages(queue='this-queue-does-not-exist', region=REGION)
 
 
 async def test_sqs_send_messages():
-    '''Test sending a batch of messages to an SQS queue.'''
+    """Test sending a batch of messages to an SQS queue."""
 
     entries = [
         {'Id': str(uuid4()), 'MessageBody': orjson.dumps({'data': 'Hello Austin!'}).decode()},
@@ -48,7 +46,7 @@ async def test_sqs_send_messages():
 
 
 async def test_sqs_get_messages():
-    '''Test receiving a batch of messages from an SQS queue.'''
+    """Test receiving a batch of messages from an SQS queue."""
 
     msgs = await get_messages(queue=QUEUE, region=REGION)
     assert len(msgs) > 0
@@ -61,7 +59,7 @@ async def test_sqs_get_messages():
 
 
 async def test_sqs_delete_messages():
-    '''Test successful deletion of a batch of SQS queue messages.'''
+    """Test successful deletion of a batch of SQS queue messages."""
 
     entries = [{'Id': str(uuid4()), 'ReceiptHandle': i} for i in RECEIPT_HANDLES]
     result = await delete_messages(queue=QUEUE, region=REGION, entries=entries)
@@ -69,7 +67,7 @@ async def test_sqs_delete_messages():
 
 
 async def test_sqs_purge_messages():
-    '''Test purging all messages from SQS queue.'''
+    """Test purging all messages from SQS queue."""
 
     # Iterate twice to exercise the err on issuing PurgeQueue within 60 seconds of previous call
     for _ in range(2):

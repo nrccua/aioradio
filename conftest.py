@@ -1,4 +1,4 @@
-'''pytest configuration.'''
+"""pytest configuration."""
 
 import asyncio
 from itertools import chain
@@ -9,16 +9,16 @@ import pytest
 from aiobotocore.config import AioConfig
 
 from aioradio.aws.dynamodb import DYNAMO
-from aioradio.aws.s3 import S3
-from aioradio.aws.sqs import SQS
-from aioradio.aws.secrets import SECRETS
-from aioradio.redis import Redis
 from aioradio.aws.moto_server import MotoService
+from aioradio.aws.s3 import S3
+from aioradio.aws.secrets import SECRETS
+from aioradio.aws.sqs import SQS
+from aioradio.redis import Redis
 
 
 @pytest.fixture(scope='session')
 def event_loop():
-    '''Redefine event_loop with scope set to session instead of function.'''
+    """Redefine event_loop with scope set to session instead of function."""
 
     loop = asyncio.get_event_loop()
     yield loop
@@ -27,7 +27,7 @@ def event_loop():
 
 @pytest.fixture(scope='module')
 def payload():
-    '''Test payload to reuse.'''
+    """Test payload to reuse."""
 
     return {
         'tool': 'pytest',
@@ -39,7 +39,7 @@ def payload():
 
 @pytest.fixture(scope='module')
 def cache(github_action):
-    '''Redefine event_loop with scope set to session instead of function.'''
+    """Redefine event_loop with scope set to session instead of function."""
 
     if github_action:
         pytest.skip('Skip test_set_one_item when running via Github Action')
@@ -49,7 +49,8 @@ def cache(github_action):
 
 
 def pytest_addoption(parser):
-    '''Command line argument --cleanse=false can be used to turn off address cleansing.'''
+    """Command line argument --cleanse=false can be used to turn off address
+    cleansing."""
 
     parser.addoption(
         '--github', action='store', default='false', help='pytest running from github action')
@@ -57,7 +58,7 @@ def pytest_addoption(parser):
 
 @pytest.fixture(scope='session')
 def github_action(pytestconfig):
-    '''Return True/False depending on the --cleanse command line argument.'''
+    """Return True/False depending on the --cleanse command line argument."""
 
     return pytestconfig.getoption("github").lower() == "true"
 
@@ -118,10 +119,8 @@ async def s3_server():
 async def create_bucket(s3_client):
     _bucket_name = None
 
-    async def _f(region_name, bucket_name=None):
+    async def _f(region_name, bucket_name):
         nonlocal _bucket_name
-        if bucket_name is None:
-            bucket_name = random_bucketname()
         _bucket_name = bucket_name
         bucket_kwargs = {'Bucket': bucket_name}
         if region_name != 'us-east-1':
@@ -184,10 +183,8 @@ async def sqs_client(session, region, sqs_config, sqs_server):
 async def sqs_queue_url(sqs_client):
     _queue_name = None
 
-    async def _f(region_name, queue_name=None):
+    async def _f(region_name, queue_name):
         nonlocal _queue_name
-        if queue_name is None:
-            queue_name = random_name()
         _queue_name = queue_name
         response = await sqs_client.create_queue(QueueName=queue_name)
         queue_url = response['QueueUrl']
@@ -284,10 +281,8 @@ async def create_table(dynamodb_client, dynamodb_resource):
         response = await dynamodb_client.describe_table(TableName=table_name)
         return response['Table']['TableStatus'] == 'ACTIVE'
 
-    async def _f(table_name=None):
+    async def _f(table_name):
         nonlocal _table_name
-        if table_name is None:
-            table_name = random_tablename()
         _table_name = table_name
         table_kwargs = {
             'TableName': table_name,

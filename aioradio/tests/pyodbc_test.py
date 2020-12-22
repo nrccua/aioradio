@@ -1,11 +1,11 @@
-'''pytest file_ingestion script'''
+"""pytest file_ingestion script."""
 
 import os
+
 import pytest
 
-from aioradio.pyodbc import establish_pyodbc_connection
-from aioradio.pyodbc import pyodbc_query_fetchone
-from aioradio.pyodbc import pyodbc_query_fetchall
+from aioradio.pyodbc import (establish_pyodbc_connection,
+                             pyodbc_query_fetchall, pyodbc_query_fetchone)
 
 pytestmark = pytest.mark.asyncio
 
@@ -14,7 +14,7 @@ CREDS = {'mssql_host': os.getenv('MSSQL_HOST'), 'mssql_user': os.getenv('MSSQL_U
 
 @pytest.mark.xfail
 async def test_bad_unixodbc_driver(github_action):
-    '''Test using a bad unixodbc_driver that the proper exception is raised.'''
+    """Test using a bad unixodbc_driver that the proper exception is raised."""
 
     if github_action:
         pytest.skip('Skip test_bad_unixodbc_driver when running via Github Action')
@@ -24,8 +24,11 @@ async def test_bad_unixodbc_driver(github_action):
 
 
 async def test_pyodbc_query_fetchone_and_fetchall(github_action):
-    '''Test pyodbc_query_fetchone. Make sure you have unixodbc and freetds installed;
-    see here: http://www.christophers.tips/pages/pyodbc_mac.html.'''
+    """Test pyodbc_query_fetchone.
+
+    Make sure you have unixodbc and freetds installed;
+    see here: http://www.christophers.tips/pages/pyodbc_mac.html.
+    """
 
     if github_action:
         pytest.skip('Skip test_pyodbc_query_fetchone_and_fetchall when running via Github Action')

@@ -1,6 +1,4 @@
-'''
-pytest Jira
-'''
+"""pytest Jira."""
 
 # pylint: disable=c-extension-no-member
 
@@ -8,9 +6,7 @@ import os
 
 import pytest
 
-from aioradio.jira import add_comment_to_jira
-from aioradio.jira import get_jira_issue
-from aioradio.jira import post_jira_issue
+from aioradio.jira import add_comment_to_jira, get_jira_issue, post_jira_issue
 
 pytestmark = pytest.mark.asyncio
 
@@ -20,7 +16,7 @@ CREDS = {'user': os.getenv('JIRA_USER'), 'pwd': os.getenv('JIRA_PW')}
 
 
 async def test_post_jira_issue():
-    '''Test posting Jira issue.'''
+    """Test posting Jira issue."""
 
     pytest.skip("Skip Jira ticket creation as we don't want to create many pointless tickets.")
 
@@ -44,7 +40,7 @@ async def test_post_jira_issue():
 
 
 async def test_get_jira_issue():
-    '''Test getting Jira issue.'''
+    """Test getting Jira issue."""
 
     pytest.skip("Skip get jira issue.")
 
@@ -54,7 +50,7 @@ async def test_get_jira_issue():
 
 
 async def test_adding_jira_comment_to_issue():
-    '''Test adding a comment to a Jira issue.'''
+    """Test adding a comment to a Jira issue."""
 
     pytest.skip("Skip adding comments to jira ticket.")
 

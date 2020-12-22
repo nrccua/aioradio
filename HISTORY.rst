@@ -3,6 +3,13 @@ History
 =======
 
 
+v0.9.6 (2020-12-22)
+-----------------------
+
+* Apply pydoc to repository.
+* Add isort and docformatter to pre-commit.
+
+
 v0.9.5 (2020-12-14)
 -----------------------
 
