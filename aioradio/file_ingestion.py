@@ -5,6 +5,7 @@
 # pylint: disable=too-many-boolean-expressions
 
 import asyncio
+import functools
 import os
 import re
 import time
@@ -35,6 +36,7 @@ def async_wrapper(func: coroutine) -> Any:
         Any: any
     """
 
+    @functools.wraps(func)
     def wrapper(*args, **kwargs) -> Any:
         """Decorator wrapper.
 
@@ -59,6 +61,7 @@ def async_wrapper_using_new_loop(func: coroutine) -> Any:
         Any: any
     """
 
+    @functools.wraps(func)
     def wrapper(*args, **kwargs) -> Any:
         """Decorator wrapper.
 
