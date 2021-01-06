@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.9.7 (2021-01-06)
+-----------------------
+
+* Give async_wrapper decorator wrapper parent function name.
+
+
 v0.9.6 (2020-12-22)
 -----------------------
 
