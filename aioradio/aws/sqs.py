@@ -11,8 +11,18 @@ from botocore.exceptions import ClientError
 from aioradio.aws.utils import AwsServiceManager
 
 LOG = logging.getLogger(__name__)
-AWS_SERVICE = AwsServiceManager(service='sqs', regions=['us-east-1', 'us-east-2'])
+AWS_SERVICE = AwsServiceManager(service='sqs', regions=['us-east-1'])
 SQS = AWS_SERVICE.service_dict
+
+
+async def add_regions(regions: List[str]):
+    """Add regions to SQS AWS service.
+
+    Args:
+        regions (List[str]): List of AWS regions
+    """
+
+    AWS_SERVICE.add_regions(regions)
 
 
 @AWS_SERVICE.active

@@ -1,11 +1,22 @@
 """Generic async AWS functions for Secrets Manager."""
 
 import base64
+from typing import List
 
 from aioradio.aws.utils import AwsServiceManager
 
-AWS_SERVICE = AwsServiceManager(service='secretsmanager', regions=['us-east-1', 'us-east-2'])
+AWS_SERVICE = AwsServiceManager(service='secretsmanager', regions=['us-east-1'])
 SECRETS = AWS_SERVICE.service_dict
+
+
+async def add_regions(regions: List[str]):
+    """Add regions to Secret Manager AWS service.
+
+    Args:
+        regions (List[str]): List of AWS regions
+    """
+
+    AWS_SERVICE.add_regions(regions)
 
 
 @AWS_SERVICE.active

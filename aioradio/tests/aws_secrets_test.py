@@ -4,9 +4,15 @@
 
 import pytest
 
-from aioradio.aws.secrets import get_secret
+from aioradio.aws.secrets import add_regions, get_secret
 
 pytestmark = pytest.mark.asyncio
+
+
+async def test_add_regions():
+    """Add us-east-2 region."""
+
+    await add_regions(['us-east-2'])
 
 
 async def test_secrets_get_secret(create_secret):

@@ -8,14 +8,20 @@ from uuid import uuid4
 import orjson
 import pytest
 
-from aioradio.aws.sqs import (delete_messages, get_messages, purge_messages,
-                              send_messages)
+from aioradio.aws.sqs import (add_regions, delete_messages, get_messages,
+                              purge_messages, send_messages)
 
 QUEUE = 'pytest'
 REGION = 'us-east-2'
 
 RECEIPT_HANDLES = []
 pytestmark = pytest.mark.asyncio
+
+
+async def test_add_regions():
+    """Add us-east-2 region."""
+
+    await add_regions(['us-east-2'])
 
 
 async def test_sqs_creating_queue(sqs_queue_url):

@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.9.8 (2021-02-01)
+-----------------------
+
+* Add ability to add more regions besides us-east-1 & us-east-2.
+
+
 v0.9.7 (2021-01-06)
 -----------------------
 
