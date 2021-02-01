@@ -54,6 +54,23 @@ class AwsServiceManager:
         except RuntimeError:
             loop = asyncio.new_event_loop().run_until_complete(self.create_scheduler())
 
+    def add_regions(self, regions: List[str]):
+        """Add regions to AWS service.
+
+        Args:
+            regions (List[str]): [description]
+        """
+
+        data = {'client': {'obj': None, 'session': None, 'busy': True}, 'active': 0}
+        if self.service == 'dynamodb':
+            data['resource'] = {'obj': None, 'session': None, 'busy': True}
+
+        for region in regions:
+            if region not in self.regions:
+                self.regions.append(region)
+                self.service_dict[region] = deepcopy(data)
+                asyncio.get_event_loop().create_task(self.spawn_aws_service_process(region))
+
     def __del__(self):
         self.scheduler.close()
 
@@ -63,9 +80,21 @@ class AwsServiceManager:
         self.scheduler = await aiojobs.create_scheduler()
         if self.regions:
             for region in self.regions:
-                await self.scheduler.spawn(self.aio_server(item='client', region=region))
-                if self.module == 'aioboto3':
-                    await self.scheduler.spawn(self.aio_server(item='resource', region=region))
+                await self.spawn_aws_service_process(region)
+        else:
+            await self.spawn_aws_service_process()
+
+    async def spawn_aws_service_process(self, region: str=''):
+        """Spawn scheduler process on a per region basis.
+
+        Args:
+            region (str, optional): AWS region. Defaults to ''.
+        """
+
+        if region:
+            await self.scheduler.spawn(self.aio_server(item='client', region=region))
+            if self.module == 'aioboto3':
+                await self.scheduler.spawn(self.aio_server(item='resource', region=region))
         else:
             await self.scheduler.spawn(self.aio_server(item='client'))
             if self.module == 'aioboto3':

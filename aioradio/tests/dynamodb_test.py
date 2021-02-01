@@ -7,7 +7,7 @@ from uuid import uuid4
 import pytest
 from boto3.dynamodb.conditions import Attr, Key
 
-from aioradio.aws.dynamodb import (batch_get_items_from_dynamo,
+from aioradio.aws.dynamodb import (add_regions, batch_get_items_from_dynamo,
                                    batch_write_to_dynamo,
                                    get_list_of_dynamo_tables,
                                    put_item_in_dynamo, query_dynamo,
@@ -20,6 +20,12 @@ DB_TABLE = 'pytest'
 REGION = 'us-east-2'
 
 pytestmark = pytest.mark.asyncio
+
+
+async def test_add_regions():
+    """Add us-east-2 region."""
+
+    await add_regions(['us-east-2'])
 
 
 async def test_dynamodb_create_table(create_table):
