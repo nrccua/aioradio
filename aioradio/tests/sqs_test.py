@@ -2,7 +2,6 @@
 
 # pylint: disable=c-extension-no-member
 
-from asyncio import sleep
 from uuid import uuid4
 
 import orjson
@@ -21,7 +20,7 @@ pytestmark = pytest.mark.asyncio
 async def test_add_regions():
     """Add us-east-2 region."""
 
-    await add_regions(['us-east-2'])
+    await add_regions([REGION])
 
 
 async def test_sqs_creating_queue(sqs_queue_url):
@@ -82,5 +81,4 @@ async def test_sqs_purge_messages():
             # accept err: "Only one PurgeQueue operation on pytest is allowed every 60 seconds."
             assert 'PurgeQueue' in err
         else:
-            await sleep(3)
             assert not await get_messages(queue=QUEUE, region=REGION, wait_time=1)

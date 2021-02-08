@@ -1,4 +1,4 @@
-"""pytest file_ingestion script."""
+"""pytest pyodbc script."""
 
 import os
 
