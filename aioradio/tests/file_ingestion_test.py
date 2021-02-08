@@ -11,7 +11,7 @@ from datetime import timedelta, timezone
 
 import pytest
 
-from aioradio.file_ingestion import (async_db_wrapper, delete_ftp_file,
+from aioradio.file_ingestion import (async_db_wrapper, async_wrapper, delete_ftp_file,
                                      establish_ftp_connection,
                                      get_current_datetime_from_timestamp,
                                      list_ftp_objects,
@@ -187,7 +187,22 @@ def test_async_wrapper(user):
     """Test async_wrapper with database connections."""
 
     if user != 'tim.reichard':
-        pytest.skip('Skip test_async_wrapper_factory since user is not Tim Reichard')
+        pytest.skip('Skip test_async_wrapper since user is not Tim Reichard')
+    
+    @async_wrapper
+    async def func():
+        return 'Hello World'
+
+    result = func()
+    assert result == 'Hello World'
+
+
+
+def test_async_db_wrapper(user):
+    """Test async_db_wrapper with database connections."""
+
+    if user != 'tim.reichard':
+        pytest.skip('Skip test_async_db_wrapper since user is not Tim Reichard')
 
     db_info=[
             {

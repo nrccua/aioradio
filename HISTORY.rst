@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.10.3 (2021-02-08)
+-----------------------
+
+* Modify async_wrapper to not directly use await within wrapper.
+
+
 v0.10.2 (2021-02-08)
 -----------------------
 

@@ -42,14 +42,14 @@ def async_wrapper(func: coroutine) -> Any:
     """
 
     @functools.wraps(func)
-    async def wrapper(*args, **kwargs) -> Any:
+    def wrapper(*args, **kwargs) -> Any:
         """Decorator wrapper.
 
         Returns:
             Any: any
         """
 
-        return await func(*args, **kwargs)
+        return asyncio.get_event_loop().run_until_complete(func(*args, **kwargs))
 
     return wrapper
 
