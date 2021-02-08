@@ -3,10 +3,16 @@ History
 =======
 
 
+v0.10.2 (2021-02-08)
+-----------------------
+
+* Use await in async_db_wrapper instead of using asyncio.get_event_loop.run_until_complete.
+
+
 v0.10.1 (2021-02-08)
 -----------------------
 
-* Add missing comma in install_requires
+* Add missing comma in install_requires.
 
 
 v0.10.0 (2021-02-08)
