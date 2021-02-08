@@ -1,6 +1,7 @@
 """Pyodbc functions for connecting and send queries."""
 
 # pylint: disable=c-extension-no-member
+# pylint: disable=too-many-arguments
 
 import os
 from typing import Any, List, Union
@@ -34,7 +35,15 @@ async def get_unixodbc_driver_path(paths: List[str]) -> Union[str, None]:
     return driver_path
 
 
-async def establish_pyodbc_connection(host: str, user: str, pwd: str, driver: str = None) -> pyodbc.Connection:
+async def establish_pyodbc_connection(
+        host: str,
+        user: str,
+        pwd: str,
+        port: int=1433,
+        database: str='',
+        driver: str='',
+        autocommit: bool=False
+) -> pyodbc.Connection:
     """Acquire and return pyodbc.Connection object else raise
     FileNotFoundError.
 
@@ -42,7 +51,9 @@ async def establish_pyodbc_connection(host: str, user: str, pwd: str, driver: st
         host (str): hostname
         user (str): username
         pwd (str): password
-        driver (str, optional): unixodbc driver. Defaults to None.
+        post (int, optional): port. Defaults to 1433.
+        database (str, optional): database. Defaults to ''.
+        driver (str, optional): unixodbc driver. Defaults to ''.
 
     Raises:
         FileNotFoundError: unable to locate unixodbc driver
@@ -51,16 +62,15 @@ async def establish_pyodbc_connection(host: str, user: str, pwd: str, driver: st
         pyodbc.Connection: database connection object
     """
 
-    if driver is None:
-        verified_driver = await get_unixodbc_driver_path(UNIXODBC_DRIVER_PATHS)
-    else:
-        verified_driver = await get_unixodbc_driver_path([driver])
-
+    verified_driver = await get_unixodbc_driver_path([driver]) if driver else await get_unixodbc_driver_path(UNIXODBC_DRIVER_PATHS)
     if verified_driver is None:
         raise FileNotFoundError('Unable to locate unixodbc driver file: libtdsodbc.so')
 
-    return pyodbc.connect(
-        f'DRIVER={verified_driver};SERVER={host};PORT=1433;UID={user};PWD={pwd};TDS_Version=8.0')
+    conn_string = f'DRIVER={verified_driver};SERVER={host};PORT={port};UID={user};PWD={pwd};TDS_Version=8.0'
+    if database:
+        conn_string += f';DATABASE={database}'
+
+    return pyodbc.connect(conn_string, autocommit=autocommit)
 
 
 async def pyodbc_query_fetchone(conn: pyodbc.Connection, query: str) -> Union[List[Any], None]:

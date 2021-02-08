@@ -1,11 +1,13 @@
 """Generic functions related to working with files or the file system."""
 
+# pylint: disable=broad-except
 # pylint: disable=invalid-name
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-boolean-expressions
 
 import asyncio
 import functools
+import json
 import os
 import re
 import time
@@ -22,6 +24,10 @@ from smb.base import SharedFile
 from smb.smb_structs import OperationFailure
 from smb.SMBConnection import SMBConnection
 
+from aioradio.aws.secrets import get_secret
+from aioradio.psycopg2 import establish_psycopg2_connection
+from aioradio.pyodbc import establish_pyodbc_connection
+
 DIRECTORY = Path(__file__).parent.absolute()
 
 
@@ -31,7 +37,6 @@ def async_wrapper(func: coroutine) -> Any:
 
     Args:
         func (coroutine): async coroutine
-
     Returns:
         Any: any
     """
@@ -44,10 +49,85 @@ def async_wrapper(func: coroutine) -> Any:
             Any: any
         """
 
-        loop = asyncio.get_event_loop()
-        return loop.run_until_complete(func(*args, **kwargs))
+        return asyncio.get_event_loop().run_until_complete(func(*args, **kwargs))
 
     return wrapper
+
+
+def async_db_wrapper(db_info: List[Dict[str, Any]]) -> Any:
+    """Decorator to run functions using async that handles database connection
+    creation and closure.  Pulls database creds from AWS secret manager.
+
+    Args:
+        db_info (List[Dict[str, str]], optional): Database info {'name', 'db', 'secret', 'region'}. Defaults to [].
+
+    Returns:
+        Any: any
+    """
+
+    def parent_wrapper(func: coroutine) -> Any:
+        """Decorator parent wrapper.
+
+        Args:
+            func (coroutine): async coroutine
+
+        Returns:
+            Any: any
+        """
+
+        @functools.wraps(func)
+        def child_wrapper(*args, **kwargs) -> Any:
+            """Decorator child wrapper. All DB established/closed connections
+            and commits or rollbacks take place in the decorator and should
+            never happen within the inner function.
+
+            Returns:
+                Any: any
+            """
+
+            async_run = asyncio.get_event_loop().run_until_complete
+            conns = {}
+            rollback = {}
+
+            # create connections
+            for item in db_info:
+
+                if item['db'] in ['pyodbc', 'psycopg2']:
+                    creds = {**json.loads(async_run(get_secret(item['secret'], item['region']))), **{'database': item.get('database', '')}}
+                    if item['db'] == 'pyodbc':
+                        conns[item['name']] = async_run(establish_pyodbc_connection(**creds, autocommit=False))
+                    elif item['db'] == 'psycopg2':
+                        conns[item['name']] = async_run(establish_psycopg2_connection(**creds))
+                    rollback[item['name']] = item['rollback']
+                    print(f"ESTABLISHED CONNECTION for {item['name']}")
+
+            result = None
+            error = None
+            try:
+                # run main function
+                result = async_run(func(*args, **kwargs, conns=conns)) if conns else async_run(func(*args, **kwargs))
+            except Exception as err:
+                error = err
+
+            # close connections
+            for name, conn in conns.items():
+
+                if rollback[name]:
+                    conn.rollback()
+
+                conn.commit()
+                conn.close()
+                print(f"CLOSED CONNECTION for {name}")
+
+            # if we caught an exception raise it again
+            if error is not None:
+                raise error
+
+            return result
+
+        return child_wrapper
+
+    return parent_wrapper
 
 
 def async_wrapper_using_new_loop(func: coroutine) -> Any:

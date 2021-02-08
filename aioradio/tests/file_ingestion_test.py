@@ -11,7 +11,8 @@ from datetime import timedelta, timezone
 
 import pytest
 
-from aioradio.file_ingestion import (delete_ftp_file, establish_ftp_connection,
+from aioradio.file_ingestion import (async_db_wrapper, delete_ftp_file,
+                                     establish_ftp_connection,
                                      get_current_datetime_from_timestamp,
                                      list_ftp_objects,
                                      send_emails_via_mandrill,
@@ -180,3 +181,37 @@ async def test_delete_ftp_file(github_action):
 
     result = await delete_ftp_file(conn=conn, service_name='EnrollmentFunnel', ftp_path='pytest/is/great/test_file_ingestion.zip')
     assert result is True
+
+
+def test_async_wrapper(user):
+    """Test async_wrapper with database connections."""
+
+    if user != 'tim.reichard':
+        pytest.skip('Skip test_async_wrapper_factory since user is not Tim Reichard')
+
+    db_info=[
+            {
+                'name': 'test1',
+                'db': 'pyodbc',
+                'secret': 'production/airflowCluster/sqloltp',
+                'region': 'us-east-1',
+                'rollback': True
+            },
+            {
+                'name': 'test2',
+                'db': 'psycopg2',
+                'secret': 'datalab/dev/classplanner_db',
+                'region': 'us-east-1',
+                'database': 'student',
+                'is_audit': False,
+                'rollback': True
+            }
+    ]
+
+    @async_db_wrapper(db_info=db_info)
+    async def func(**kwargs):
+        conns = kwargs['conns']
+        for name, conn in conns.items():
+            print(f"Connection name: {name}\tConnection object: {conn}")
+
+    func()

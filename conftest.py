@@ -1,6 +1,7 @@
 """pytest configuration."""
 
 import asyncio
+import os
 from itertools import chain
 
 import aioboto3
@@ -23,6 +24,17 @@ def event_loop():
     loop = asyncio.get_event_loop()
     yield loop
     loop.close()
+
+
+@pytest.fixture(scope='session')
+def user():
+    """Get the current USER environment variable value.
+
+    Some tests need to be skipped if the user doesn't have access to an
+    AWS service.
+    """
+
+    return os.getenv('USER')
 
 
 @pytest.fixture(scope='module')

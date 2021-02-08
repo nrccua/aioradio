@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.10.0 (2021-02-08)
+-----------------------
+
+* Add decorator to manage DB connections and using SQL transactions.
+
+
 v0.9.8 (2021-02-01)
 -----------------------
 
