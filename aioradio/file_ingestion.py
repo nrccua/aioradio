@@ -114,7 +114,7 @@ def async_db_wrapper(db_info: List[Dict[str, Any]]) -> Any:
 
                 if rollback[name]:
                     conn.rollback()
-                else:
+                elif error is None:
                     conn.commit()
 
                 conn.close()
