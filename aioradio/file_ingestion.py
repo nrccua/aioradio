@@ -42,14 +42,14 @@ def async_wrapper(func: coroutine) -> Any:
     """
 
     @functools.wraps(func)
-    def wrapper(*args, **kwargs) -> Any:
+    async def wrapper(*args, **kwargs) -> Any:
         """Decorator wrapper.
 
         Returns:
             Any: any
         """
 
-        return asyncio.get_event_loop().run_until_complete(func(*args, **kwargs))
+        return await func(*args, **kwargs)
 
     return wrapper
 
@@ -76,7 +76,7 @@ def async_db_wrapper(db_info: List[Dict[str, Any]]) -> Any:
         """
 
         @functools.wraps(func)
-        def child_wrapper(*args, **kwargs) -> Any:
+        async def child_wrapper(*args, **kwargs) -> Any:
             """Decorator child wrapper. All DB established/closed connections
             and commits or rollbacks take place in the decorator and should
             never happen within the inner function.
@@ -85,7 +85,6 @@ def async_db_wrapper(db_info: List[Dict[str, Any]]) -> Any:
                 Any: any
             """
 
-            async_run = asyncio.get_event_loop().run_until_complete
             conns = {}
             rollback = {}
 
@@ -93,11 +92,11 @@ def async_db_wrapper(db_info: List[Dict[str, Any]]) -> Any:
             for item in db_info:
 
                 if item['db'] in ['pyodbc', 'psycopg2']:
-                    creds = {**json.loads(async_run(get_secret(item['secret'], item['region']))), **{'database': item.get('database', '')}}
+                    creds = {**json.loads(await get_secret(item['secret'], item['region'])), **{'database': item.get('database', '')}}
                     if item['db'] == 'pyodbc':
-                        conns[item['name']] = async_run(establish_pyodbc_connection(**creds, autocommit=False))
+                        conns[item['name']] = await establish_pyodbc_connection(**creds, autocommit=False)
                     elif item['db'] == 'psycopg2':
-                        conns[item['name']] = async_run(establish_psycopg2_connection(**creds))
+                        conns[item['name']] = await establish_psycopg2_connection(**creds)
                     rollback[item['name']] = item['rollback']
                     print(f"ESTABLISHED CONNECTION for {item['name']}")
 
@@ -105,7 +104,7 @@ def async_db_wrapper(db_info: List[Dict[str, Any]]) -> Any:
             error = None
             try:
                 # run main function
-                result = async_run(func(*args, **kwargs, conns=conns)) if conns else async_run(func(*args, **kwargs))
+                result = await func(*args, **kwargs, conns=conns) if conns else await func(*args, **kwargs)
             except Exception as err:
                 error = err
 
