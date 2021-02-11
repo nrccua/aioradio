@@ -54,9 +54,10 @@ async def establish_pyodbc_connection(
         host (str): hostname
         user (str): username
         pwd (str): password
-        post (int, optional): port. Defaults to 1433.
+        port (int, optional): port. Defaults to None.
         database (str, optional): database. Defaults to ''.
         driver (str, optional): unixodbc driver. Defaults to ''.
+        autocommit (bool, optional): autocommit. Defaults to False.
 
     Raises:
         FileNotFoundError: unable to locate unixodbc driver
