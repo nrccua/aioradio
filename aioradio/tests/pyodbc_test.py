@@ -1,15 +1,14 @@
 """pytest pyodbc script."""
 
-import os
+import json
 
 import pytest
 
+from aioradio.aws.secrets import get_secret
 from aioradio.pyodbc import (establish_pyodbc_connection,
                              pyodbc_query_fetchall, pyodbc_query_fetchone)
 
 pytestmark = pytest.mark.asyncio
-
-CREDS = {'mssql_host': os.getenv('MSSQL_HOST'), 'mssql_user': os.getenv('MSSQL_USER'), 'mssql_pwd': os.getenv('MSSQL_PW')}
 
 
 @pytest.mark.xfail
@@ -19,8 +18,8 @@ async def test_bad_unixodbc_driver(github_action):
     if github_action:
         pytest.skip('Skip test_bad_unixodbc_driver when running via Github Action')
 
-    driver = '/usr/lib/bogus.so'
-    await establish_pyodbc_connection(host=CREDS['mssql_host'], user=CREDS['mssql_user'], pwd=CREDS['mssql_pwd'], driver=driver)
+    creds = json.loads(await get_secret('production/airflowCluster/sqloltp', 'us-east-1'))
+    await establish_pyodbc_connection(**creds, driver='/usr/lib/bogus.so')
 
 
 async def test_pyodbc_query_fetchone_and_fetchall(github_action):
@@ -33,7 +32,8 @@ async def test_pyodbc_query_fetchone_and_fetchall(github_action):
     if github_action:
         pytest.skip('Skip test_pyodbc_query_fetchone_and_fetchall when running via Github Action')
 
-    conn = await establish_pyodbc_connection(host=CREDS['mssql_host'], user=CREDS['mssql_user'], pwd=CREDS['mssql_pwd'])
+    creds = json.loads(await get_secret('production/airflowCluster/sqloltp', 'us-east-1'))
+    conn = await establish_pyodbc_connection(**creds)
     query = "SELECT EFIemails FROM DataStage.dbo.EESFileuploadAssignments WHERE FICE = '003800' AND FileCategory = 'EnrollmentLens'"
 
     row = await pyodbc_query_fetchone(conn=conn, query=query)

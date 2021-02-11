@@ -11,8 +11,8 @@ from datetime import timedelta, timezone
 
 import pytest
 
-from aioradio.file_ingestion import (async_db_wrapper, async_wrapper, delete_ftp_file,
-                                     establish_ftp_connection,
+from aioradio.file_ingestion import (async_db_wrapper, async_wrapper,
+                                     delete_ftp_file, establish_ftp_connection,
                                      get_current_datetime_from_timestamp,
                                      list_ftp_objects,
                                      send_emails_via_mandrill,
@@ -188,7 +188,7 @@ def test_async_wrapper(user):
 
     if user != 'tim.reichard':
         pytest.skip('Skip test_async_wrapper since user is not Tim Reichard')
-    
+
     @async_wrapper
     async def func():
         return 'Hello World'
