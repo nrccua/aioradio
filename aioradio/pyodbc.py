@@ -4,9 +4,12 @@
 # pylint: disable=too-many-arguments
 
 import os
+import platform
 from typing import Any, List, Union
 
 import pyodbc
+
+OPERATING_SYSTEM = platform.system()
 
 # driver location varies based on OS.  add to this list if necessary...
 UNIXODBC_DRIVER_PATHS = [
@@ -39,7 +42,7 @@ async def establish_pyodbc_connection(
         host: str,
         user: str,
         pwd: str,
-        port: int=1433,
+        port: int=None,
         database: str='',
         driver: str='',
         autocommit: bool=False
@@ -62,11 +65,20 @@ async def establish_pyodbc_connection(
         pyodbc.Connection: database connection object
     """
 
-    verified_driver = await get_unixodbc_driver_path([driver]) if driver else await get_unixodbc_driver_path(UNIXODBC_DRIVER_PATHS)
-    if verified_driver is None:
-        raise FileNotFoundError('Unable to locate unixodbc driver file: libtdsodbc.so')
+    verified_driver = None
+    if OPERATING_SYSTEM == 'Windows':
+        verified_driver = driver
+    else:
+        if driver and not driver.startswith('{'):
+            verified_driver = await get_unixodbc_driver_path([driver])
+        else:
+            verified_driver = await get_unixodbc_driver_path(UNIXODBC_DRIVER_PATHS)
+        if verified_driver is None:
+            raise FileNotFoundError('Unable to locate unixodbc driver file: libtdsodbc.so')
 
-    conn_string = f'DRIVER={verified_driver};SERVER={host};PORT={port};UID={user};PWD={pwd};TDS_Version=8.0'
+    conn_string = f'DRIVER={verified_driver};SERVER={host};UID={user};PWD={pwd};TDS_Version=8.0'
+    if port is not None:
+        conn_string += f';PORT={port}'
     if database:
         conn_string += f';DATABASE={database}'
 
