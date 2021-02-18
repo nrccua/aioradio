@@ -75,6 +75,7 @@ class Redis:
         Args:
             key (str): redis cache key
             use_json (bool, optional): convert json value to object. Defaults to None.
+            encoding (Union[str, None], optional): encoding of values
 
         Returns:
             Any: any
@@ -96,6 +97,7 @@ class Redis:
         Args:
             items (List[str]): list of redis cache keys
             use_json (bool, optional): convert json values to objects. Defaults to None.
+            encoding (Union[str, None], optional): encoding of values
 
         Returns:
             List[Any]: list of objects
@@ -154,6 +156,7 @@ class Redis:
             key (str): cache key
             field (str): hash field
             use_json (bool, optional): convert json values to objects. Defaults to None.
+            encoding (Union[str, None], optional): encoding of values
 
         Returns:
             Any: any
@@ -176,6 +179,7 @@ class Redis:
             key (str): cache key
             fields (List[str]): hash fields
             use_json (bool, optional): convert json values to objects. Defaults to None.
+            encoding (Union[str, None], optional): encoding of values
 
         Returns:
             Any: any
@@ -200,7 +204,7 @@ class Redis:
             keys (List[str]): cache keys
             fields (List[str]): hash fields
             use_json (bool, optional): convert json values to objects. Defaults to None.
-            encoding (Union[str, None]): encoding of values
+            encoding (Union[str, None], optional): encoding of values
 
         Returns:
             List[Any]: any
@@ -231,6 +235,7 @@ class Redis:
         Args:
             key (str): cache key
             use_json (bool, optional): convert json values to objects. Defaults to None.
+            encoding (Union[str, None], optional): encoding of values
 
         Returns:
             Any: any
@@ -254,7 +259,7 @@ class Redis:
         Args:
             keys (str): cache keys
             use_json (bool, optional): convert json values to objects. Defaults to None.
-            encoding (Union[str, None]): encoding of values
+            encoding (Union[str, None], optional): encoding of values
 
         Returns:
             List[Any]: any
@@ -287,6 +292,7 @@ class Redis:
             field (str): hash field
             value (str): hash value
             use_json (bool, optional): set object to json before writing to cache. Defaults to None.
+            expire (int, optional): cache expiration. Defaults to None.
 
         Returns:
             int: 1 if key is set successfully else 0
@@ -313,6 +319,7 @@ class Redis:
             key (str): cache key
             items (List[str, Any]): list of redis hash key-value pairs
             use_json (bool, optional): set object to json before writing to cache. Defaults to None.
+            expire (int, optional): cache expiration. Defaults to None.
 
         Returns:
             bool: True if hash is set successfully else False
@@ -337,7 +344,8 @@ class Redis:
         """Delete one or more hash fields.
 
         Args:
-            key (str): cache key
+            key (str): hash key
+            fields (List[str]): hash fields
 
         Returns:
             int: Number of hash fields deleted
@@ -349,8 +357,8 @@ class Redis:
         """Determine if hash field exists.
 
         Args:
-            key (str): [description]
-            field (str): [description]
+            key (str): hash key
+            field (str): hash field
 
         Returns:
             int: True if hash field exists else False
