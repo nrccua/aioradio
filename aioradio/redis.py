@@ -186,9 +186,10 @@ class Redis:
 
         items = {}
         for index, value in enumerate(await self.pool.hmget(key, *fields, encoding=encoding)):
-            if value is not None and use_json:
-                value = orjson.loads(value)
-            items[fields[index]] = value
+            if value is not None:
+                if use_json:
+                    value = orjson.loads(value)
+                items[fields[index]] = value
 
         return items
 
@@ -237,7 +238,7 @@ class Redis:
         if use_json:
             value = orjson.dumps(value)
 
-        result = await self.pool.hmset(key, field, value)
+        result = await self.pool.hset(key, field, value)
         await self.pool.expire(key, timeout=expire)
 
         return result

@@ -56,7 +56,7 @@ async def test_hash_redis_functions(cache):
     assert result == 1
 
     result = await cache.hmget(key='complex_hash', fields=['name', 'team', 'apps', 'fake'])
-    assert result['fake'] is None
+    assert 'fake' not in result
     assert 'aioradio' in result['apps']
 
     result = await cache.hgetall(key='complex_hash')

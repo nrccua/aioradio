@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.11.1 (2021-02-18)
+-----------------------
+
+* Fix issue with sending None values in redis func hmget.
+
+
 v0.11.0 (2021-02-18)
 -----------------------
 
