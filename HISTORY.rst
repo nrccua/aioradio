@@ -3,7 +3,13 @@ History
 =======
 
 
-v0.10.4 (2021-02-011)
+v0.11.0 (2021-02-18)
+-----------------------
+
+* Add initial support in redis for the hashes data structure.
+
+
+v0.10.4 (2021-02-11)
 -----------------------
 
 * Add pyodbc driver string for windows OS.

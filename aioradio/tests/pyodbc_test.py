@@ -18,7 +18,7 @@ async def test_bad_unixodbc_driver(github_action):
     if github_action:
         pytest.skip('Skip test_bad_unixodbc_driver when running via Github Action')
 
-    creds = json.loads(await get_secret('production/airflowCluster/sqloltp', 'us-east-1'))
+    creds = json.loads(await get_secret('efi/sandbox/mssql', 'us-east-1'))
     await establish_pyodbc_connection(**creds, driver='/usr/lib/bogus.so')
 
 
@@ -32,7 +32,7 @@ async def test_pyodbc_query_fetchone_and_fetchall(github_action):
     if github_action:
         pytest.skip('Skip test_pyodbc_query_fetchone_and_fetchall when running via Github Action')
 
-    creds = json.loads(await get_secret('production/airflowCluster/sqloltp', 'us-east-1'))
+    creds = json.loads(await get_secret('efi/sandbox/mssql', 'us-east-1'))
     conn = await establish_pyodbc_connection(**creds)
     query = "SELECT EFIemails FROM DataStage.dbo.EESFileuploadAssignments WHERE FICE = '003800' AND FileCategory = 'EnrollmentLens'"
 
