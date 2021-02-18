@@ -174,7 +174,7 @@ class Redis:
 
         Args:
             key (str): cache key
-            fields (str): hash field
+            fields (List[str]): hash fields
             use_json (bool, optional): convert json values to objects. Defaults to None.
 
         Returns:
@@ -193,6 +193,38 @@ class Redis:
 
         return items
 
+    async def hmget_many(self, keys: List[str], fields: List[str], use_json: bool=None, encoding: Union[str, None]='utf-8') -> List[Any]:
+        """Get the values of all the given fields for many hashed keys.
+
+        Args:
+            keys (List[str]): cache keys
+            fields (List[str]): hash fields
+            use_json (bool, optional): convert json values to objects. Defaults to None.
+            encoding (Union[str, None]): encoding of values
+
+        Returns:
+            List[Any]: any
+        """
+
+        if use_json is None:
+            use_json = self.use_json
+
+        transaction = self.pool.multi_exec()
+        for key in keys:
+            transaction.hmget(key, *fields, encoding=encoding)
+
+        results = []
+        for values in await transaction.execute():
+            items = {}
+            for index, value in enumerate(values):
+                if value is not None:
+                    if use_json:
+                        value = orjson.loads(value)
+                    items[fields[index]] = value
+            results.append(items)
+
+        return results
+
     async def hgetall(self, key: str, use_json: bool=None, encoding: Union[str, None]='utf-8') -> Any:
         """Get all the fields and values in a hash.
 
@@ -208,13 +240,44 @@ class Redis:
             use_json = self.use_json
 
         items = {}
-        results = await self.pool.hgetall(key, encoding=encoding)
-        for hash_key, value in results.items():
-            if value is not None and use_json:
-                value = orjson.loads(value)
-            items[hash_key] = value
+        for hash_key, value in (await self.pool.hgetall(key, encoding=encoding)).items():
+            if value is not None:
+                if use_json:
+                    value = orjson.loads(value)
+                items[hash_key] = value
 
         return items
+
+    async def hgetall_many(self, keys: List[str], use_json: bool=None, encoding: Union[str, None]='utf-8') -> List[Any]:
+        """Get all the fields and values in a hash.
+
+        Args:
+            keys (str): cache keys
+            use_json (bool, optional): convert json values to objects. Defaults to None.
+            encoding (Union[str, None]): encoding of values
+
+        Returns:
+            List[Any]: any
+        """
+
+        if use_json is None:
+            use_json = self.use_json
+
+        transaction = self.pool.multi_exec()
+        for key in keys:
+            transaction.hgetall(key, encoding=encoding)
+
+        results = []
+        for item in await transaction.execute():
+            items = {}
+            for key, value in item.items():
+                if value is not None:
+                    if use_json:
+                        value = orjson.loads(value)
+                    items[key] = value
+            results.append(items)
+
+        return results
 
     async def hset(self, key: str, field: str, value: str, use_json: bool=None, expire: int=None) -> int:
         """Set the string value of a hash field.

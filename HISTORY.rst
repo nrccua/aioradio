@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.11.2 (2021-02-18)
+-----------------------
+
+* Add custom hmget_many & hmgetall_many redis commands to get many hashed keys data.
+
+
 v0.11.1 (2021-02-18)
 -----------------------
 
