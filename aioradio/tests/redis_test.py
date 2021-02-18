@@ -77,6 +77,17 @@ async def test_hash_redis_functions(cache):
     result = await cache.hgetall(key='address_hash', use_json=False)
     assert result == items
 
+    await cache.hmset(key='tim', items={'firstname': 'Tim', 'lastname': 'Reichard', 'avg': '190'}, expire=1, use_json=False)
+    await cache.hmset(key='don', items={'firstname': 'Don', 'lastname': 'Mattingly', 'avg': '325'}, expire=1, use_json=False)
+    result = await cache.hmget_many(keys=['tim', 'don', 'fake'], fields=['firstname', 'lastname'], use_json=False)
+    assert len(result) == 3
+    assert result[-1] == {}
+
+    result = await cache.hgetall_many(keys=['tim', 'don', 'fake'], use_json=False)
+    assert len(result) == 3
+    assert result[0]['avg'] == '190'
+    assert result[-1] == {}
+
 
 async def test_set_one_item(payload, cache):
     """Test set_one_item."""
