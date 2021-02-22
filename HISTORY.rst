@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.11.4 (2021-02-22)
+-----------------------
+
+* Use redis transactions via pipelining with hash set & expire commands.
+
+
 v0.11.3 (2021-02-18)
 -----------------------
 
