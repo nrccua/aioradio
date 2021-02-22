@@ -213,12 +213,12 @@ class Redis:
         if use_json is None:
             use_json = self.use_json
 
-        transaction = self.pool.multi_exec()
+        pipeline = self.pool.pipeline()
         for key in keys:
-            transaction.hmget(key, *fields, encoding=encoding)
+            pipeline.hmget(key, *fields, encoding=encoding)
 
         results = []
-        for values in await transaction.execute():
+        for values in await pipeline.execute():
             items = {}
             for index, value in enumerate(values):
                 if value is not None:
@@ -268,12 +268,12 @@ class Redis:
         if use_json is None:
             use_json = self.use_json
 
-        transaction = self.pool.multi_exec()
+        pipeline = self.pool.pipeline()
         for key in keys:
-            transaction.hgetall(key, encoding=encoding)
+            pipeline.hgetall(key, encoding=encoding)
 
         results = []
-        for item in await transaction.execute():
+        for item in await pipeline.execute():
             items = {}
             for key, value in item.items():
                 if value is not None:
@@ -307,8 +307,10 @@ class Redis:
         if use_json:
             value = orjson.dumps(value)
 
-        result = await self.pool.hset(key, field, value)
-        await self.pool.expire(key, timeout=expire)
+        pipeline = self.pool.multi_exec()
+        pipeline.hset(key, field, value)
+        pipeline.expire(key, timeout=expire)
+        result, _ = await pipeline.execute()
 
         return result
 
@@ -335,8 +337,10 @@ class Redis:
             modified_items = {k: orjson.dumps(v) for k, v in items.items()}
             items = modified_items
 
-        result = await self.pool.hmset_dict(key, items)
-        await self.pool.expire(key, timeout=expire)
+        pipeline = self.pool.pipeline()
+        pipeline.hmset_dict(key, items)
+        pipeline.expire(key, timeout=expire)
+        result, _ = await pipeline.execute()
 
         return  result
 
