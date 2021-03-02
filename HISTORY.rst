@@ -3,6 +3,18 @@ History
 =======
 
 
+v0.11.6 (2021-03-01)
+-----------------------
+
+* Simplify manage_async_tasks args to include list of coroutines.
+
+
+v0.11.5 (2021-03-01)
+-----------------------
+
+* Add manage_async_tasks & manage_async_to_thread_tasks async functions in aioradio/utils.py.
+
+
 v0.11.4 (2021-02-22)
 -----------------------
 

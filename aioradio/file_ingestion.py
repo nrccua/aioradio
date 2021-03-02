@@ -13,7 +13,6 @@ import re
 import time
 import zipfile
 from asyncio import sleep
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, tzinfo
 from pathlib import Path
 from types import coroutine
@@ -152,39 +151,6 @@ def async_wrapper_using_new_loop(func: coroutine) -> Any:
         return asyncio.run(func(*args, **kwargs))
 
     return wrapper
-
-
-async def async_process_manager(
-        function: coroutine,
-        list_of_kwargs: List[Dict[str, Any]],
-        chunk_size: int,
-        use_threads=True) -> List[Any]:
-    """Process manager to run fixed number of functions, usually the same
-    function expressed as coroutines in an array.  Use case is sending many
-    http requests or iterating files.
-
-    Args:
-        function (coroutine): async coroutine
-        list_of_kwargs (List[Dict[str, Any]]): list of kwargs to pass into function
-        chunk_size (int): number of functions to run concurrently
-        use_threads (bool, optional): should threads be used. Defaults to True
-
-    Returns:
-        List[Any]: List of function results
-    """
-
-    results = []
-    if use_threads:
-        with ThreadPoolExecutor(max_workers=chunk_size) as exe:
-            futures = [exe.submit(function, **items) for items in list_of_kwargs]
-            for future in as_completed(futures):
-                results.append(future.result())
-    else:
-        for num in range(0, len(list_of_kwargs), chunk_size):
-            tasks = [function(**items) for items in list_of_kwargs[num:num+chunk_size]]
-            results.extend(await asyncio.gather(*tasks))
-
-    return results
 
 
 async def unzip_file(filepath: str, directory: str) -> List[str]:

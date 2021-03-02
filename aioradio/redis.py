@@ -3,6 +3,7 @@
 # pylint: disable=c-extension-no-member
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-instance-attributes
+# pylint: disable=unsubscriptable-object
 
 import asyncio
 import hashlib

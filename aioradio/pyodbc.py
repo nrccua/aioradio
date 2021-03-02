@@ -2,6 +2,7 @@
 
 # pylint: disable=c-extension-no-member
 # pylint: disable=too-many-arguments
+# pylint: disable=unsubscriptable-object
 
 import os
 import platform
