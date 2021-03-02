@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.11.7 (2021-03-01)
+-----------------------
+
+* Fix syntax error in manage_async_tasks where append should be equal symbol.
+
+
 v0.11.6 (2021-03-01)
 -----------------------
 
