@@ -1,11 +1,12 @@
 """aioradio utils cache script."""
 
-from asyncio import create_task, to_thread, sleep, coroutine
+from asyncio import coroutine, create_task, sleep, to_thread
 from typing import Any, Dict, List, Tuple
 
+
 async def manage_async_tasks(items: List[Tuple[coroutine, str]], concurrency: int) -> Dict[str, Any]:
-    """Manages a grouping of async tasks, keeping number of active tasks at
-    the concurrency level by starting new tasks whenver one completes.
+    """Manages a grouping of async tasks, keeping number of active tasks at the
+    concurrency level by starting new tasks whenver one completes.
 
     Args:
         items (List[Dict[str, Any]]): List of tuples (coroutine, name)
@@ -26,7 +27,7 @@ async def manage_async_tasks(items: List[Tuple[coroutine, str]], concurrency: in
                 results[task.get_name()] = await task
                 if count < num_of_items:
                     coro, name = items[count]
-                    arr[index].append(create_task(coro) if name is None else create_task(coro, name=name))
+                    arr[index] = create_task(coro) if name is None else create_task(coro, name=name)
                     count += 1
 
     return results
