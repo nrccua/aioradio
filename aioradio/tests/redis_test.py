@@ -53,7 +53,7 @@ async def test_hash_redis_functions(cache):
     }
 
     result = await cache.hmset(key='complex_hash', items=items, expire=1)
-    assert result == 1
+    assert result == 4
 
     result = await cache.hmget(key='complex_hash', fields=['name', 'team', 'apps', 'fake'])
     assert 'fake' not in result
@@ -73,7 +73,7 @@ async def test_hash_redis_functions(cache):
 
     items = {'state': 'TX', 'city': 'Austin', 'zipcode': '78745', 'addr1': '8103 Shiloh Ct.', 'addr2': ''}
     result = await cache.hmset(key='address_hash', items=items, expire=1, use_json=False)
-    assert result == 1
+    assert result == 5
     result = await cache.hgetall(key='address_hash', use_json=False)
     assert result == items
 
@@ -101,6 +101,13 @@ async def test_set_one_item(payload, cache):
 
     result = await cache.delete(key)
     assert result == 1
+
+    await cache.set(key='set_simple_key', value='aioradio is superb', use_json=False)
+    result = await cache.get('set_simple_key', use_json=False)
+    assert result == 'aioradio is superb'
+    result = await cache.mget(items=['set_simple_key'], use_json=False)
+    assert result == ['aioradio is superb']
+
 
 async def test_set_one_item_with_hashed_key(payload, cache):
     """Test set_one_item."""

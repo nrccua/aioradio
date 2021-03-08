@@ -13,7 +13,6 @@ from typing import Any, Dict, List, Union
 
 import aioredis
 import orjson
-from fakeredis.aioredis import create_redis_pool as fake_redis_pool
 
 HASH_ALGO_MAP = {
     'SHA1': hashlib.sha1,
@@ -34,7 +33,6 @@ class Redis:
 
     config: Dict[str, Any] = dataclass_field(default_factory=dict)
     pool: aioredis.Redis = dataclass_field(init=False, repr=False)
-    pool_task: asyncio.coroutine = None
 
     # Set the redis pool min and max connections size
     pool_minsize: int = 5
@@ -51,24 +49,9 @@ class Redis:
     # retrieve value letting this class convert from json set use_json = True.
     use_json: bool = True
 
-    # used exclusively for pytest
-    fakeredis: bool = False
-
     def __post_init__(self):
-        if self.fakeredis:
-            self.pool = asyncio.get_event_loop().run_until_complete(fake_redis_pool())
-        else:
-            primary_endpoint = f'redis://{self.config["redis_primary_endpoint"]}'
-            loop = asyncio.get_event_loop()
-            if loop and loop.is_running():
-                self.pool_task = loop.create_task(
-                    aioredis.create_redis_pool(primary_endpoint, minsize=self.pool_minsize, maxsize=self.pool_maxsize))
-            else:
-                self.pool = loop.run_until_complete(
-                    aioredis.create_redis_pool(primary_endpoint, minsize=self.pool_minsize, maxsize=self.pool_maxsize))
-
-    def __del__(self):
-        self.pool.close()
+        primary_endpoint = self.config["redis_primary_endpoint"]
+        self.pool = aioredis.Redis(host=primary_endpoint)
 
     async def get(self, key: str, use_json: bool=None, encoding: Union[str, None]='utf-8') -> Any:
         """Check if an item is cached in redis.
@@ -85,10 +68,13 @@ class Redis:
         if use_json is None:
             use_json = self.use_json
 
-        value = await self.pool.get(key, encoding=encoding)
+        value = await self.pool.get(key)
 
-        if value is not None and use_json:
-            value = orjson.loads(value)
+        if value is not None:
+            if encoding is not None:
+                value = value.decode(encoding)
+            if use_json:
+                value = orjson.loads(value)
 
         return value
 
@@ -107,12 +93,18 @@ class Redis:
         if use_json is None:
             use_json = self.use_json
 
-        values = await self.pool.mget(*items, encoding=encoding)
+        values = await self.pool.mget(*items)
 
-        if use_json:
-            values = [orjson.loads(val) if val is not None else None for val in values]
+        results = []
+        for val in values:
+            if val is not None:
+                if encoding is not None:
+                    val = val.decode(encoding)
+                if use_json:
+                    val = orjson.loads(val)
+            results.append(val)
 
-        return values
+        return results
 
     async def set(self, key: str, value: str, expire: int=None, use_json: bool=None) -> int:
         """Set one key-value pair in redis.
@@ -136,7 +128,7 @@ class Redis:
         if use_json:
             value = orjson.dumps(value)
 
-        return await self.pool.set(key, value, expire=expire)
+        return await self.pool.set(key, value, ex=expire)
 
     async def delete(self, key: str) -> int:
         """Delete key from redis.
@@ -166,10 +158,13 @@ class Redis:
         if use_json is None:
             use_json = self.use_json
 
-        value = await self.pool.hget(key, field, encoding=encoding)
+        value = await self.pool.hget(key, field)
 
-        if value is not None and use_json:
-            value = orjson.loads(value)
+        if value is not None:
+            if encoding is not None:
+                value = value.decode(encoding)
+            if use_json:
+                value = orjson.loads(value)
 
         return value
 
@@ -190,8 +185,10 @@ class Redis:
             use_json = self.use_json
 
         items = {}
-        for index, value in enumerate(await self.pool.hmget(key, *fields, encoding=encoding)):
+        for index, value in enumerate(await self.pool.hmget(key, *fields)):
             if value is not None:
+                if encoding is not None:
+                    value = value.decode(encoding)
                 if use_json:
                     value = orjson.loads(value)
                 items[fields[index]] = value
@@ -216,13 +213,15 @@ class Redis:
 
         pipeline = self.pool.pipeline()
         for key in keys:
-            pipeline.hmget(key, *fields, encoding=encoding)
+            pipeline.hmget(key, *fields)
 
         results = []
         for values in await pipeline.execute():
             items = {}
             for index, value in enumerate(values):
                 if value is not None:
+                    if encoding is not None:
+                        value = value.decode(encoding)
                     if use_json:
                         value = orjson.loads(value)
                     items[fields[index]] = value
@@ -246,8 +245,12 @@ class Redis:
             use_json = self.use_json
 
         items = {}
-        for hash_key, value in (await self.pool.hgetall(key, encoding=encoding)).items():
+        for hash_key, value in (await self.pool.hgetall(key)).items():
+            if encoding is not None:
+                hash_key = hash_key.decode(encoding)
             if value is not None:
+                if encoding is not None:
+                    value = value.decode(encoding)
                 if use_json:
                     value = orjson.loads(value)
                 items[hash_key] = value
@@ -271,16 +274,20 @@ class Redis:
 
         pipeline = self.pool.pipeline()
         for key in keys:
-            pipeline.hgetall(key, encoding=encoding)
+            pipeline.hgetall(key)
 
         results = []
         for item in await pipeline.execute():
             items = {}
             for key, value in item.items():
+                if encoding is not None:
+                    key = key.decode(encoding)
                 if value is not None:
+                    if encoding is not None:
+                        value = value.decode(encoding)
                     if use_json:
                         value = orjson.loads(value)
-                    items[key] = value
+                items[key] = value
             results.append(items)
 
         return results
@@ -308,9 +315,9 @@ class Redis:
         if use_json:
             value = orjson.dumps(value)
 
-        pipeline = self.pool.multi_exec()
+        pipeline = self.pool.pipeline()
         pipeline.hset(key, field, value)
-        pipeline.expire(key, timeout=expire)
+        pipeline.expire(key, time=expire)
         result, _ = await pipeline.execute()
 
         return result
@@ -320,7 +327,7 @@ class Redis:
 
         Args:
             key (str): cache key
-            items (List[str, Any]): list of redis hash key-value pairs
+            items (Dict[str, Any]): list of redis hash key-value pairs
             use_json (bool, optional): set object to json before writing to cache. Defaults to None.
             expire (int, optional): cache expiration. Defaults to None.
 
@@ -339,10 +346,9 @@ class Redis:
             items = modified_items
 
         pipeline = self.pool.pipeline()
-        pipeline.hmset_dict(key, items)
-        pipeline.expire(key, timeout=expire)
+        pipeline.hset(key, mapping=items)
+        pipeline.expire(key, time=expire)
         result, _ = await pipeline.execute()
-
         return  result
 
     async def hdel(self, key: str, fields: List[str]) -> int:

@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.12.0 (2021-03-08)
+-----------------------
+
+* Use aioredis transactions performance fixed branch (sean/aioredis-redis-py-compliance) instead of version 1.3.1.
+
+
 v0.11.7 (2021-03-01)
 -----------------------
 
