@@ -5,7 +5,6 @@
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=unsubscriptable-object
 
-import asyncio
 import hashlib
 from dataclasses import dataclass
 from dataclasses import field as dataclass_field
