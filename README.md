@@ -14,10 +14,6 @@ async def main():
     config = {'redis_primary_endpoint': 'your-redis-endpoint'}
     redis = Redis(config=config, use_json=True, expire=60, use_hashkey=False)
 
-    # since aioredis.create_redis_pool is a coroutine we need to instantiate the object within an async function
-    if redis.pool_task is not None:
-        redis.pool = await redis.pool_task
-
     # we can override the global expire and since we are using json the cache_value will be converted to json
     await redis.set_one_item(cache_key='aioradio', cache_value={'a': 'alpha', 'number': 123}, expire=2)
 

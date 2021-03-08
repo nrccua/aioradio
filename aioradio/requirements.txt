@@ -1,10 +1,9 @@
 aioboto3==8.2.0
 aiobotocore==1.1.2
 aiojobs==0.3.0
-aioredis==1.3.1
 ddtrace==0.46.0
-fakeredis==1.4.5
 flask==1.1.2
+git+https://github.com/aio-libs/aioredis@sean/aioredis-redis-py-compliance
 httpx==0.17.0
 mandrill==1.0.59
 moto==1.3.16
