@@ -3,7 +3,7 @@ History
 =======
 
 
-v0.12.1 (2021-03-12)
+v0.12.2 (2021-03-12)
 -----------------------
 
 * Add correct version in install_requires for aioredis.
