@@ -1,46 +1,6 @@
 # aioradio
 Generic asynchronous i/o python utilities for AWS services (SQS, S3, DynamoDB, Secrets Manager), Redis, MSSQL (pyodbc), JIRA and more.
 
-## REDIS example code
-We build upon aioredis to further abstract some of the gotchas to help make using aioredis even simplier.
-
-```python
-import asyncio
-
-from aioradio.redis import Redis
-
-# We use the async main function as an example, but we could have used fastapi's on_startup function similarly
-async def main():
-    config = {'redis_primary_endpoint': 'your-redis-endpoint'}
-    redis = Redis(config=config, use_json=True, expire=60, use_hashkey=False)
-
-    # we can override the global expire and since we are using json the cache_value will be converted to json
-    await redis.set_one_item(cache_key='aioradio', cache_value={'a': 'alpha', 'number': 123}, expire=2)
-
-    result = await redis.get_one_item(cache_key='aioradio')
-    print(f"retrieved cached value = {result}")
-
-    await asyncio.sleep(3)
-    result = await redis.get_one_item(cache_key='aioradio')
-    print(f"wait 3 seconds and retrieved cached value = {result}")
-
-    # we can get more than one cached item at a time
-    await redis.set_one_item(cache_key='aioradio1', cache_value='one')
-    await redis.set_one_item(cache_key='aioradio2', cache_value='two')
-    await redis.set_one_item(cache_key='aioradio3', cache_value='three')
-    results = await redis.get_many_items(['aioradio1', 'aioradio2', 'aioradio3'])
-    print(f"Cached items retrieved = {results}")
-
-    # build a cache key from a python unnested dictionary object, sorted by key
-    # if the value is None or an empty list than exclude from adding to the cache key
-    some_dict = {'code': 'aioradio', 'opinion': ['redis', 'rocks'], 'none': None, 'empty': [], 'rad': True}
-    key = await redis.build_cache_key(some_dict)
-    print(key)
-
-asyncio.get_event_loop().run_until_complete(main())
-```
-
-
 ## AWS S3 example code
 aioradio abstracts using aiobotocore and aioboto3 making async AWS funtion calls simple one liners.
 Besides what is shown below in the examples, there is also support for SQS, DynamoDB and Secrets Manager.

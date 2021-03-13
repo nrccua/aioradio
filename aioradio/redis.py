@@ -10,8 +10,8 @@ from dataclasses import dataclass
 from dataclasses import field as dataclass_field
 from typing import Any, Dict, List, Union
 
-import aioredis
 import orjson
+import redis
 
 HASH_ALGO_MAP = {
     'SHA1': hashlib.sha1,
@@ -28,14 +28,10 @@ HASH_ALGO_MAP = {
 
 @dataclass
 class Redis:
-    """class dealing with aioredis functions."""
+    """class dealing with redis functions."""
 
     config: Dict[str, Any] = dataclass_field(default_factory=dict)
-    pool: aioredis.Redis = dataclass_field(init=False, repr=False)
-
-    # Set the redis pool min and max connections size
-    pool_minsize: int = 5
-    pool_maxsize: int = 10
+    pool: redis.Redis = dataclass_field(init=False, repr=False)
 
     # Cache expiration in seconds
     expire: int = 60
@@ -50,7 +46,7 @@ class Redis:
 
     def __post_init__(self):
         primary_endpoint = self.config["redis_primary_endpoint"]
-        self.pool = aioredis.Redis(host=primary_endpoint)
+        self.pool = redis.Redis(host=primary_endpoint)
 
     async def get(self, key: str, use_json: bool=None, encoding: Union[str, None]='utf-8') -> Any:
         """Check if an item is cached in redis.
@@ -67,7 +63,7 @@ class Redis:
         if use_json is None:
             use_json = self.use_json
 
-        value = await self.pool.get(key)
+        value = self.pool.get(key)
 
         if value is not None:
             if encoding is not None:
@@ -92,7 +88,7 @@ class Redis:
         if use_json is None:
             use_json = self.use_json
 
-        values = await self.pool.mget(*items)
+        values = self.pool.mget(*items)
 
         results = []
         for val in values:
@@ -127,7 +123,7 @@ class Redis:
         if use_json:
             value = orjson.dumps(value)
 
-        return await self.pool.set(key, value, ex=expire)
+        return self.pool.set(key, value, ex=expire)
 
     async def delete(self, key: str) -> int:
         """Delete key from redis.
@@ -139,7 +135,7 @@ class Redis:
             int: 1 if key is found and deleted else 0
         """
 
-        return await self.pool.delete(key)
+        return self.pool.delete(key)
 
     async def hget(self, key: str, field: str, use_json: bool=None, encoding: Union[str, None]='utf-8') -> Any:
         """Get the value of a hash field.
@@ -157,7 +153,7 @@ class Redis:
         if use_json is None:
             use_json = self.use_json
 
-        value = await self.pool.hget(key, field)
+        value = self.pool.hget(key, field)
 
         if value is not None:
             if encoding is not None:
@@ -184,7 +180,7 @@ class Redis:
             use_json = self.use_json
 
         items = {}
-        for index, value in enumerate(await self.pool.hmget(key, *fields)):
+        for index, value in enumerate(self.pool.hmget(key, *fields)):
             if value is not None:
                 if encoding is not None:
                     value = value.decode(encoding)
@@ -215,7 +211,7 @@ class Redis:
             pipeline.hmget(key, *fields)
 
         results = []
-        for values in await pipeline.execute():
+        for values in pipeline.execute():
             items = {}
             for index, value in enumerate(values):
                 if value is not None:
@@ -244,7 +240,7 @@ class Redis:
             use_json = self.use_json
 
         items = {}
-        for hash_key, value in (await self.pool.hgetall(key)).items():
+        for hash_key, value in self.pool.hgetall(key).items():
             if encoding is not None:
                 hash_key = hash_key.decode(encoding)
             if value is not None:
@@ -276,7 +272,7 @@ class Redis:
             pipeline.hgetall(key)
 
         results = []
-        for item in await pipeline.execute():
+        for item in pipeline.execute():
             items = {}
             for key, value in item.items():
                 if encoding is not None:
@@ -317,7 +313,7 @@ class Redis:
         pipeline = self.pool.pipeline()
         pipeline.hset(key, field, value)
         pipeline.expire(key, time=expire)
-        result, _ = await pipeline.execute()
+        result, _ = pipeline.execute()
 
         return result
 
@@ -347,7 +343,7 @@ class Redis:
         pipeline = self.pool.pipeline()
         pipeline.hset(key, mapping=items)
         pipeline.expire(key, time=expire)
-        result, _ = await pipeline.execute()
+        result, _ = pipeline.execute()
         return  result
 
     async def hdel(self, key: str, fields: List[str]) -> int:
@@ -361,7 +357,7 @@ class Redis:
             int: Number of hash fields deleted
         """
 
-        return await self.pool.hdel(key, *fields)
+        return self.pool.hdel(key, *fields)
 
     async def hexists(self, key: str, field: str) -> bool:
         """Determine if hash field exists.
@@ -374,7 +370,7 @@ class Redis:
             int: True if hash field exists else False
         """
 
-        return await self.pool.hexists(key, field)
+        return self.pool.hexists(key, field)
 
     async def build_cache_key(self, payload: Dict[str, Any], separator='|', use_hashkey: bool=None) -> str:
         """build a cache key from a dictionary object. Concatenate and
