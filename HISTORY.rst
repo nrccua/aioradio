@@ -3,10 +3,11 @@ History
 =======
 
 
-v0.12.2 (2021-03-12)
+v0.12.3 (2021-03-12)
 -----------------------
 
-* Add correct version in install_requires for aioredis.
+* Use redis instead of aioredis because it is maintained much better by developers.
+* Removed aioredis examples from README.md since using aioradio for redis has no benefit over simply using redis.
 
 
 v0.12.0 (2021-03-08)
