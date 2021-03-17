@@ -46,9 +46,12 @@ class Redis:
 
     def __post_init__(self):
         primary_endpoint = self.config["redis_primary_endpoint"]
-        self.pool = redis.Redis(host=primary_endpoint)
+        if "encoding" in self.config:
+            self.pool = redis.Redis(host=primary_endpoint, encoding=self.config["encoding"], decode_responses=True)
+        else:
+            self.pool = redis.Redis(host=primary_endpoint)
 
-    async def get(self, key: str, use_json: bool=None, encoding: Union[str, None]='utf-8') -> Any:
+    async def get(self, key: str, use_json: bool=None, encoding: Union[str, None]=None) -> Any:
         """Check if an item is cached in redis.
 
         Args:
@@ -73,7 +76,7 @@ class Redis:
 
         return value
 
-    async def mget(self, items: List[str], use_json: bool=None, encoding: Union[str, None]='utf-8') -> List[Any]:
+    async def mget(self, items: List[str], use_json: bool=None, encoding: Union[str, None]=None) -> List[Any]:
         """Check if many items are cached in redis.
 
         Args:
@@ -137,7 +140,7 @@ class Redis:
 
         return self.pool.delete(key)
 
-    async def hget(self, key: str, field: str, use_json: bool=None, encoding: Union[str, None]='utf-8') -> Any:
+    async def hget(self, key: str, field: str, use_json: bool=None, encoding: Union[str, None]=None) -> Any:
         """Get the value of a hash field.
 
         Args:
@@ -163,7 +166,7 @@ class Redis:
 
         return value
 
-    async def hmget(self, key: str, fields: List[str], use_json: bool=None, encoding: Union[str, None]='utf-8') -> Any:
+    async def hmget(self, key: str, fields: List[str], use_json: bool=None, encoding: Union[str, None]=None) -> Any:
         """Get the values of all the given fields.
 
         Args:
@@ -190,7 +193,7 @@ class Redis:
 
         return items
 
-    async def hmget_many(self, keys: List[str], fields: List[str], use_json: bool=None, encoding: Union[str, None]='utf-8') -> List[Any]:
+    async def hmget_many(self, keys: List[str], fields: List[str], use_json: bool=None, encoding: Union[str, None]=None) -> List[Any]:
         """Get the values of all the given fields for many hashed keys.
 
         Args:
@@ -224,7 +227,7 @@ class Redis:
 
         return results
 
-    async def hgetall(self, key: str, use_json: bool=None, encoding: Union[str, None]='utf-8') -> Any:
+    async def hgetall(self, key: str, use_json: bool=None, encoding: Union[str, None]=None) -> Any:
         """Get all the fields and values in a hash.
 
         Args:
@@ -252,7 +255,7 @@ class Redis:
 
         return items
 
-    async def hgetall_many(self, keys: List[str], use_json: bool=None, encoding: Union[str, None]='utf-8') -> List[Any]:
+    async def hgetall_many(self, keys: List[str], use_json: bool=None, encoding: Union[str, None]=None) -> List[Any]:
         """Get all the fields and values in a hash.
 
         Args:
