@@ -45,6 +45,8 @@ async def establish_pyodbc_connection(
         pwd: str,
         port: int=None,
         database: str='',
+        trusted_connection: str='',
+        multi_subnet_failover: str='',
         driver: str='',
         autocommit: bool=False
 ) -> pyodbc.Connection:
@@ -57,6 +59,8 @@ async def establish_pyodbc_connection(
         pwd (str): password
         port (int, optional): port. Defaults to None.
         database (str, optional): database. Defaults to ''.
+        trusted_connection (str, optional): Trusted_Connection. Defaults to ''.
+        multi_subnet_failover (str, optional): MultiSubnetFailover. Defaults to ''.
         driver (str, optional): unixodbc driver. Defaults to ''.
         autocommit (bool, optional): autocommit. Defaults to False.
 
@@ -83,6 +87,10 @@ async def establish_pyodbc_connection(
         conn_string += f';PORT={port}'
     if database:
         conn_string += f';DATABASE={database}'
+    if trusted_connection:
+        conn_string += f';Trusted_Connection={trusted_connection}'
+    if multi_subnet_failover:
+        conn_string += f';MultiSubnetFailover={multi_subnet_failover}'
 
     return pyodbc.connect(conn_string, autocommit=autocommit)
 

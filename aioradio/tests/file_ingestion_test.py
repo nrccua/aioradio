@@ -112,8 +112,9 @@ async def test_write_file_to_ftp(github_action, request):
 
     conn.close()
     assert file_attributes.file_size > 100000
-    now = time.time()
     last_write_time = file_attributes.last_write_time
+    time.sleep(1)
+    now = time.time()
     assert now > last_write_time and now - last_write_time < 10
 
 
