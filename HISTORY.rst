@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.13.0 (2021-04-12)
+-----------------------
+
+* Adding Long Running Job worker class to work asynchronously with client.
+
+
 v0.12.5 (2021-03-23)
 -----------------------
 
