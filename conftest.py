@@ -74,7 +74,7 @@ def lrj(github_action):
 
     lrj = LongRunningJobs(
         redis_host='prod-race2.gbngr1.ng.0001.use1.cache.amazonaws.com',
-        cache_expiration=3
+        cache_expiration=5
     )
     yield lrj
 
