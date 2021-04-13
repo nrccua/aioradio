@@ -66,16 +66,37 @@ def cache(github_action):
 
 
 @pytest.fixture(scope='module')
-def lrj(github_action):
+def lrj1(github_action):
     """LongRunningProcess class object."""
 
     if github_action:
         pytest.skip('Skip tests using LongRunningJobs when running via Github Action')
 
     lrj = LongRunningJobs(
+        name='lrj1',
         redis_host='prod-race2.gbngr1.ng.0001.use1.cache.amazonaws.com',
-        cache_expiration=5
+        cache_expiration=5,
+        sqs_queue='NARWHAL_QUEUE_SANDBOX.fifo',
+        sqs_region='us-east-1'
     )
+
+    yield lrj
+
+
+@pytest.fixture(scope='module')
+def lrj2(github_action):
+    """LongRunningProcess class object."""
+
+    if github_action:
+        pytest.skip('Skip tests using LongRunningJobs when running via Github Action')
+
+    lrj = LongRunningJobs(
+        name='lrj2',
+        redis_host='prod-race2.gbngr1.ng.0001.use1.cache.amazonaws.com',
+        cache_expiration=5,
+        queue_service='redis'
+    )
+
     yield lrj
 
 

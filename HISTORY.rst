@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.13.1 (2021-04-13)
+-----------------------
+
+* Updating LongRunningJob to use either 'sqs' or 'redis' as the queue mechanism.
+
+
 v0.13.0 (2021-04-12)
 -----------------------
 
