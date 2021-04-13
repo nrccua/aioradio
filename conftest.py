@@ -14,7 +14,6 @@ from aioradio.aws.moto_server import MotoService
 from aioradio.aws.s3 import S3
 from aioradio.aws.secrets import SECRETS
 from aioradio.aws.sqs import SQS
-from aioradio.long_running_jobs import LongRunningJobs
 from aioradio.redis import Redis
 
 
@@ -63,41 +62,6 @@ def cache(github_action):
         'encoding': 'utf-8'
     })
     yield cache_object
-
-
-@pytest.fixture(scope='module')
-def lrj1(github_action):
-    """LongRunningProcess class object."""
-
-    if github_action:
-        pytest.skip('Skip tests using LongRunningJobs when running via Github Action')
-
-    lrj = LongRunningJobs(
-        name='lrj1',
-        redis_host='prod-race2.gbngr1.ng.0001.use1.cache.amazonaws.com',
-        cache_expiration=5,
-        sqs_queue='NARWHAL_QUEUE_SANDBOX.fifo',
-        sqs_region='us-east-1'
-    )
-
-    yield lrj
-
-
-@pytest.fixture(scope='module')
-def lrj2(github_action):
-    """LongRunningProcess class object."""
-
-    if github_action:
-        pytest.skip('Skip tests using LongRunningJobs when running via Github Action')
-
-    lrj = LongRunningJobs(
-        name='lrj2',
-        redis_host='prod-race2.gbngr1.ng.0001.use1.cache.amazonaws.com',
-        cache_expiration=5,
-        queue_service='redis'
-    )
-
-    yield lrj
 
 
 def pytest_addoption(parser):

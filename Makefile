@@ -19,7 +19,7 @@ lint:
 
 test:
 	. env/bin/activate; \
-	pytest -vss --cov=aioradio  --cov-config=.coveragerc --cov-report=html --cov-fail-under=80
+	pytest -vss --cov=aioradio  --cov-config=.coveragerc --cov-report=html --cov-fail-under=75
 
 pre-commit:
 	. env/bin/activate; \
