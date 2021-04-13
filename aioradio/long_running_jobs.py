@@ -6,6 +6,7 @@
 # pylint: disable=too-many-instance-attributes
 
 import asyncio
+import socket
 import traceback
 from dataclasses import dataclass, field
 from time import time
@@ -72,6 +73,7 @@ class LongRunningJobs:
                 raise ValueError('Job timeout needs to be no more than 5 hours')
 
         self.longest_job_timeout = max([i[1] for i in self.jobs.values()])
+        self.host_uuid = f'{socket.gethostname()}|{uuid4()}'
 
     async def check_job_status(self, uuid: str) -> Dict[str, Any]:
         """Check if the job is done and if so add results to the returned dict.
@@ -110,13 +112,13 @@ class LongRunningJobs:
             raise ValueError(f"{job_name} not found in {self.job_names}")
 
         identifier = str(uuid4())
-        items = {"uuid": identifier, "params": params, "cache_key": cache_key}
+        items = {"uuid": identifier, "params": params, "cache_key": cache_key, "job_name": job_name}
 
         result = {}
         try:
             msg = orjson.dumps(items).decode()
             if self.queue_service == 'sqs':
-                entries = [{'Id': str(uuid4()), 'MessageBody': msg, 'MessageGroupId': job_name}]
+                entries = [{'Id': str(uuid4()), 'MessageBody': msg, 'MessageGroupId': self.host_uuid}]
                 await sqs.send_messages(queue=self.sqs_queue, region=self.sqs_region, entries=entries)
             else:
                 self.cache.pool.rpush(f'{job_name}-not-started', msg)
@@ -170,14 +172,15 @@ class LongRunningJobs:
             region=self.sqs_region,
             wait_time=1,
             visibility_timeout=self.longest_job_timeout,
-            attribute_names=["MessageGroupId"]
+            max_messages=1
         )
+
         if not msg:
             await asyncio.sleep(0.1)
         else:
             body = orjson.loads(msg[0]['Body'])
             key = body['cache_key']
-            job_name = msg[0]['Attributes']['MessageGroupId']
+            job_name = body['job_name']
 
             data = None if key is None else await self.cache.get(key)
             if data is None:

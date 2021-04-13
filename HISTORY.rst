@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.13.3 (2021-04-13)
+-----------------------
+
+* Fix issue with pulling more than one message in LongRunningJobs.
+
+
 v0.13.2 (2021-04-13)
 -----------------------
 
