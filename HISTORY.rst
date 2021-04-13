@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.13.2 (2021-04-13)
+-----------------------
+
+* Add ability for LongRunningJobs to run one to many jobs.
+
+
 v0.13.1 (2021-04-13)
 -----------------------
 
