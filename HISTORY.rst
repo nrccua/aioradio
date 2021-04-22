@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.13.4 (2021-04-22)
+-----------------------
+
+* Remove sensitive company emails and database references.
+
+
 v0.13.3 (2021-04-13)
 -----------------------
 
