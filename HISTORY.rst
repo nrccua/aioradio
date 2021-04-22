@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.13.4 (2021-04-22)
+-----------------------
+
+* Remove sensitive company email addresses along with database, redis and secret manager info.
+
+
 v0.13.3 (2021-04-13)
 -----------------------
 

@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from dataclasses import field as dataclass_field
 from typing import Any, Dict, List, Union
 
+import fakeredis
 import orjson
 import redis
 
@@ -44,12 +45,18 @@ class Redis:
     # retrieve value letting this class convert from json set use_json = True.
     use_json: bool = True
 
+    # If running test cases use fakeredis
+    fake: bool = False
+
     def __post_init__(self):
-        primary_endpoint = self.config["redis_primary_endpoint"]
-        if "encoding" in self.config:
-            self.pool = redis.Redis(host=primary_endpoint, encoding=self.config["encoding"], decode_responses=True)
+        if self.fake:
+            self.pool = fakeredis.FakeRedis(encoding='utf-8', decode_responses=True)
         else:
-            self.pool = redis.Redis(host=primary_endpoint)
+            primary_endpoint = self.config["redis_primary_endpoint"]
+            if "encoding" in self.config:
+                self.pool = redis.Redis(host=primary_endpoint, encoding=self.config["encoding"], decode_responses=True)
+            else:
+                self.pool = redis.Redis(host=primary_endpoint)
 
     async def get(self, key: str, use_json: bool=None, encoding: Union[str, None]=None) -> Any:
         """Check if an item is cached in redis.

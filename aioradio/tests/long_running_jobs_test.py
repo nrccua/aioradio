@@ -7,9 +7,25 @@ from typing import Any, Dict
 
 import pytest
 
+from aioradio.aws.sqs import add_regions
 from aioradio.long_running_jobs import LongRunningJobs
 
+QUEUE = 'pytest.fifo'
+REGION = 'us-east-2'
+
 pytestmark = pytest.mark.asyncio
+
+async def test_add_regions():
+    """Add us-east-2 region."""
+
+    await add_regions([REGION])
+
+
+async def test_sqs_creating_queue(sqs_queue_url):
+    """Create mock SQS queue."""
+
+    queue_url = await sqs_queue_url(region_name=REGION, queue_name=QUEUE)
+    assert queue_url
 
 
 async def job1(params: Dict[str, Any]) -> int:
@@ -31,23 +47,20 @@ async def job2(params: Dict[str, Any]) -> int:
     return delay(**params)
 
 
-async def test_lrj_worker(github_action):
+async def test_lrj_worker():
     """Test test_lrj_worker."""
 
-    if github_action:
-        pytest.skip('Skip test_lrj_worker when running via Github Action')
-
     lrj1 = LongRunningJobs(
-        redis_host='prod-race2.gbngr1.ng.0001.use1.cache.amazonaws.com',
+        fakeredis=True,
         expire_cached_result=5,
         expire_job_data=5,
-        sqs_queue='NARWHAL_QUEUE_SANDBOX.fifo',
-        sqs_region='us-east-1',
+        sqs_queue=QUEUE,
+        sqs_region=REGION,
         jobs={'job1': (job1, 10)}
     )
 
     lrj2 = LongRunningJobs(
-        redis_host='prod-race2.gbngr1.ng.0001.use1.cache.amazonaws.com',
+        fakeredis=True,
         expire_cached_result=5,
         expire_job_data=5,
         queue_service='redis',
@@ -74,7 +87,7 @@ async def test_lrj_worker(github_action):
     assert result['job_done'] and result['results'] == params['result']
 
     result3 = await lrj1.send_message(job_name='job1', params=params, cache_key=cache_key)
-    await sleep(1)
+    await sleep(1.5)
     assert 'uuid' in result3 and 'error' not in result3
     result = await lrj1.check_job_status(result3['uuid'])
     assert result['job_done'] and result['results'] == params['result']
@@ -83,15 +96,15 @@ async def test_lrj_worker(github_action):
     result = await lrj2.check_job_status(result2['uuid'])
     assert not result['job_done'] and 'error' in result
 
+    await lrj1.stop_worker()
+    await lrj2.stop_worker()
 
-async def test_lrj_worker_running_two_jobs(github_action):
+
+async def test_lrj_worker_running_two_jobs():
     """Test test_lrj_worker_running_two_jobs."""
 
-    if github_action:
-        pytest.skip('Skip test_lrj_worker_running_two_jobs when running via Github Action')
-
     lrj3 = LongRunningJobs(
-        redis_host='prod-race2.gbngr1.ng.0001.use1.cache.amazonaws.com',
+        fakeredis=True,
         expire_cached_result=5,
         expire_job_data=5,
         queue_service='redis',
@@ -110,3 +123,5 @@ async def test_lrj_worker_running_two_jobs(github_action):
     result2 = await lrj3.check_job_status(result2['uuid'])
     assert result1['job_done'] and result1['results'] == params['result']
     assert result2['job_done'] and result2['results'] == params['result']
+
+    await lrj3.stop_worker()

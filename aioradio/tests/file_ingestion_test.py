@@ -78,7 +78,7 @@ async def test_send_emails_via_mandrill():
 
     result = await send_emails_via_mandrill(
         mandrill_api_key=CREDS['mandrill'],
-        emails=['tim.reichard@nrccua.org'],
+        emails=['not.real@nrccua.org'],
         subject='Pytest send_emails_via_mandrill',
         global_merge_vars=global_merge_vars,
         template_name='EFI-Internal'

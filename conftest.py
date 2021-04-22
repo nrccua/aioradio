@@ -57,10 +57,7 @@ def cache(github_action):
     if github_action:
         pytest.skip('Skip test_set_one_item when running via Github Action')
 
-    cache_object = Redis(config={
-        'redis_primary_endpoint': 'prod-race2.gbngr1.ng.0001.use1.cache.amazonaws.com',
-        'encoding': 'utf-8'
-    })
+    cache_object = Redis(fake=True)
     yield cache_object
 
 

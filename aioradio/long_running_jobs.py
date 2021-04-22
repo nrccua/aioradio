@@ -29,7 +29,7 @@ class LongRunningJobs:
     job is complete.
     """
 
-    redis_host: str
+    redis_host: str = 'localhost'
 
     # Expiration of cached result. If a job has the same cache_key of a previously run job in redis
     # then we can skip running the job using the previously obtained result.
@@ -52,13 +52,23 @@ class LongRunningJobs:
     sqs_queue: str = None
     sqs_region: str = None
 
+    # If running test cases use fakeredis
+    fakeredis: bool = False
+
+    # Trigger the worker to stop running continually
+    stop: bool = False
+
     def __post_init__(self):
 
         self.queue_service = self.queue_service.lower()
         if self.queue_service not in ['sqs', 'redis']:
             raise ValueError("queue_service must be either 'sqs' or 'redis'.")
 
-        self.cache = Redis(config={'redis_primary_endpoint': self.redis_host, 'encoding': 'utf-8'})
+        if self.fakeredis:
+            self.cache = Redis(fake=True)
+        else:
+            self.cache = Redis(config={'redis_primary_endpoint': self.redis_host, 'encoding': 'utf-8'})
+
         self.job_names = set(self.jobs.keys())
         for job_name, job_info in self.jobs.items():
             if len(job_info) != 2:
@@ -74,6 +84,11 @@ class LongRunningJobs:
 
         self.longest_job_timeout = max([i[1] for i in self.jobs.values()])
         self.host_uuid = f'{socket.gethostname()}|{uuid4()}'
+
+    async def stop_worker(self):
+        """Stop the worker from running continually."""
+
+        self.stop = True
 
     async def check_job_status(self, uuid: str) -> Dict[str, Any]:
         """Check if the job is done and if so add results to the returned dict.
@@ -137,7 +152,7 @@ class LongRunningJobs:
     async def start_worker(self):
         """Continually run the worker."""
 
-        while True:
+        while not self.stop:
             try:
                 # run job the majority of the time pulling up to 10 messages to process
                 for _ in range(10):
@@ -157,6 +172,8 @@ class LongRunningJobs:
             except Exception:
                 print(traceback.format_exc())
                 await asyncio.sleep(30)
+
+        self.stop = False
 
     async def __sqs_pull_messages_and_run_jobs__(self):
         """Pull messages one at a time and run job.
