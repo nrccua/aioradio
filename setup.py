@@ -35,6 +35,7 @@ setup(name='aioradio',
     ],
     include_package_data=True,
     tests_require=[
+        'fakeredis',
         'flask',
         'moto',
         'pre-commit',

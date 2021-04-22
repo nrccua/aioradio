@@ -15,7 +15,7 @@ setup:
 
 lint:
 	. env/bin/activate; \
-	pylint aioradio/*.py aioradio/aws/*.py aioradio/tests/*.py
+	pylint aioradio/*.py aioradio/aws/*.py aioradio/tests/*.py --disable=similarities
 
 test:
 	. env/bin/activate; \
