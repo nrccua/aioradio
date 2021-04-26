@@ -8,7 +8,8 @@ import pytest
 
 from aioradio.aws.s3 import (delete_s3_object, download_file, get_object,
                              get_s3_file_attributes, list_s3_objects,
-                             upload_file)
+                             upload_file, create_multipart_upload, upload_part,
+                             complete_multipart_upload, abort_multipart_upload)
 
 LOG = logging.getLogger(__name__)
 
@@ -76,3 +77,29 @@ async def test_get_file_attributes():
 
     result = await get_s3_file_attributes(bucket=S3_BUCKET, s3_key=f'{S3_PREFIX}/hello_world.txt')
     assert result['ContentLength'] == 22
+
+async def test_multipart_upload():
+    """"Test a success case of multipart upload"""
+
+    filename = 'hello_world.txt'
+    s3_key = f'{S3_PREFIX}/{filename}'
+    multipart_upload = await create_multipart_upload(bucket=S3_BUCKET s3_key=s3_key)
+    upload_id = multipart_upload["UploadId"]
+    assert upload_id is not None
+
+    part_number=1
+    part_result = await upload_part(
+        bucket=S3_BUCKET,
+        s3_key=s3_key,
+        part='Hello World/n',
+        part_number=part_number,
+        uploadId=upload_id)
+
+    parts = [{'ETag': part['ETag'], 'PartNumber': part_number}]
+
+    await complete_multipart_upload(
+        bucket=S3_BUCKET,
+        s3_key=s3_key,
+        parts=parts,
+        upload_id=upload_id
+    )
