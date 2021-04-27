@@ -3,10 +3,10 @@ History
 =======
 
 
-v0.13.5 (2021-04-22)
+v0.13.5 (2021-04-27)
 -----------------------
 
-* Add functions (create_multipart_upload, upload_part, complete_multipart_upload, abort_multipart_upload) to s3 multupart upload.
+* Add functions (create_multipart_upload, upload_part, complete_multipart_upload, abort_multipart_upload, list_parts) to s3 multupart upload.
 
 v0.13.4 (2021-04-22)
 -----------------------

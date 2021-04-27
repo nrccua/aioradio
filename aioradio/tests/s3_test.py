@@ -6,10 +6,11 @@ import logging
 
 import pytest
 
-from aioradio.aws.s3 import (delete_s3_object, download_file, get_object,
-                             get_s3_file_attributes, list_s3_objects,
-                             upload_file, create_multipart_upload, upload_part,
-                             complete_multipart_upload, abort_multipart_upload)
+from aioradio.aws.s3 import (abort_multipart_upload, complete_multipart_upload,
+                             create_multipart_upload, delete_s3_object,
+                             download_file, get_object, get_s3_file_attributes,
+                             list_parts, list_s3_objects, upload_file,
+                             upload_part)
 
 LOG = logging.getLogger(__name__)
 
@@ -79,27 +80,67 @@ async def test_get_file_attributes():
     assert result['ContentLength'] == 22
 
 async def test_multipart_upload():
-    """"Test a success case of multipart upload"""
+    """"Test a success case of multipart upload."""
 
-    filename = 'hello_world.txt'
+    filename = 'multipart_upload_hello_world.txt'
     s3_key = f'{S3_PREFIX}/{filename}'
-    multipart_upload = await create_multipart_upload(bucket=S3_BUCKET s3_key=s3_key)
+
+    # First delete the file from s3 if it exists and verify it is gone from s3
+    await delete_s3_object(bucket=S3_BUCKET, s3_prefix=s3_key)
+    assert s3_key not in await list_s3_objects(bucket=S3_BUCKET, s3_prefix=S3_PREFIX)
+
+    # Create the multipart upload
+    multipart_upload = await create_multipart_upload(bucket=S3_BUCKET, s3_key=s3_key)
     upload_id = multipart_upload["UploadId"]
     assert upload_id is not None
 
+    # Upload a part
     part_number=1
     part_result = await upload_part(
         bucket=S3_BUCKET,
         s3_key=s3_key,
         part='Hello World/n',
         part_number=part_number,
-        uploadId=upload_id)
+        upload_id=upload_id)
+    parts = [{'ETag': part_result['ETag'], 'PartNumber': part_number}]
 
-    parts = [{'ETag': part['ETag'], 'PartNumber': part_number}]
+    # Verify if the part was listed
+    uploaded_parts = await list_parts(
+        bucket=S3_BUCKET,
+        s3_key=s3_key,
+        upload_id=upload_id)
+    assert len(uploaded_parts['Parts'])==part_number
 
+    # If everythin looks fine, complete the multipart upload
     await complete_multipart_upload(
         bucket=S3_BUCKET,
         s3_key=s3_key,
         parts=parts,
         upload_id=upload_id
     )
+    # Confirm the file now exists in s3
+    assert s3_key in await list_s3_objects(bucket=S3_BUCKET, s3_prefix=S3_PREFIX)
+
+async def test_abort_multipart_upload():
+    """"Test aborting a multipart upload."""
+
+    filename = 'multipart_upload_hello_world.txt'
+    s3_key = f'{S3_PREFIX}/{filename}'
+
+    # First delete the file from s3 if it exists and verify it is gone from s3
+    await delete_s3_object(bucket=S3_BUCKET, s3_prefix=s3_key)
+    assert s3_key not in await list_s3_objects(bucket=S3_BUCKET, s3_prefix=S3_PREFIX)
+
+    # Create multipart upload, so we can abort it
+    multipart_upload = await create_multipart_upload(bucket=S3_BUCKET, s3_key=s3_key)
+    upload_id = multipart_upload["UploadId"]
+    assert upload_id is not None
+
+    await abort_multipart_upload(
+        bucket=S3_BUCKET,
+        s3_key=s3_key,
+        upload_id=upload_id
+    )
+
+    # Verify if the proccess was successfully aborted
+    assert s3_key not in await list_s3_objects(bucket=S3_BUCKET, s3_prefix=S3_PREFIX)

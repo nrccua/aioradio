@@ -179,13 +179,33 @@ async def upload_part(bucket: str, s3_key: str, part: str, part_number: int, upl
     return response
 
 @AWS_SERVICE.active
-async def complete_multipart_upload(bucket: str, s3_key: str, parts: str, upload_id: str) -> Dict[str, Any]:
+async def list_parts(bucket: str, s3_key: str, upload_id: str) -> Dict[str, Any]:
+    """List parts already uploaded to s3.
+
+    Args:
+        bucket (str): s3 bucket
+        s3_key (str): s3 prefix
+        upload_id (str): multipart upload Id
+
+    Returns:
+        Dict[str, Any]: response of operation
+    """
+
+    response = await S3['client']['obj'].list_parts(
+        Bucket=bucket,
+        Key=s3_key,
+        UploadId=upload_id)
+
+    return response
+
+@AWS_SERVICE.active
+async def complete_multipart_upload(bucket: str, s3_key: str, parts: List, upload_id: str) -> Dict[str, Any]:
     """Complete multipart upload to s3.
 
     Args:
         bucket (str): s3 bucket
         s3_key (str): s3 prefix
-        parts (str): array with all parts info
+        parts (List): all parts info
         upload_id (str): multipart upload Id
 
     Returns:
@@ -202,7 +222,7 @@ async def complete_multipart_upload(bucket: str, s3_key: str, parts: str, upload
 
 @AWS_SERVICE.active
 async def abort_multipart_upload(bucket: str, s3_key: str, upload_id: str) -> Dict[str, Any]:
-    """Complete multipart upload to s3.
+    """Abort multipart upload.
 
     Args:
         bucket (str): s3 bucket
@@ -216,7 +236,6 @@ async def abort_multipart_upload(bucket: str, s3_key: str, upload_id: str) -> Di
     response = await S3['client']['obj'].abort_multipart_upload(
         Bucket=bucket,
         Key=s3_key,
-        UploadId=upload_id,
-        MultipartUpload={'Parts': parts})
+        UploadId=upload_id)
 
     return response
