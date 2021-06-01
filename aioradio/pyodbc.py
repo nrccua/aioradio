@@ -11,6 +11,7 @@ from typing import Any, List, Union
 import pyodbc
 
 OPERATING_SYSTEM = platform.system()
+SQL_ATTR_CONNECTION_TIMEOUT = 113
 
 # driver location varies based on OS.  add to this list if necessary...
 UNIXODBC_DRIVER_PATHS = [
@@ -92,7 +93,7 @@ async def establish_pyodbc_connection(
     if multi_subnet_failover:
         conn_string += f';MultiSubnetFailover={multi_subnet_failover}'
 
-    return pyodbc.connect(conn_string, autocommit=autocommit)
+    return pyodbc.connect(conn_string, autocommit=autocommit, attr_before={SQL_ATTR_CONNECTION_TIMEOUT: 3})
 
 
 async def pyodbc_query_fetchone(conn: pyodbc.Connection, query: str) -> Union[List[Any], None]:

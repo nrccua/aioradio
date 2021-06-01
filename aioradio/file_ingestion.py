@@ -164,13 +164,12 @@ async def unzip_file(filepath: str, directory: str) -> List[str]:
         List[str]: List of filenames
     """
 
-    zipped = zipfile.ZipFile(filepath)
+    filenames = []
+    with zipfile.ZipFile(filepath) as zipped:
 
-    # exclude __MACOSX directory that could be added when creating zip on macs
-    filenames = [i for i in zipped.namelist() if '__MACOSX' not in i]
-
-    zipped.extractall(directory)
-    zipped.close()
+        # exclude __MACOSX directory that could be added when creating zip on macs
+        filenames = [i for i in zipped.namelist() if '__MACOSX' not in i]
+        zipped.extractall(directory)
 
     return filenames
 
