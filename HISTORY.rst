@@ -3,7 +3,12 @@ History
 =======
 
 
-v0.13.7 (2021-06-02)
+v0.13.8 (2021-06-02)
+
+* Add application_intent & tds_version as pyodbc connection options.
+
+
+v0.13.7 (2021-06-01)
 -----------------------
 
 * Add attr_before parameter in pyodbc.connect.

@@ -46,9 +46,11 @@ async def establish_pyodbc_connection(
         pwd: str,
         port: int=None,
         database: str='',
+        tds_version: str='8.0',
         trusted_connection: str='',
         multi_subnet_failover: str='',
         driver: str='',
+        application_intent: str='',
         autocommit: bool=False
 ) -> pyodbc.Connection:
     """Acquire and return pyodbc.Connection object else raise
@@ -60,9 +62,11 @@ async def establish_pyodbc_connection(
         pwd (str): password
         port (int, optional): port. Defaults to None.
         database (str, optional): database. Defaults to ''.
+        tds_version (str, optional): TDS_Version. Defaults to '8.0'.
         trusted_connection (str, optional): Trusted_Connection. Defaults to ''.
         multi_subnet_failover (str, optional): MultiSubnetFailover. Defaults to ''.
         driver (str, optional): unixodbc driver. Defaults to ''.
+        application_intent (str, optional): ReadOnly | ReadWrite. Defaults to ''.
         autocommit (bool, optional): autocommit. Defaults to False.
 
     Raises:
@@ -83,7 +87,8 @@ async def establish_pyodbc_connection(
         if verified_driver is None:
             raise FileNotFoundError('Unable to locate unixodbc driver file: libtdsodbc.so')
 
-    conn_string = f'DRIVER={verified_driver};SERVER={host};UID={user};PWD={pwd};TDS_Version=8.0'
+    conn_string = f'DRIVER={verified_driver};SERVER={host};UID={user};PWD={pwd}'
+    conn_string += f';TDS_Version={tds_version if tds_version else "8.0"}'
     if port is not None:
         conn_string += f';PORT={port}'
     if database:
@@ -92,6 +97,8 @@ async def establish_pyodbc_connection(
         conn_string += f';Trusted_Connection={trusted_connection}'
     if multi_subnet_failover:
         conn_string += f';MultiSubnetFailover={multi_subnet_failover}'
+    if application_intent:
+        conn_string += f';ApplicationIntent={application_intent}'
 
     return pyodbc.connect(conn_string, autocommit=autocommit, attr_before={SQL_ATTR_CONNECTION_TIMEOUT: 3})
 
@@ -110,6 +117,7 @@ async def pyodbc_query_fetchone(conn: pyodbc.Connection, query: str) -> Union[Li
 
     cursor = conn.cursor()
     result = cursor.execute(query).fetchone()
+    cursor.close()
 
     return result
 
@@ -128,5 +136,6 @@ async def pyodbc_query_fetchall(conn: pyodbc.Connection, query: str) -> Union[Li
 
     cursor = conn.cursor()
     result = cursor.execute(query).fetchall()
+    cursor.close()
 
     return result
