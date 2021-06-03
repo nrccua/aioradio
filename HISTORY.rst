@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.13.9 (2021-06-03)
+
+* Add SQL Server 2017 driver path for Debian operating systems.
+
+
 v0.13.8 (2021-06-02)
 
 * Add application_intent & tds_version as pyodbc connection options.

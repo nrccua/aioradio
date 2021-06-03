@@ -11,13 +11,13 @@ from typing import Any, List, Union
 import pyodbc
 
 OPERATING_SYSTEM = platform.system()
-SQL_ATTR_CONNECTION_TIMEOUT = 113
 
 # driver location varies based on OS.  add to this list if necessary...
 UNIXODBC_DRIVER_PATHS = [
     '/usr/lib/libtdsodbc.so',
     '/usr/local/lib/libtdsodbc.so',
-    '/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so'
+    '/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so',
+    '/opt/microsoft/msodbcsql/lib64/opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.7.so.2.1'
 ]
 
 
@@ -80,15 +80,16 @@ async def establish_pyodbc_connection(
     if OPERATING_SYSTEM == 'Windows':
         verified_driver = driver
     else:
-        if driver and not driver.startswith('{'):
+        if driver:
             verified_driver = await get_unixodbc_driver_path([driver])
         else:
             verified_driver = await get_unixodbc_driver_path(UNIXODBC_DRIVER_PATHS)
+
         if verified_driver is None:
             raise FileNotFoundError('Unable to locate unixodbc driver file: libtdsodbc.so')
 
     conn_string = f'DRIVER={verified_driver};SERVER={host};UID={user};PWD={pwd}'
-    conn_string += f';TDS_Version={tds_version if tds_version else "8.0"}'
+    conn_string += f';TDS_Version={tds_version if tds_version else "7.4"}'
     if port is not None:
         conn_string += f';PORT={port}'
     if database:
@@ -100,7 +101,7 @@ async def establish_pyodbc_connection(
     if application_intent:
         conn_string += f';ApplicationIntent={application_intent}'
 
-    return pyodbc.connect(conn_string, autocommit=autocommit, attr_before={SQL_ATTR_CONNECTION_TIMEOUT: 3})
+    return pyodbc.connect(conn_string, autocommit=autocommit)
 
 
 async def pyodbc_query_fetchone(conn: pyodbc.Connection, query: str) -> Union[List[Any], None]:
