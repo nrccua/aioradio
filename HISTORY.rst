@@ -3,9 +3,10 @@ History
 =======
 
 
-v0.13.9 (2021-06-03)
+v0.13.10 (2021-06-03)
 
 * Add SQL Server 2017 driver path for Debian operating systems.
+* Moving pyodbc.connect port reference within the SERVER term (ex. "<server>,5123")
 
 
 v0.13.8 (2021-06-02)

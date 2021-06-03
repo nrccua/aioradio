@@ -46,7 +46,7 @@ async def establish_pyodbc_connection(
         pwd: str,
         port: int=None,
         database: str='',
-        tds_version: str='8.0',
+        tds_version: str='7.4',
         trusted_connection: str='',
         multi_subnet_failover: str='',
         driver: str='',
@@ -62,7 +62,7 @@ async def establish_pyodbc_connection(
         pwd (str): password
         port (int, optional): port. Defaults to None.
         database (str, optional): database. Defaults to ''.
-        tds_version (str, optional): TDS_Version. Defaults to '8.0'.
+        tds_version (str, optional): TDS_Version. Defaults to '7.4'.
         trusted_connection (str, optional): Trusted_Connection. Defaults to ''.
         multi_subnet_failover (str, optional): MultiSubnetFailover. Defaults to ''.
         driver (str, optional): unixodbc driver. Defaults to ''.
@@ -80,18 +80,15 @@ async def establish_pyodbc_connection(
     if OPERATING_SYSTEM == 'Windows':
         verified_driver = driver
     else:
-        if driver:
-            verified_driver = await get_unixodbc_driver_path([driver])
-        else:
-            verified_driver = await get_unixodbc_driver_path(UNIXODBC_DRIVER_PATHS)
-
+        verified_driver = driver if driver else await get_unixodbc_driver_path(UNIXODBC_DRIVER_PATHS)
         if verified_driver is None:
             raise FileNotFoundError('Unable to locate unixodbc driver file: libtdsodbc.so')
 
-    conn_string = f'DRIVER={verified_driver};SERVER={host};UID={user};PWD={pwd}'
-    conn_string += f';TDS_Version={tds_version if tds_version else "7.4"}'
     if port is not None:
-        conn_string += f';PORT={port}'
+        host += f',{port}'
+
+    conn_string = f'DRIVER={verified_driver};SERVER={host};UID={user};PWD={pwd};TDS_Version={tds_version}'
+
     if database:
         conn_string += f';DATABASE={database}'
     if trusted_connection:
@@ -100,6 +97,8 @@ async def establish_pyodbc_connection(
         conn_string += f';MultiSubnetFailover={multi_subnet_failover}'
     if application_intent:
         conn_string += f';ApplicationIntent={application_intent}'
+
+    print(conn_string)
 
     return pyodbc.connect(conn_string, autocommit=autocommit)
 
