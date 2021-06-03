@@ -98,8 +98,6 @@ async def establish_pyodbc_connection(
     if application_intent:
         conn_string += f';ApplicationIntent={application_intent}'
 
-    print(conn_string)
-
     return pyodbc.connect(conn_string, autocommit=autocommit)
 
 
