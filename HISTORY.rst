@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.13.12 (2021-06-09)
+
+* Remove logging in aioradio/aws/utils.py.
+* Skip all tests interacting with FTP.
+
+
 v0.13.11 (2021-06-03)
 
 * Add SQL Server 2017 driver path for Debian operating systems.
