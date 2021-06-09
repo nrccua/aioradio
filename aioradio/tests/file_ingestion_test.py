@@ -87,11 +87,10 @@ async def test_send_emails_via_mandrill():
     assert result[0]['status'] in ['sent', 'queued']
 
 
-async def test_write_file_to_ftp(github_action, request):
+async def test_write_file_to_ftp(request):
     """Test write_file_to_ftp."""
 
-    if github_action:
-        pytest.skip('Skip test_write_file_to_ftp when running via Github Action')
+    pytest.skip('Skip test_write_file_to_ftp')
 
     filepath = os.path.join(request.fspath.dirname, 'test_data', 'test_file_ingestion.zip')
 
@@ -118,11 +117,10 @@ async def test_write_file_to_ftp(github_action, request):
     assert now > last_write_time and now - last_write_time < 10
 
 
-async def test_list_ftp_objects(github_action):
+async def test_list_ftp_objects():
     """Test test_list_ftp_objects."""
 
-    if github_action:
-        pytest.skip('Skip test_list_ftp_objects when running via Github Action')
+    pytest.skip('Skip test_list_ftp_objects')
 
     conn = await establish_ftp_connection(
         user=CREDS['ftp_user'],
@@ -141,11 +139,10 @@ async def test_list_ftp_objects(github_action):
     assert results[0].filename == 'test_file_ingestion.zip'
 
 
-async def test_list_ftp_objects_with_regex(github_action):
+async def test_list_ftp_objects_with_regex():
     """Test test_list_ftp_objects with regex."""
 
-    if github_action:
-        pytest.skip('Skip test_list_ftp_objects_with_regex when running via Github Action')
+    pytest.skip('Skip test_list_ftp_objects_with_regex')
 
     conn = await establish_ftp_connection(
         user=CREDS['ftp_user'],
@@ -166,11 +163,10 @@ async def test_list_ftp_objects_with_regex(github_action):
     assert results[0].filename == 'test_file_ingestion.zip'
 
 
-async def test_delete_ftp_file(github_action):
+async def test_delete_ftp_file():
     """Test delete_ftp_file."""
 
-    if github_action:
-        pytest.skip('Skip test_list_ftp_objects_with_regex when running via Github Action')
+    pytest.skip('Skip test_list_ftp_objects_with_regex')
 
     conn = await establish_ftp_connection(
         user=CREDS['ftp_user'],

@@ -6,7 +6,6 @@
 # pylint: disable=protected-access
 
 import asyncio
-import logging
 from asyncio import sleep
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -17,8 +16,6 @@ from typing import Any, Dict, List
 import aioboto3
 import aiobotocore
 import aiojobs
-
-LOG = logging.getLogger(__name__)
 
 
 @dataclass
@@ -134,13 +131,9 @@ class AwsServiceManager:
         """
 
         kwargs = {'service_name': self.service, 'verify': False}
-        if region == '':
-            phrase = f're-establish {self.service}' if reestablish else f'establish {self.service}'
-        else:
+        if region:
             kwargs['region_name'] = region
-            phrase = f're-establish {self.service} {region}' if reestablish else f'establish {self.service} {region}'
 
-        LOG.info(f'Atempting to {phrase} service object...')
         if reestablish:
             service_dict['busy'] = True
             await service_dict['obj'].__aexit__(None, None, None)
@@ -153,7 +146,6 @@ class AwsServiceManager:
             service_dict['obj'] = await func(**kwargs).__aenter__()
 
         service_dict['busy'] = False
-        LOG.info(f'Successfully {phrase} service object!')
 
     def get_region(self, args: List[Any], kwargs: Dict[str, Any]) -> str:
         """Attempt to detect the region from the kwargs or args.
