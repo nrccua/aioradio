@@ -8,11 +8,13 @@
 import asyncio
 import socket
 import traceback
+from asyncio import create_task
 from dataclasses import dataclass, field
 from time import time
 from typing import Any, Dict, Tuple
 from uuid import uuid4
 
+import httpx
 import orjson
 
 from aioradio.aws import sqs
@@ -57,6 +59,8 @@ class LongRunningJobs:
 
     # Trigger the worker to stop running continually
     stop: bool = False
+
+    httpx_client: httpx.AsyncClient = httpx.AsyncClient()
 
     def __post_init__(self):
 
@@ -199,6 +203,9 @@ class LongRunningJobs:
             key = body['cache_key']
             job_name = body['job_name']
 
+            callback_url = body['params'].get('callback_url', '')
+            body['params'].pop('callback_url', None)
+
             data = None if key is None else await self.cache.get(key)
             if data is None:
                 # No results found in cache so run the job
@@ -208,12 +215,17 @@ class LongRunningJobs:
                 if key is not None and not await self.cache.set(key, data, expire=self.expire_cached_result):
                     raise IOError(f"Setting cache string failed for cache_key: {key}")
 
+            # Send results via POST request if necessary
+            if callback_url:
+                create_task(self.httpx_client.post(callback_url, params={'results': data, 'uuid': body['uuid']}, timeout=30))
+
             # Update the hashed UUID with processing results
             await self.cache.hmset(
                 key=body['uuid'],
                 items={**body, **{'results': data, 'job_done': True}},
                 expire=self.expire_job_data
             )
+
             entries = [{'Id': str(uuid4()), 'ReceiptHandle': msg[0]['ReceiptHandle']}]
             await sqs.delete_messages(queue=self.sqs_queue, region=self.sqs_region, entries=entries)
 
@@ -235,6 +247,9 @@ class LongRunningJobs:
             body = orjson.loads(msg)
             key = body['cache_key']
 
+            callback_url = body['params'].get('callback_url', '')
+            body['params'].pop('callback_url', None)
+
             # Add start time and push msg to <self.name>-in-process
             body['start_time'] = time()
             self.cache.pool.rpush(f'{job_name}-in-process', orjson.dumps(body).decode())
@@ -247,6 +262,10 @@ class LongRunningJobs:
                 # Set the cached parameter based key with results
                 if key is not None and not await self.cache.set(key, data, expire=self.expire_cached_result):
                     raise IOError(f"Setting cache string failed for cache_key: {key}")
+
+            # Send results via POST request if necessary
+            if callback_url:
+                create_task(self.httpx_client.post(callback_url, params={'results': data, 'uuid': body['uuid']}, timeout=30))
 
             # Update the hashed UUID with processing results
             await self.cache.hmset(
