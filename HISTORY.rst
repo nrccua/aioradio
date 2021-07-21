@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.13.15 (2021-07-21)
+
+* Update aiobotocore==1.2.2.
+
+
 v0.13.14 (2021-07-21)
 
 * Assign fixed version for python packages.
