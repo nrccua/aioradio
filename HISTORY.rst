@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.13.14 (2021-07-21)
+
+* Assign fixed version for python packages.
+
+
 v0.13.13 (2021-06-10)
 
 * Add callback_url functionality in long_running_jobs.
