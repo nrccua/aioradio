@@ -3,9 +3,14 @@ History
 =======
 
 
+v0.13.18 (2021-07-21)
+
+* Use json instead of data for callback.
+
+
 v0.13.17 (2021-07-21)
 
-* Update long running jobs callback to use data instead of params in post
+* Update long running jobs callback to use data instead of params in post.
 
 
 v0.13.16 (2021-07-21)

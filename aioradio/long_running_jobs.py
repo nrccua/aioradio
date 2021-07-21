@@ -217,7 +217,7 @@ class LongRunningJobs:
 
             # Send results via POST request if necessary
             if callback_url:
-                create_task(self.httpx_client.post(callback_url, data={'results': data, 'uuid': body['uuid']}, timeout=30))
+                create_task(self.httpx_client.post(callback_url, json={'results': data, 'uuid': body['uuid']}, timeout=30))
 
             # Update the hashed UUID with processing results
             await self.cache.hmset(
@@ -265,7 +265,7 @@ class LongRunningJobs:
 
             # Send results via POST request if necessary
             if callback_url:
-                create_task(self.httpx_client.post(callback_url, data={'results': data, 'uuid': body['uuid']}, timeout=30))
+                create_task(self.httpx_client.post(callback_url, json={'results': data, 'uuid': body['uuid']}, timeout=30))
 
             # Update the hashed UUID with processing results
             await self.cache.hmset(
