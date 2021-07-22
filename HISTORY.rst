@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.14.0 (2021-07-22)
+
+* Update aioboto3==9.1.0, aiobotocore==1.3.3, boto3==1.17.106 & moto==2.1.0.
+
+
 v0.13.18 (2021-07-21)
 
 * Use json instead of data for callback.
