@@ -142,7 +142,8 @@ class AwsServiceManager:
             service_dict['session'] = aiobotocore.get_session()
             service_dict['obj'] = await service_dict['session'].create_client(**kwargs).__aenter__()
         elif self.module == 'aioboto3':
-            func = aioboto3.client if item == 'client' else aioboto3.resource
+            service_dict['session'] = aioboto3.Session()
+            func = service_dict['session'].client if item == 'client' else service_dict['session'].resource
             service_dict['obj'] = await func(**kwargs).__aenter__()
 
         service_dict['busy'] = False
@@ -196,7 +197,7 @@ class AwsServiceManager:
 
             # Make sure aiobotocore or aioboto3 isn't busy
             while obj['client']['busy'] or ('resource' in obj and obj['resource']['busy']):
-                await sleep(0.01)
+                await sleep(0.001)
 
             result = None
             error = None

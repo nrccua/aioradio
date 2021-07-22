@@ -265,7 +265,7 @@ async def dynamodb_kw(dynamodb2_server):
 
 @pytest.fixture(scope='module')
 async def dynamodb_session(dynamodb2_server):
-    return aioboto3._get_default_session(region_name=region)
+    return aioboto3.Session(region_name=region)
 
 
 @pytest.fixture(scope='module')

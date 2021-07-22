@@ -10,7 +10,7 @@ install:
 
 setup:
 	. env/bin/activate; \
-	python setup.py develop --no-deps
+	python setup.py develop
 	rm -rf build dist aioradio.egg-info
 
 lint:
