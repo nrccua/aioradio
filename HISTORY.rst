@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.14.1 (2021-07-22)
+
+* Relaxed aioboto3, aiobotocore & boto3 version requirements to work with python3.7 since new versions of aioboto3 are limited to python3.8+.
+
+
 v0.14.0 (2021-07-22)
 
 * Update aioboto3==9.1.0, aiobotocore==1.3.3, boto3==1.17.106 & moto==2.1.0.
