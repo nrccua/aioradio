@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.14.3 (2021-07-30)
+
+* Add SentTimestamp attribute to SQS get_messages function.
+
+
 v0.14.2 (2021-07-22)
 
 * Update aioboto3==9.2.0.
