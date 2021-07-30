@@ -193,7 +193,8 @@ class LongRunningJobs:
             region=self.sqs_region,
             wait_time=1,
             visibility_timeout=self.longest_job_timeout,
-            max_messages=1
+            max_messages=1,
+            attribute_names=['SentTimestamp']
         )
 
         if not msg:
@@ -228,6 +229,9 @@ class LongRunningJobs:
 
             entries = [{'Id': str(uuid4()), 'ReceiptHandle': msg[0]['ReceiptHandle']}]
             await sqs.delete_messages(queue=self.sqs_queue, region=self.sqs_region, entries=entries)
+
+            total = round(time() - float(msg[0]['Attributes']['SentTimestamp'])/1000, 3)
+            print(f"Async college match processing time for UUID {body['uuid']} took {total} seconds")
 
     async def __redis_pull_messages_and_run_jobs__(self, job_name):
         """Pull messages one at a time and run job.
