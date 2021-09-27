@@ -133,3 +133,19 @@ async def test_get_many_items(cache):
     await cache.set(key='pytest-3', value='three')
     results = await cache.mget(['pytest-1', 'pytest-2', 'pytest-3'])
     assert results == ['one', 'two', 'three']
+
+async def test_delete_many_items(cache):
+    """Test delete_many"""
+
+    await cache.set(key='delete-many-1', value='one')
+    await cache.set(key='delete-many-2', value='two')
+    await cache.set(key='delete-many-3', value='three')
+
+    results = await cache.mget(['delete-many-1', 'delete-many-2', 'delete-many-3'])
+    assert results == ['one', 'two', 'three']
+
+    total = await cache.delete_many('delete-many*')
+    assert total == 3
+
+    results = await cache.mget(['delete-many-1', 'delete-many-2', 'delete-many-3'])
+    assert results == [None, None, None]
