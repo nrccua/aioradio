@@ -147,6 +147,33 @@ class Redis:
 
         return self.pool.delete(key)
 
+    async def delete_many(self, pattern: str, max_batch_size: int=500) -> int:
+        """Delete all keys it matches the desired pattern
+
+        Args:
+            pattern (str): cache key pattern
+            max_batch_size (int): size of pipeline batch, defaults to 500, can be adjusted to increase performance
+
+        Returns:
+            int: total of deleted keys
+        """
+        pipe = self.pool.pipeline()
+        total = 0
+        batch_size = 0
+
+        for key in self.pool.scan_iter(pattern):
+            pipe.delete(key)
+            total = total + 1
+            batch_size = batch_size + 1
+
+            if batch_size == max_batch_size:
+                pipe.execute()
+                batch_size = 0
+
+        pipe.execute()
+
+        return total
+
     async def hget(self, key: str, field: str, use_json: bool=None, encoding: Union[str, None]=None) -> Any:
         """Get the value of a hash field.
 

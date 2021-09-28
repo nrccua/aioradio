@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.14.4 (2021-09-27)
+
+* Add function delete_many to Redis.
+
+
 v0.14.3 (2021-07-30)
 
 * Add SentTimestamp attribute to SQS get_messages function.
