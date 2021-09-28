@@ -148,7 +148,7 @@ class Redis:
         return self.pool.delete(key)
 
     async def delete_many(self, pattern: str, max_batch_size: int=500) -> int:
-        """Delete all keys it matches the desired pattern
+        """Delete all keys it matches the desired pattern.
 
         Args:
             pattern (str): cache key pattern

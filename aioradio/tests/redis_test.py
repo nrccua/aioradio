@@ -135,7 +135,7 @@ async def test_get_many_items(cache):
     assert results == ['one', 'two', 'three']
 
 async def test_delete_many_items(cache):
-    """Test delete_many"""
+    """Test delete_many."""
 
     await cache.set(key='delete-many-1', value='one')
     await cache.set(key='delete-many-2', value='two')
