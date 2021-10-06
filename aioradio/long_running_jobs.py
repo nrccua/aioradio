@@ -3,6 +3,7 @@
 # pylint: disable=broad-except
 # pylint: disable=c-extension-no-member
 # pylint: disable=logging-fstring-interpolation
+# pylint: disable=no-member
 # pylint: disable=too-many-instance-attributes
 
 import asyncio

@@ -194,26 +194,24 @@ async def sqs_client(session, region, sqs_config, sqs_server):
 
 @pytest.fixture(scope='module')
 async def sqs_queue_url(sqs_client):
-    _queue_name = None
+    _queue_url = None
 
     async def _f(region_name, queue_name):
-        nonlocal _queue_name
-        _queue_name = queue_name
+        nonlocal _queue_url
         response = await sqs_client.create_queue(QueueName=queue_name)
         queue_url = response['QueueUrl']
+        _queue_url = queue_url
         assert_status_code(response, 200)
         return queue_url
 
     try:
         yield _f
     finally:
-        await delete_sqs_queue(sqs_client, _queue_name)
+        await delete_sqs_queue(sqs_client, _queue_url)
 
 
 async def delete_sqs_queue(sqs_client, queue_url):
-    response = await sqs_client.delete_queue(
-        QueueUrl=queue_url
-    )
+    response = await sqs_client.delete_queue(QueueUrl=queue_url)
     assert_status_code(response, 200)
 
 

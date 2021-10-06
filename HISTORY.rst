@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.14.5 (2021-10-06)
+
+* Updating python modules and loosening versioning of sub-dependencies
+
+
 v0.14.4 (2021-09-27)
 
 * Add function delete_many to Redis.

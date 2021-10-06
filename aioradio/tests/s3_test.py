@@ -36,7 +36,7 @@ async def test_s3_upload_file(tmpdir_factory):
 
     filename = 'hello_world.txt'
     path = str(tmpdir_factory.mktemp('upload').join(filename))
-    with open(path, 'w') as file_handle:
+    with open(path, 'w', encoding='utf-8') as file_handle:
         file_handle.write(FILE_CONTENT)
 
     s3_key = f'{S3_PREFIX}/{filename}'
@@ -61,7 +61,7 @@ async def test_s3_download_file(tmpdir_factory):
 
     s3_key = f'{S3_PREFIX}/{filename}'
     await download_file(bucket=S3_BUCKET, filepath=path, s3_key=s3_key)
-    with open(path, 'r') as file_handle:
+    with open(path, 'r', encoding='utf-8') as file_handle:
         data = file_handle.read()
         assert data == FILE_CONTENT
 
