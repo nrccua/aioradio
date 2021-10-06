@@ -49,7 +49,7 @@ class MotoService:
     Service will be returned by `__aenter__`.
     """
 
-    _services = dict()  # {name: instance}
+    _services = {}  # {name: instance}
     _main_app: moto.server.DomainDispatcherApplication = None
 
     def __init__(self, service_name: str, port: int = None):
@@ -138,16 +138,14 @@ class MotoService:
 
                 try:
                     # we need to bypass the proxies due to monkeypatches
-                    async with session.get(self.endpoint_url + '/static',
-                                           timeout=_CONNECT_TIMEOUT):
+                    async with session.get(f'{self.endpoint_url}/static', timeout=_CONNECT_TIMEOUT):
                         pass
                     break
                 except (asyncio.TimeoutError, aiohttp.ClientConnectionError):
                     await asyncio.sleep(0.5)
             else:
                 await self._stop()  # pytest.fail doesn't call stop_process
-                raise Exception("Can not start service: {}".format(
-                    self._service_name))
+                raise Exception(f"Cannot start service: {self._service_name}")
 
     async def _stop(self):
         if self._server:

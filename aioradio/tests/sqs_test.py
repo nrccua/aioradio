@@ -1,6 +1,7 @@
 """pytest sqs."""
 
 # pylint: disable=c-extension-no-member
+# pylint: disable=no-member
 
 from uuid import uuid4
 
