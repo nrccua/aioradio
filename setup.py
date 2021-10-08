@@ -27,7 +27,7 @@ setup(name='aioradio',
         'fakeredis>=1.6.1',
         'httpx>=0.19.0',
         'mandrill>=1.0.60',
-        'numpy>=1.21.2'
+        'numpy>=1.21.2',
         'orjson>=3.6.4',
         'psycopg2-binary==2.9.1',
         'pysmb>=1.2.7',
