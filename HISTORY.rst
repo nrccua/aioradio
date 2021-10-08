@@ -3,9 +3,14 @@ History
 =======
 
 
+v0.15.0 (2021-10-06)
+
+* Shift common EFI logic into file_ingestion to be used by EFI and Datalab File Upload systems.
+
+
 v0.14.5 (2021-10-06)
 
-* Updating python modules and loosening versioning of sub-dependencies
+* Updating python modules and loosening versioning of sub-dependencies.
 
 
 v0.14.4 (2021-09-27)

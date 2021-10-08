@@ -1,24 +1,36 @@
 """Generic functions related to working with files or the file system."""
 
 # pylint: disable=broad-except
+# pylint: disable=consider-using-enumerate
 # pylint: disable=invalid-name
+# pylint: disable=logging-fstring-interpolation
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-boolean-expressions
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-lines
+# pylint: disable=too-many-nested-blocks
+# pylint: disable=too-many-public-methods
 
 import asyncio
 import functools
 import json
+import logging
 import os
 import re
 import time
 import zipfile
 from asyncio import sleep
+from collections import defaultdict
+from dataclasses import dataclass
+from dataclasses import field as dc_field
 from datetime import datetime, timezone, tzinfo
 from pathlib import Path
 from types import coroutine
 from typing import Any, Dict, List
 
 import mandrill
+import numpy as np
 from smb.base import SharedFile
 from smb.smb_structs import OperationFailure
 from smb.SMBConnection import SMBConnection
@@ -28,6 +40,761 @@ from aioradio.psycopg2 import establish_psycopg2_connection
 from aioradio.pyodbc import establish_pyodbc_connection
 
 DIRECTORY = Path(__file__).parent.absolute()
+LOG = logging.getLogger('file_ingestion')
+
+@dataclass
+class EFIParse:
+    """EnrollmentFileIngestion parse class."""
+
+    filename: str
+    fice_enrolled_logic: set = dc_field(default_factory=set)
+    entry_year_filter: dict = dc_field(default_factory=dict)
+
+    def __post_init__(self):
+
+        if not self.fice_enrolled_logic:
+            self.fice_enrolled_logic = {
+                "001100",
+                "001397",
+                "001507",
+                "001526",
+                "002120",
+                "002122",
+                "002180",
+                "002760",
+                "002778",
+                "002795",
+                "002907",
+                "003301",
+                "003450",
+                "003505",
+                "003535",
+                "003688",
+                "003709"
+            }
+
+        if not self.entry_year_filter:
+            self.entry_year_filter = {
+                "start": "2021",
+                "end": "2025"
+            }
+
+        self.field_to_max_widths = {
+            "StudentID": 50,
+            "LastName": 64,
+            "FirstName": 64,
+            "Gender": 1,
+            "GPA": 20,
+            "Address1": 150,
+            "Address2": 150,
+            "City": 50,
+            "StateCode": 50,
+            "ZipCode": 20,
+            "BirthDate": 10,
+            "EntryTerm": 14,
+            "EntryYear": 4,
+            "HSGradYear": 4,
+            "SrcCode": 256,
+            "SrcDate": 10,
+            "Inquired": 10,
+            "Applied": 10,
+            "Completed": 10,
+            "Admitted": 10,
+            "Confirmed": 10,
+            "Enrolled": 10,
+            "Canceled": 10,
+            "Dropped": 10,
+            "Graduated": 10,
+            "AcademicProgram": 256,
+            "StudentAthlete": 50,
+            "CampusLocation": 50,
+            "Email": 75
+        }
+
+        self.gender_map = {
+            "MALE/MAN": "M",
+            "MALE": "M",
+            "MAN": "M",
+            "M": "M",
+            "FEMALE/WOMAN": "F",
+            "FEMALE": "F",
+            "WOMAN": "F",
+            "F": "F"
+        }
+
+        self.grades_map = {
+            "A+": "4.0",
+            "A": "4.0",
+            "A-": "3.667",
+            "B+": "3.333",
+            "B": "3.0",
+            "B-": "2.667",
+            "C+": "2.333",
+            "C": "2.0",
+            "C-": "1.667",
+            "D+": "1.333",
+            "D": "1.0",
+            "D-": "0.667",
+            "F+": "0.333",
+            "F": "0.0",
+            "F-": "0.0"
+        }
+
+        self.date_formats = [
+            "%m/%d/%y",
+            "%m/%d/%Y",
+            "%-m/%-d/%Y",
+            "%-m/%-d/%y",
+            "%Y-%m-%d",
+            "%Y%m%d",
+            "%d-%b-%Y",
+            "%m-%d-%y",
+            "%m-%d-%Y",
+            "%b %d, %Y",
+            "%Y-%m-%dT%H:%M:%SZ",
+            "%d-%b-%y",
+            "%Y-%m-%dT%H:%M:%S",
+            "%-d-%b-%y",
+            "%-d-%b-%Y",
+            "%Y/%m/%d"
+        ]
+
+        self.student_athlete_map = {
+            "0": "N",
+            "1": "Y",
+            "CHRL": "Y",
+            "NO": "N",
+            "WLAX": "Y",
+            "YES": "Y",
+            "TRUE": "Y",
+            "MWR": "Y",
+            "MTR": "Y",
+            "VB": "Y",
+            "N": "N",
+            "BASEB": "Y",
+            "MSWIM": "Y",
+            "WWR": "Y",
+            "Y": "Y",
+            "FALSE": "N",
+            "FB": "Y"
+        }
+
+        self.season_year_map = {
+            "FA19": "2019",
+            "FA20": "2020",
+            "FA21": "2021",
+            "FA22": "2022",
+            "FA23": "2023",
+            "FA24": "2024",
+            "FA25": "2025",
+            "FA26": "2026",
+            "FA27": "2027",
+            "19FA": "2019",
+            "20FA": "2020",
+            "21FA": "2021",
+            "22FA": "2022",
+            "23FA": "2023",
+            "24FA": "2024",
+            "25FA": "2025",
+            "26FA": "2026",
+            "27FA": "2027"
+        }
+
+        self.seasons_map = {
+            "SPRING": "SPRING",
+            "SUMMER": "SUMMER",
+            "FALL": "FALL",
+            "WINTER": "WINTER",
+            "FA": "FALL"
+        }
+
+        self.state_to_statecode = {
+            "ALABAMA": "AL",
+            "ALASKA": "AK",
+            "AMERICAN SAMOA": "AS",
+            "ARIZONA": "AZ",
+            "ARKANSAS": "AR",
+            "CALIFORNIA": "CA",
+            "COLORADO": "CO",
+            "CONNECTICUT": "CT",
+            "DELAWARE": "DE",
+            "DISTRICT OF COLUMBIA": "DC",
+            "FEDERATED STATES OF MICRONESIA": "FM",
+            "FLORIDA": "FL",
+            "GEORGIA": "GA",
+            "GUAM": "GU",
+            "HAWAII": "HI",
+            "IDAHO": "ID",
+            "ILLINOIS": "IL",
+            "INDIANA": "IN",
+            "IOWA": "IA",
+            "KANSAS": "KS",
+            "KENTUCKY": "KY",
+            "LOUISIANA": "LA",
+            "MAINE": "ME",
+            "MARSHALL ISLANDS": "MH",
+            "MARYLAND": "MD",
+            "MASSACHUSETTS": "MA",
+            "MICHIGAN": "MI",
+            "MINNESOTA": "MN",
+            "MISSISSIPPI": "MS",
+            "MISSOURI": "MO",
+            "MONTANA": "MT",
+            "NEBRASKA": "NE",
+            "NEVADA": "NV",
+            "NEW HAMPSHIRE": "NH",
+            "NEW JERSEY": "NJ",
+            "NEW MEXICO": "NM",
+            "NEW YORK": "NY",
+            "NORTH CAROLINA": "NC",
+            "NORTH DAKOTA": "ND",
+            "NORTHERN MARIANA ISLANDS": "MP",
+            "OHIO": "OH",
+            "OKLAHOMA": "OK",
+            "OREGON": "OR",
+            "PALAU": "PW",
+            "PENNSYLVANIA": "PA",
+            "PUERTO RICO": "PR",
+            "RHODE ISLAND": "RI",
+            "SOUTH CAROLINA": "SC",
+            "SOUTH DAKOTA": "SD",
+            "TENNESSEE": "TN",
+            "TEXAS": "TX",
+            "U.S. ARMED FORCES - AMERICAS": "AA",
+            "U.S. ARMED FORCES - EUROPE": "AE",
+            "U.S. ARMED FORCES - PACIFIC": "AP",
+            "UTAH": "UT",
+            "VERMONT": "VT",
+            "VIRGIN ISLANDS": "VI",
+            "VIRGINIA": "VA",
+            "WASHINGTON": "WA",
+            "WEST VIRGINIA": "WV",
+            "WISCONSIN": "WI",
+            "WYOMING": "WY"
+        }
+
+        self.cache = {
+            'year': {},
+            'sort_date': {},
+            'date': {},
+            'bad_date': set()
+        }
+
+        self.year_formats = [
+            '%Y',
+            '%y'
+        ]
+
+        self.apt_to_compiled = {
+            "apt": re.compile(re.escape("apt"), re.IGNORECASE),
+            "avenue": re.compile(re.escape("avenue"), re.IGNORECASE),
+            "ave": re.compile(re.escape("ave"), re.IGNORECASE),
+            "blvd": re.compile(re.escape("blvd"), re.IGNORECASE),
+            "circle": re.compile(re.escape("circle"), re.IGNORECASE),
+            "cir": re.compile(re.escape("cir"), re.IGNORECASE),
+            "court": re.compile(re.escape("court"), re.IGNORECASE),
+            "drive": re.compile(re.escape("drive"), re.IGNORECASE),
+            "lane": re.compile(re.escape("lane"), re.IGNORECASE),
+            "parkway": re.compile(re.escape("parkway"), re.IGNORECASE),
+            "place": re.compile(re.escape("place"), re.IGNORECASE),
+            "road": re.compile(re.escape("road"), re.IGNORECASE),
+            "street": re.compile(re.escape("street"), re.IGNORECASE),
+            "way": re.compile(re.escape("way"), re.IGNORECASE)
+        }
+
+        self.addr_suffix_list = [
+            "ct",
+            "dr",
+            "pl",
+            "rd",
+            "st"
+        ]
+
+        self.addr_unit_to_compiled = {
+            " unit ": re.compile(re.escape(" unit "), re.IGNORECASE),
+            " bldg ": re.compile(re.escape(" bldg "), re.IGNORECASE),
+            " ste ": re.compile(re.escape(" ste "), re.IGNORECASE),
+            " # ": re.compile(re.escape(" # "), re.IGNORECASE),
+            " #": re.compile(re.escape(" #"), re.IGNORECASE)
+        }
+
+        #### Used by EFI exclusively ####
+        self.non_prospect_row_idxs = set()
+
+        self.enrollment_funnel_fields = {
+            'Inquired',
+            'Applied',
+            'Completed',
+            'Admitted',
+            'Confirmed',
+            'Enrolled',
+            'Canceled',
+            'Dropped',
+            'Graduated'
+        }
+
+        self.non_prospect_fields = self.enrollment_funnel_fields - {'Dropped', 'Graduated'}
+
+        self.season_year_map = defaultdict(str, self.season_year_map)
+
+        self.filtered = {
+            'entryyear': 0,
+            'prospects': 0
+        }
+
+    def check_width(self, value: str, field: str, row_idx: int) -> str:
+        """Check field value and truncate if it is longer than expected.
+
+        Args:
+            value (str): Value
+            field (str): Column header field value
+            row_idx (int): Row index
+
+        Returns:
+            str: [description]
+        """
+
+        if len(value) > self.field_to_max_widths[field]:
+            new_value = value[:self.field_to_max_widths[field]].rstrip()
+            LOG.warning(f"[{self.filename}] [row:{row_idx}] [{field}] - '{value}' "
+                        f"exceeds max width of {self.field_to_max_widths[field]}. Trimming value to {new_value}")
+            value = new_value
+
+        return value
+
+    def check_name(self, records: list[str], field: str, row_idx: int):
+        """Check FirstName | LastName logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            if records[idx] != '':
+                records[idx] = records[idx].replace('"', '')
+                records[idx] = self.check_width(records[idx], field, row_idx)
+
+    def check_gender(self, records: list[str]):
+        """Check Gender logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+        """
+
+        for idx in range(len(records)):
+            if records[idx] != '':
+                value_upper = records[idx].upper()
+                records[idx] = self.gender_map[value_upper] if value_upper in self.gender_map else ''
+
+    def check_gpa(self, records: list[str], field: str, row_idx: int):
+        """Check GPA logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            if records[idx] != '':
+                try:
+                    records[idx] = '' if not (0 <= float(records[idx]) <= 200) else self.check_width(records[idx], field, row_idx)
+                except ValueError:
+                    value_upper = records[idx].upper()
+                    records[idx] = self.grades_map[value_upper] if value_upper in self.grades_map else ''
+
+    def check_statecode(self, records: list[str], field: str, row_idx: int):
+        """Check StateCode logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            if records[idx] != '':
+                value_upper = records[idx].upper()
+                if value_upper in self.state_to_statecode:
+                    records[idx] = self.state_to_statecode[value_upper]
+                records[idx] = self.check_width(records[idx], field, row_idx)
+
+    def check_date(self, records: list[str], field: str, past: datetime, future: datetime, row_idx: int):
+        """Check date conforms to expected date within time range.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            past (datetime): Past datetime threshold
+            future (datetime): Future datetime threshold
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+
+            if records[idx] != '':
+
+                index = records[idx].find(' ')
+                if index != -1:
+                    records[idx] = records[idx][:index]
+
+                if records[idx] in self.cache['date']:
+                    records[idx] = self.cache['date'][records[idx]]
+                    if field in self.non_prospect_fields:
+                        self.non_prospect_row_idxs.add(idx)
+                elif records[idx] in self.cache['bad_date']:
+                    records[idx] = ''
+                else:
+                    for df_idx, pattern in enumerate(self.date_formats):
+                        try:
+                            value = datetime.strptime(records[idx], pattern)
+                            if df_idx != 0:
+                                self.date_formats[0], self.date_formats[df_idx] = self.date_formats[df_idx], self.date_formats[0]
+                            if past <= value <= future:
+                                value = value.strftime('%Y/%m/%d')
+                                self.cache['date'][records[idx]] = value
+                                self.cache['sort_date'][value] = f"{value[5:7]}/{value[8:10]}/{value[:4]}"
+                                records[idx] = value
+                                if field in self.non_prospect_fields:
+                                    self.non_prospect_row_idxs.add(idx)
+                            else:
+                                LOG.warning(f"[{self.filename}] [row:{row_idx}] [{field}] - {value.date()}"
+                                            f" not between range of {past.date()} to {future.date()}")
+                                records[idx] = ''
+                            break
+                        except ValueError:
+                            pass
+                    else:
+                        self.cache['bad_date'].add(records[idx])
+                        records[idx] = ''
+
+    def check_year(self, records: list[str], field: str, past: datetime, future: datetime, row_idx: int):
+        """Check year conforms to expected year within time range.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            past (datetime): Past datetime threshold
+            future (datetime): Future datetime threshold
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            if records[idx] != '':
+                if records[idx] in self.cache['year']:
+                    records[idx] = self.cache['year'][records[idx]]
+                    continue
+
+                for df_idx, pattern in enumerate(self.year_formats):
+                    try:
+                        value = datetime.strptime(records[idx], pattern).year
+                        if df_idx != 0:
+                            self.year_formats[0], self.year_formats[df_idx] = self.year_formats[df_idx], self.year_formats[0]
+
+                        if past <= value <= future:
+                            value = str(value)
+                            self.cache['year'][records[idx]] = value
+                            records[idx] = value
+                        else:
+                            LOG.warning(f"[{self.filename}] [row:{row_idx}] [{field}] - {value}"
+                                        f" not between range of {past} to {future}")
+                            self.cache['year'][records[idx]] = ''
+                            records[idx] = ''
+                        break
+                    except ValueError:
+                        pass
+                else:
+                    if field != 'EntryYear':
+                        self.cache['year'][records[idx]] = ''
+                        records[idx] = ''
+
+    def check_srccode(self, records: list[str], field: str, row_idx: int):
+        """Check SrcCode logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            if records[idx] != '':
+                records[idx] = self.check_width(records[idx], field, row_idx)
+            else:
+                records[idx] = 'NRCCUA Unknown'
+
+    def check_athlete(self, records: list[str]):
+        """Check StudentAthlete logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            rows (list[int]): List of row indicies
+        """
+
+        for idx in range(len(records)):
+            if records[idx] != '':
+                value_upper = records[idx].upper()
+                records[idx] = self.student_athlete_map[value_upper] if value_upper in self.student_athlete_map else 'Y'
+
+    def check_email(self, records: list[str], field: str, row_idx: int):
+        """Check Email logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            if records[idx] != '':
+                records[idx] = self.check_width(records[idx], field, row_idx) if '@' in records[idx] else ''
+
+    def check_generic(self, records: list[str], field: str, row_idx: int):
+        """Check generic column logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            if records[idx] != '':
+                records[idx] = self.check_width(records[idx], field, row_idx)
+
+    def check_address1(self, records: list[str], field: str, row_idx: int):
+        """Check Address1 logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            if records[idx] != '':
+                records[idx] = self.check_no_spaces_address(records[idx])
+                records[idx] = self.check_address(records[idx])
+                records[idx] = self.check_width(records[idx], field, row_idx)
+
+    def check_address2(self, records: list[str], field: str, row_idx: int):
+        """Check Address2 logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            if records[idx] != '':
+                records[idx] = self.check_address(f" {records[idx]}")
+                records[idx] = self.check_width(records[idx], field, row_idx)
+
+    def check_no_spaces_address(self, value: str) -> str:
+        """Check and adjust address values that have no spaces by detecting
+        where spaces should exist and applying.
+
+        Args:
+            value (str): Address value
+
+        Returns:
+            str: Address value
+        """
+
+        if ' ' not in value:
+            value = value.rstrip('.')
+            for idx, character in enumerate(value):
+                if not character.isdigit():
+                    if idx != 0:
+                        # add space after all starting digits detected
+                        value = f"{value[:idx]} {value[idx:]}"
+                    break
+
+            value_lower = value.lower()
+            for item, compiled in self.apt_to_compiled.items():
+                if item in value_lower:
+                    # add space before item
+                    value = compiled.sub(f" {item}", value)
+                    break
+
+            for item in self.addr_suffix_list:
+                if value_lower.endswith(item):
+                    # add space before item
+                    value = f"{value[:len(value)-2]} {value[len(value)-2:]}"
+                    break
+
+        return value
+
+    def check_address(self, value: str) -> str:
+        """Normalize address unit if necessary.
+
+        Args:
+            value (str): Address value
+
+        Returns:
+            str: Address value
+        """
+
+        value_lower = value.lower()
+        for item, compiled in self.addr_unit_to_compiled.items():
+            if item in value_lower:
+                value = compiled.sub(" apt ", value)
+                break
+
+        return value.lstrip()
+
+    def apply_fice_enrolled_logic(self, fice: str, confirmed: str, enrolled: str, canceled: str, dropped: str) -> str:
+        """Apply FICE enrolled logic if defined in the config.
+
+        Args:
+            fice (str): Institution unique identifier
+            confirmed (str): Confirmed enrollment funnel value
+            enrolled (str): Enrolled enrollment funnel value
+            canceled (str): Canceled enrollment funnel value
+            dropped (str): Dropped enrollment funnel value
+
+        Returns:
+            str: Enrolled enrollment funnel value
+        """
+
+        if fice in self.fice_enrolled_logic:
+            if confirmed != '' and enrolled == '' and canceled == '' and dropped == '':
+                enrolled = confirmed
+
+        return enrolled
+
+    def check_entry_fields(self, entryyear, entryterm) -> tuple:
+        """Check entryyear and entryterm fields and try to detect their values.
+        Some colleges put the year and term in the same fields.
+
+        Args:
+            entryyear ([type]): Student's college entry year
+            entryterm ([type]): Student's college entry term
+
+        Returns:
+            tuple: Skip record True/False, entryyear value, entryterm value
+        """
+
+        skip_record = False
+        values = defaultdict(str)
+        if entryyear != '':
+            values['year'] = entryyear.replace('/', '')
+            entryyear = ''
+
+        if entryterm != '':
+            values['term'] = entryterm.replace('/', '')
+            entryterm = ''
+
+        # search for season & year within entryyear and entryterm if available
+        if len(values) > 0:
+            concat_str = f"{values['year']} {values['term']}".upper()
+            for key, value in self.seasons_map.items():
+                if key in concat_str:
+                    entryterm = value
+                    break
+
+            words = []
+            for word in concat_str.split():
+                word_length = len(word)
+                if word_length >= 4:
+                    words.append(word[:4])
+                    if word[:4] != word[word_length-4:]:
+                        words.append(word[word_length-4:])
+
+            for word in words:
+                if self.entry_year_filter['start'] <= self.season_year_map[word] <= self.entry_year_filter['end']:
+                    entryyear = self.season_year_map[word]
+                    break
+                if self.entry_year_filter['start'] <= word <= self.entry_year_filter['end']:
+                    entryyear = word
+                    break
+
+        if entryyear == '':
+            self.filtered['entryyear'] += 1
+            skip_record = True
+
+        return skip_record, entryyear, entryterm
+
+    def check_for_prospects(self, row: dict[str, Any]) -> bool:
+        """Check if a record is a prospect, in which case we can skip and leave
+        out of output.
+
+        Args:
+            row (dict[str, Any]): A single record that is a dict of column names to values
+
+        Returns:
+            bool: Skip record since it is a prospect
+        """
+
+        skip_record = True
+        for field in self.non_prospect_fields:
+            # Check if we have a date in one of the enrollment funnel fields
+            if row[field]:
+                skip_record = False
+                break
+        else:
+            self.filtered['prospects'] += 1
+
+        return skip_record
+
+    ###############################################################################################
+    ################################### Used by EFI exclusively ###################################
+    ###############################################################################################
+
+    def check_for_prospects_efi(self, records: list[list[str]]):
+        """Check and remove any records identified as prospects.
+
+        Args:
+            records (list[list[str]]): All records defined as a list of lists
+        """
+
+        remove_indices = [i for i in range(len(records[0])) if i not in self.non_prospect_row_idxs]
+        if remove_indices:
+            self.filtered['prospects'] = len(remove_indices)
+            for col_idx, record in enumerate(records):
+                records[col_idx] = np.delete(record, remove_indices).tolist()
+
+    def check_entry_fields_efi(self, records: list[list[str]], header_to_index: dict[str, int]):
+        """Check entryyear and entryterm fields and try to detect their values.
+        Some colleges put the year and term in the same fields.
+
+        Args:
+            records (list[list[str]]): All records defined as a list of lists
+            header_to_index (dict[str, int]): Column name to index in records
+        """
+
+        entryyear = records[header_to_index['EntryYear']]
+        entryterm = records[header_to_index['EntryTerm']]
+        remove_indices = []
+        for idx in range(len(records[0])):
+
+            skip_record, entryyear[idx], entryterm[idx] = self.check_entry_fields(entryyear[idx], entryterm[idx])
+            if skip_record:
+                remove_indices.append(idx)
+
+        if remove_indices:
+            for col_idx, record in enumerate(records):
+                records[col_idx] = np.delete(record, remove_indices).tolist()
+
+    def apply_fice_enrolled_logic_efi(self, records: list[list[str]], fice: str, header_to_index: dict[str, int]):
+        """Apply FICE enrolled logic if defined in the config.
+
+        Args:
+            records (list[list[str]]): All records defined as a list of lists
+            fice (str): Institution unique identifier
+            header_to_index (dict[str, int]): Column name to index in records
+        """
+
+        if fice in self.fice_enrolled_logic:
+            confirmed = records[header_to_index['Confirmed']]
+            enrolled = records[header_to_index['Enrolled']]
+            canceled = records[header_to_index['Canceled']]
+            dropped = records[header_to_index['Dropped']]
+            for idx in range(len(records[0])):
+                confirmed[idx] = self.apply_fice_enrolled_logic(fice, confirmed[idx], enrolled[idx], canceled[idx], dropped[idx])
 
 
 def async_wrapper(func: coroutine) -> Any:
