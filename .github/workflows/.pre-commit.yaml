@@ -31,4 +31,4 @@ jobs:
       run: |
         pip install -r aioradio/requirements.txt
         pylint aioradio/*.py aioradio/tests/*.py --disable=similarities
-        pytest -vss --github=true --cov=aioradio  --cov-config=.coveragerc --cov-report html --cov-fail-under=70
+        pytest -vss --github=true --cov=aioradio  --cov-config=.coveragerc --cov-report html --cov-fail-under=60
