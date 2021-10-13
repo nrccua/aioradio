@@ -362,236 +362,271 @@ class EFIParse:
 
         return value
 
-    def check_name(self, records: list[str], field: str, row_idx: int):
+    def check_name(self, value: str, field: str, row_idx: int) -> str:
         """Check FirstName | LastName logic.
 
         Args:
-            records (list[str]): List of a specific columns values
+            value (str): Name value
             field (str): Column header field value
             row_idx (int): Row number in file
+
+        Returns:
+            str: Name value
         """
 
-        for idx in range(len(records)):
-            if records[idx] != '':
-                records[idx] = records[idx].replace('"', '')
-                records[idx] = self.check_width(records[idx], field, row_idx)
+        if value != '':
+            value = value.replace('"', '')
+            value = self.check_width(value, field, row_idx)
 
-    def check_gender(self, records: list[str]):
+        return value
+
+    def check_gender(self, value: str) -> str:
         """Check Gender logic.
 
         Args:
-            records (list[str]): List of a specific columns values
+            value (str): Gender value
+
+        Returns:
+            str: Gender value
         """
 
-        for idx in range(len(records)):
-            if records[idx] != '':
-                value_upper = records[idx].upper()
-                records[idx] = self.gender_map[value_upper] if value_upper in self.gender_map else ''
+        if value != '':
+            value_upper = value.upper()
+            value = self.gender_map[value_upper] if value_upper in self.gender_map else ''
 
-    def check_gpa(self, records: list[str], field: str, row_idx: int):
+        return value
+
+    def check_gpa(self, value: str, field: str, row_idx: int) -> str:
         """Check GPA logic.
 
         Args:
-            records (list[str]): List of a specific columns values
+            value (str): GPA value
             field (str): Column header field value
             row_idx (int): Row number in file
+
+        Returns:
+            str: GPA value
         """
 
-        for idx in range(len(records)):
-            if records[idx] != '':
-                try:
-                    records[idx] = '' if not (0 <= float(records[idx]) <= 200) else self.check_width(records[idx], field, row_idx)
-                except ValueError:
-                    value_upper = records[idx].upper()
-                    records[idx] = self.grades_map[value_upper] if value_upper in self.grades_map else ''
+        if value != '':
+            try:
+                value = '' if not (0 <= float(value) <= 200) else self.check_width(value, field, row_idx)
+            except ValueError:
+                value_upper = value.upper()
+                value = self.grades_map[value_upper] if value_upper in self.grades_map else ''
 
-    def check_statecode(self, records: list[str], field: str, row_idx: int):
+        return value
+
+    def check_statecode(self, value: str, field: str, row_idx: int) -> str:
         """Check StateCode logic.
 
         Args:
-            records (list[str]): List of a specific columns values
+            value (str): StateCode value
             field (str): Column header field value
             row_idx (int): Row number in file
+
+        Returns:
+            str: StateCode value
         """
 
-        for idx in range(len(records)):
-            if records[idx] != '':
-                value_upper = records[idx].upper()
-                if value_upper in self.state_to_statecode:
-                    records[idx] = self.state_to_statecode[value_upper]
-                records[idx] = self.check_width(records[idx], field, row_idx)
+        if value != '':
+            value_upper = value.upper()
+            if value_upper in self.state_to_statecode:
+                value = self.state_to_statecode[value_upper]
+            value = self.check_width(value, field, row_idx)
 
-    def check_date(self, records: list[str], field: str, past: datetime, future: datetime, row_idx: int):
+        return value
+
+    def check_date(self, value: str, field: str, past: datetime, future: datetime, row_idx: int) -> str:
         """Check date conforms to expected date within time range.
 
         Args:
-            records (list[str]): List of a specific columns values
+            value (str): Date value
             field (str): Column header field value
             past (datetime): Past datetime threshold
             future (datetime): Future datetime threshold
             row_idx (int): Row number in file
+
+        Returns:
+            str: Date value
         """
 
-        for idx in range(len(records)):
+        if value != '':
 
-            if records[idx] != '':
+            index = value.find(' ')
+            if index != -1:
+                value = value[:index]
 
-                index = records[idx].find(' ')
-                if index != -1:
-                    records[idx] = records[idx][:index]
-
-                if records[idx] in self.cache['date']:
-                    records[idx] = self.cache['date'][records[idx]]
-                    if field in self.non_prospect_fields:
-                        self.non_prospect_row_idxs.add(idx)
-                elif records[idx] in self.cache['bad_date']:
-                    records[idx] = ''
+            if value in self.cache['date']:
+                value = self.cache['date'][value]
+            elif value in self.cache['bad_date']:
+                value = ''
+            else:
+                for idx, pattern in enumerate(self.date_formats):
+                    try:
+                        val = datetime.strptime(value, pattern)
+                        if idx != 0:
+                            self.date_formats[0], self.date_formats[idx] = self.date_formats[idx], self.date_formats[0]
+                        if past <= val <= future:
+                            val = val.strftime('%Y/%m/%d')
+                            self.cache['date'][value] = val
+                            self.cache['sort_date'][val] = f"{val[5:7]}/{val[8:10]}/{val[:4]}"
+                            value = val
+                        else:
+                            LOG.warning(f"[{self.filename}] [row:{row_idx}] [{field}] - {val.date()}"
+                                        f" not between range of {past.date()} to {future.date()}")
+                            value = ''
+                        break
+                    except ValueError:
+                        pass
                 else:
-                    for df_idx, pattern in enumerate(self.date_formats):
-                        try:
-                            value = datetime.strptime(records[idx], pattern)
-                            if df_idx != 0:
-                                self.date_formats[0], self.date_formats[df_idx] = self.date_formats[df_idx], self.date_formats[0]
-                            if past <= value <= future:
-                                value = value.strftime('%Y/%m/%d')
-                                self.cache['date'][records[idx]] = value
-                                self.cache['sort_date'][value] = f"{value[5:7]}/{value[8:10]}/{value[:4]}"
-                                records[idx] = value
-                                if field in self.non_prospect_fields:
-                                    self.non_prospect_row_idxs.add(idx)
-                            else:
-                                LOG.warning(f"[{self.filename}] [row:{row_idx}] [{field}] - {value.date()}"
-                                            f" not between range of {past.date()} to {future.date()}")
-                                records[idx] = ''
-                            break
-                        except ValueError:
-                            pass
-                    else:
-                        self.cache['bad_date'].add(records[idx])
-                        records[idx] = ''
+                    self.cache['bad_date'].add(value)
+                    value = ''
 
-    def check_year(self, records: list[str], field: str, past: datetime, future: datetime, row_idx: int):
+        return value
+
+    def check_year(self, value: str, field: str, past: datetime, future: datetime, row_idx: int) -> str:
         """Check year conforms to expected year within time range.
 
         Args:
-            records (list[str]): List of a specific columns values
+            value (str): Year value
             field (str): Column header field value
             past (datetime): Past datetime threshold
             future (datetime): Future datetime threshold
             row_idx (int): Row number in file
+
+        Returns:
+            str: Year value
         """
 
-        for idx in range(len(records)):
-            if records[idx] != '':
-                if records[idx] in self.cache['year']:
-                    records[idx] = self.cache['year'][records[idx]]
-                    continue
-
-                for df_idx, pattern in enumerate(self.year_formats):
+        if value != '':
+            if value in self.cache['year']:
+                value = self.cache['year'][value]
+            else:
+                for idx, pattern in enumerate(self.year_formats):
                     try:
-                        value = datetime.strptime(records[idx], pattern).year
-                        if df_idx != 0:
-                            self.year_formats[0], self.year_formats[df_idx] = self.year_formats[df_idx], self.year_formats[0]
-
-                        if past <= value <= future:
-                            value = str(value)
-                            self.cache['year'][records[idx]] = value
-                            records[idx] = value
+                        val = datetime.strptime(value, pattern).year
+                        if idx != 0:
+                            self.year_formats[0], self.year_formats[idx] = self.year_formats[idx], self.year_formats[0]
+                        if past <= val <= future:
+                            val = str(val)
+                            self.cache['year'][value] = val
+                            value = val
                         else:
-                            LOG.warning(f"[{self.filename}] [row:{row_idx}] [{field}] - {value}"
-                                        f" not between range of {past} to {future}")
-                            self.cache['year'][records[idx]] = ''
-                            records[idx] = ''
+                            LOG.warning(f"[{self.filename}] [row:{row_idx}] [{field}] - {val} not between range of {past} to {future}")
+                            self.cache['year'][value] = ''
+                            value = ''
                         break
                     except ValueError:
                         pass
                 else:
                     if field != 'EntryYear':
-                        self.cache['year'][records[idx]] = ''
-                        records[idx] = ''
+                        self.cache['year'][value] = ''
+                        value = ''
 
-    def check_srccode(self, records: list[str], field: str, row_idx: int):
+        return value
+
+    def check_srccode(self, value: str, field: str, row_idx: int) -> str:
         """Check SrcCode logic.
 
         Args:
-            records (list[str]): List of a specific columns values
+            value (str): SrcCode value
             field (str): Column header field value
             row_idx (int): Row number in file
+
+        Returns:
+            str: SrcCode value
         """
 
-        for idx in range(len(records)):
-            if records[idx] != '':
-                records[idx] = self.check_width(records[idx], field, row_idx)
-            else:
-                records[idx] = 'NRCCUA Unknown'
+        return self.check_width(value, field, row_idx) if value != '' else 'NRCCUA Unknown'
 
-    def check_athlete(self, records: list[str]):
+    def check_athlete(self, value: str) -> str:
         """Check StudentAthlete logic.
 
         Args:
-            records (list[str]): List of a specific columns values
+            value (str): Athlete value
             rows (list[int]): List of row indicies
+
+        Returns:
+            str: Athlete value
         """
 
-        for idx in range(len(records)):
-            if records[idx] != '':
-                value_upper = records[idx].upper()
-                records[idx] = self.student_athlete_map[value_upper] if value_upper in self.student_athlete_map else 'Y'
+        if value != '':
+            value_upper = value.upper()
+            value = self.student_athlete_map[value_upper] if value_upper in self.student_athlete_map else 'Y'
 
-    def check_email(self, records: list[str], field: str, row_idx: int):
+        return value
+
+    def check_email(self, value: str, field: str, row_idx: int) -> str:
         """Check Email logic.
 
         Args:
-            records (list[str]): List of a specific columns values
+            value (str): Email value
             field (str): Column header field value
             row_idx (int): Row number in file
+
+        Returns:
+            str: Email value
         """
 
-        for idx in range(len(records)):
-            if records[idx] != '':
-                records[idx] = self.check_width(records[idx], field, row_idx) if '@' in records[idx] else ''
+        if value != '':
+            value = self.check_width(value, field, row_idx) if '@' in value else ''
 
-    def check_generic(self, records: list[str], field: str, row_idx: int):
+        return value
+
+    def check_generic(self, value: str, field: str, row_idx: int) -> str:
         """Check generic column logic.
 
         Args:
-            records (list[str]): List of a specific columns values
+            value (str): Generic value
             field (str): Column header field value
             row_idx (int): Row number in file
+
+        Returns:
+            str: Generic value
         """
 
-        for idx in range(len(records)):
-            if records[idx] != '':
-                records[idx] = self.check_width(records[idx], field, row_idx)
+        if value != '':
+            value = self.check_width(value, field, row_idx)
 
-    def check_address1(self, records: list[str], field: str, row_idx: int):
+        return value
+
+    def check_address1(self, value: str, field: str, row_idx: int) -> str:
         """Check Address1 logic.
 
         Args:
-            records (list[str]): List of a specific columns values
+            value (str): Address value
             field (str): Column header field value
             row_idx (int): Row number in file
+
+        Returns:
+            str: Address value
         """
 
-        for idx in range(len(records)):
-            if records[idx] != '':
-                records[idx] = self.check_no_spaces_address(records[idx])
-                records[idx] = self.check_address(records[idx])
-                records[idx] = self.check_width(records[idx], field, row_idx)
+        if value != '':
+            value = self.check_no_spaces_address(value)
+            value = self.check_address(value)
+            value = self.check_width(value, field, row_idx)
 
-    def check_address2(self, records: list[str], field: str, row_idx: int):
+        return value
+
+    def check_address2(self, value: str, field: str, row_idx: int) -> str:
         """Check Address2 logic.
 
         Args:
-            records (list[str]): List of a specific columns values
+            value (str): Address value
             field (str): Column header field value
             row_idx (int): Row number in file
+
+        Returns:
+            str: Address value
         """
 
-        for idx in range(len(records)):
-            if records[idx] != '':
-                records[idx] = self.check_address(f" {records[idx]}")
-                records[idx] = self.check_width(records[idx], field, row_idx)
+        if value != '':
+            value = self.check_address(f" {value}")
+            value = self.check_width(value, field, row_idx)
+
+        return value
 
     def check_no_spaces_address(self, value: str) -> str:
         """Check and adjust address values that have no spaces by detecting
@@ -743,6 +778,153 @@ class EFIParse:
     ###############################################################################################
     ################################### Used by EFI exclusively ###################################
     ###############################################################################################
+
+    def check_year_efi(self, records: list[str], field: str, past: datetime, future: datetime, row_idx: int):
+        """Check year conforms to expected year within time range.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            past (datetime): Past datetime threshold
+            future (datetime): Future datetime threshold
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_year(records[idx], field, past, future, row_idx + idx)
+
+    def check_date_efi(self, records: list[str], field: str, past: datetime, future: datetime, row_idx: int):
+        """Check date conforms to expected date within time range.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            past (datetime): Past datetime threshold
+            future (datetime): Future datetime threshold
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_date(records[idx], field, past, future, row_idx + idx)
+            if field in self.non_prospect_fields and records[idx]:
+                self.non_prospect_row_idxs.add(idx)
+
+    def check_name_efi(self, records: list[str], field: str, row_idx: int):
+        """Check FirstName | LastName logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_name(records[idx], field, row_idx + idx)
+
+    def check_gender_efi(self, records: list[str]):
+        """Check Gender logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_gender(records[idx])
+
+    def check_gpa_efi(self, records: list[str], field: str, row_idx: int):
+        """Check GPA logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_gpa(records[idx], field, row_idx + idx)
+
+    def check_statecode_efi(self, records: list[str], field: str, row_idx: int):
+        """Check StateCode logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_statecode(records[idx], field, row_idx + idx)
+
+    def check_srccode_efi(self, records: list[str], field: str, row_idx: int):
+        """Check SrcCode logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_srccode(records[idx], field, row_idx + idx)
+
+    def check_athlete_efi(self, records: list[str]):
+        """Check StudentAthlete logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            rows (list[int]): List of row indicies
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_athlete(records[idx])
+
+    def check_email_efi(self, records: list[str], field: str, row_idx: int):
+        """Check Email logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_email(records[idx], field, row_idx + idx)
+
+    def check_generic_efi(self, records: list[str], field: str, row_idx: int):
+        """Check generic column logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_generic(records[idx], field, row_idx + idx)
+
+    def check_address1_efi(self, records: list[str], field: str, row_idx: int):
+        """Check Address1 logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_address1(records[idx], field, row_idx + idx)
+
+    def check_address2_efi(self, records: list[str], field: str, row_idx: int):
+        """Check Address2 logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_address2(records[idx], field, row_idx + idx)
 
     def check_for_prospects_efi(self, records: list[list[str]]):
         """Check and remove any records identified as prospects.

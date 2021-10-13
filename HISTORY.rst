@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.15.1 (2021-10-13)
+
+* Improve shared EFI code by creating base functions for Datalab File Upload to use without using a list of one item.
+
+
 v0.15.0 (2021-10-06)
 
 * Shift common EFI logic into file_ingestion to be used by EFI and Datalab File Upload systems.
