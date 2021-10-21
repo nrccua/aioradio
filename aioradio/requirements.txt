@@ -6,9 +6,9 @@ ddtrace==0.54.1
 fakeredis==1.6.1
 flask==2.0.2
 flask-cors==3.0.10
-httpx==0.19.0
+httpx==0.20.0
 mandrill==1.0.60
-moto==2.2.9
+moto==2.2.10
 numpy==1.21.2
 orjson==3.6.4
 pre-commit==2.15.0

@@ -976,7 +976,7 @@ class EFIParse:
             canceled = records[header_to_index['Canceled']]
             dropped = records[header_to_index['Dropped']]
             for idx in range(len(records[0])):
-                confirmed[idx] = self.apply_fice_enrolled_logic(fice, confirmed[idx], enrolled[idx], canceled[idx], dropped[idx])
+                enrolled[idx] = self.apply_fice_enrolled_logic(fice, confirmed[idx], enrolled[idx], canceled[idx], dropped[idx])
 
 
 def async_wrapper(func: coroutine) -> Any:
