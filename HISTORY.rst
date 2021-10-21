@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.15.2 (2021-10-13)
+
+* Fix error in FICE enrolled logic by setting enrolled field instead of confirmed.
+
+
 v0.15.1 (2021-10-13)
 
 * Improve shared EFI code by creating base functions for Datalab File Upload to use without using a list of one item.
