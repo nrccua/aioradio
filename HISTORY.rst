@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.15.3 (2021-10-27)
+
+* Move the import of pyodbc within the function that uses it since it requires additional dependencies.
+
+
 v0.15.2 (2021-10-13)
 
 * Fix error in FICE enrolled logic by setting enrolled field instead of confirmed.

@@ -2,6 +2,7 @@
 
 # pylint: disable=broad-except
 # pylint: disable=consider-using-enumerate
+# pylint: disable=import-outside-toplevel
 # pylint: disable=invalid-name
 # pylint: disable=logging-fstring-interpolation
 # pylint: disable=too-many-arguments
@@ -18,6 +19,7 @@ import json
 import logging
 import os
 import re
+import sys
 import time
 import zipfile
 from asyncio import sleep
@@ -37,7 +39,6 @@ from smb.SMBConnection import SMBConnection
 
 from aioradio.aws.secrets import get_secret
 from aioradio.psycopg2 import establish_psycopg2_connection
-from aioradio.pyodbc import establish_pyodbc_connection
 
 DIRECTORY = Path(__file__).parent.absolute()
 LOG = logging.getLogger('file_ingestion')
@@ -1042,6 +1043,11 @@ def async_db_wrapper(db_info: List[Dict[str, Any]]) -> Any:
                 if item['db'] in ['pyodbc', 'psycopg2']:
                     creds = {**json.loads(await get_secret(item['secret'], item['region'])), **{'database': item.get('database', '')}}
                     if item['db'] == 'pyodbc':
+                        # Add import here because it requires extra dependencies many systems
+                        # don't have out of the box so only import when explicitly being used
+                        if 'pyodbc' not in sys.modules:
+                            from aioradio.pyodbc import \
+                                establish_pyodbc_connection
                         conns[item['name']] = await establish_pyodbc_connection(**creds, autocommit=False)
                     elif item['db'] == 'psycopg2':
                         conns[item['name']] = await establish_psycopg2_connection(**creds)
