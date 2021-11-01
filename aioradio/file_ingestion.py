@@ -80,21 +80,24 @@ class EFIParse:
                 "end": "2025"
             }
 
-        dtn = datetime.now()
+        now = datetime.now()
         self.filed_date_min_max = {
-            "BirthDate": (dtn - timedelta(days=80 * 365), dtn - timedelta(days=10 * 365)),
-            "EntryYear": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=10 * 365)),
-            "HSGradYear": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=10 * 365)),
-            "SrcDate": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
-            "Inquired": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
-            "Applied": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
-            "Completed": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
-            "Admitted": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
-            "Confirmed": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
-            "Enrolled": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
-            "Canceled": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
-            "Dropped": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
-            "Graduated": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365))
+            "BirthDate": (now - timedelta(days=80 * 365), now - timedelta(days=10 * 365)),
+            "SrcDate": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Inquired": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Applied": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Completed": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Admitted": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Confirmed": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Enrolled": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Canceled": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Dropped": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Graduated": (now - timedelta(days=50 * 365), now + timedelta(days=365))
+        }
+
+        self.filed_year_min_max = {
+            "EntryYear": ((now - timedelta(days=50 * 365)).year, (now + timedelta(days=10 * 365)).year),
+            "HSGradYear": ((now - timedelta(days=50 * 365)).year, (now + timedelta(days=10 * 365)).year)
         }
 
         self.field_to_max_widths = {
@@ -505,14 +508,12 @@ class EFIParse:
 
         return value
 
-    def check_year(self, value: str, field: str, past: datetime, future: datetime, row_idx: int) -> str:
+    def check_year(self, value: str, field: str, row_idx: int) -> str:
         """Check year conforms to expected year within time range.
 
         Args:
             value (str): Year value
             field (str): Column header field value
-            past (datetime): Past datetime threshold
-            future (datetime): Future datetime threshold
             row_idx (int): Row number in file
 
         Returns:
@@ -528,15 +529,18 @@ class EFIParse:
                         val = datetime.strptime(value, pattern).year
                         if idx != 0:
                             self.year_formats[0], self.year_formats[idx] = self.year_formats[idx], self.year_formats[0]
-                        if past <= val <= future:
-                            val = str(val)
-                            self.cache['year'][value] = val
-                            value = val
-                        else:
-                            LOG.warning(
-                                f"[{self.filename}] [row:{row_idx}] [{field}] - {val} not between range of {past} to {future}")
-                            self.cache['year'][value] = ''
-                            value = ''
+                        if field in self.filed_year_min_max:
+                            # we have year field with defined min/max range.
+                            ymin = self.filed_year_min_max[field][0]
+                            ymax = self.filed_year_min_max[field][1]
+                            if ymin <= val <= ymax:
+                                val = str(val)
+                                self.cache['year'][value] = val
+                                value = val
+                            else:
+                                LOG.warning(f"[{self.filename}] [row:{row_idx}] [{field}] - {val} not between range of {ymin} to {ymax}")
+                                self.cache['year'][value] = ''
+                                value = ''
                         break
                     except ValueError:
                         pass
@@ -806,13 +810,13 @@ class EFIParse:
         Args:
             records (list[str]): List of a specific columns values
             field (str): Column header field value
-            past (datetime): Past datetime threshold
-            future (datetime): Future datetime threshold
+            past (datetime): Past datetime threshold --> Deprecated, remove
+            future (datetime): Future datetime threshold --> Deprecated, remove
             row_idx (int): Row number in file
         """
 
         for idx in range(len(records)):
-            records[idx] = self.check_year(records[idx], field, past, future, row_idx + idx)
+            records[idx] = self.check_year(records[idx], field, row_idx + idx)
 
     def check_date_efi(self, records: list[str], field: str, past: datetime, future: datetime, row_idx: int):
         """Check date conforms to expected date within time range.
@@ -820,8 +824,8 @@ class EFIParse:
         Args:
             records (list[str]): List of a specific columns values
             field (str): Column header field value
-            past (datetime): Past datetime threshold
-            future (datetime): Future datetime threshold
+            past (datetime): Past datetime threshold --> Deprecated, remove
+            future (datetime): Future datetime threshold --> Deprecated, remove
             row_idx (int): Row number in file
         """
 
@@ -997,8 +1001,7 @@ class EFIParse:
             canceled = records[header_to_index['Canceled']]
             dropped = records[header_to_index['Dropped']]
             for idx in range(len(records[0])):
-                enrolled[idx] = self.apply_fice_enrolled_logic(fice, confirmed[idx], enrolled[idx], canceled[idx],
-                                                               dropped[idx])
+                enrolled[idx] = self.apply_fice_enrolled_logic(fice, confirmed[idx], enrolled[idx], canceled[idx], dropped[idx])
 
 
 def async_wrapper(func: coroutine) -> Any:
@@ -1062,8 +1065,7 @@ def async_db_wrapper(db_info: List[Dict[str, Any]]) -> Any:
             for item in db_info:
 
                 if item['db'] in ['pyodbc', 'psycopg2']:
-                    creds = {**json.loads(await get_secret(item['secret'], item['region'])),
-                             **{'database': item.get('database', '')}}
+                    creds = {**json.loads(await get_secret(item['secret'], item['region'])), **{'database': item.get('database', '')}}
                     if item['db'] == 'pyodbc':
                         # Add import here because it requires extra dependencies many systems
                         # don't have out of the box so only import when explicitly being used
@@ -1195,8 +1197,7 @@ async def unzip_file_get_filepaths(
     return paths
 
 
-async def get_current_datetime_from_timestamp(dt_format: str = '%Y-%m-%d %H_%M_%S.%f',
-                                              time_zone: tzinfo = timezone.utc) -> str:
+async def get_current_datetime_from_timestamp(dt_format: str = '%Y-%m-%d %H_%M_%S.%f', time_zone: tzinfo = timezone.utc) -> str:
     """Get the datetime from the timestamp in the format and timezone desired.
 
     Args:
@@ -1216,8 +1217,7 @@ async def send_emails_via_mandrill(
         subject: str,
         global_merge_vars: List[Dict[str, Any]],
         template_name: str,
-        template_content: List[Dict[str, Any]] = None
-) -> Any:
+        template_content: List[Dict[str, Any]] = None) -> Any:
     """Send emails via Mailchimp mandrill API.
 
     Args:
