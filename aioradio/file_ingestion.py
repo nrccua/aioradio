@@ -26,7 +26,7 @@ from asyncio import sleep
 from collections import defaultdict
 from dataclasses import dataclass
 from dataclasses import field as dc_field
-from datetime import datetime, timezone, tzinfo, timedelta
+from datetime import datetime, timedelta, timezone, tzinfo
 from pathlib import Path
 from types import coroutine
 from typing import Any, Dict, List
@@ -804,7 +804,7 @@ class EFIParse:
     ################################### Used by EFI exclusively ###################################
     ###############################################################################################
 
-    def check_year_efi(self, records: list[str], field: str, past: datetime, future: datetime, row_idx: int):
+    def check_year_efi(self, records: list[str], field: str, row_idx: int):
         """Check year conforms to expected year within time range.
 
         Args:
@@ -818,7 +818,7 @@ class EFIParse:
         for idx in range(len(records)):
             records[idx] = self.check_year(records[idx], field, row_idx + idx)
 
-    def check_date_efi(self, records: list[str], field: str, past: datetime, future: datetime, row_idx: int):
+    def check_date_efi(self, records: list[str], field: str, row_idx: int):
         """Check date conforms to expected date within time range.
 
         Args:
