@@ -2,6 +2,12 @@
 History
 =======
 
+v0.15.4 (2021-11-01)
+
+* Dates and years checks now use values from constants and we do not need to pass min/max into the corresponding functions:
+ * check_date()
+ * check_year()
+
 
 v0.15.3 (2021-10-27)
 

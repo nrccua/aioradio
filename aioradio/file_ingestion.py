@@ -26,7 +26,7 @@ from asyncio import sleep
 from collections import defaultdict
 from dataclasses import dataclass
 from dataclasses import field as dc_field
-from datetime import datetime, timezone, tzinfo
+from datetime import datetime, timezone, tzinfo, timedelta
 from pathlib import Path
 from types import coroutine
 from typing import Any, Dict, List
@@ -79,6 +79,26 @@ class EFIParse:
                 "start": "2021",
                 "end": "2025"
             }
+
+        now = datetime.now()
+        self.filed_date_min_max = {
+            "BirthDate": (now - timedelta(days=80 * 365), now - timedelta(days=10 * 365)),
+            "SrcDate": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Inquired": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Applied": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Completed": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Admitted": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Confirmed": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Enrolled": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Canceled": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Dropped": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "Graduated": (now - timedelta(days=50 * 365), now + timedelta(days=365))
+        }
+
+        self.filed_year_min_max = {
+            "EntryYear": ((now - timedelta(days=50 * 365)).year, (now + timedelta(days=10 * 365)).year),
+            "HSGradYear": ((now - timedelta(days=50 * 365)).year, (now + timedelta(days=10 * 365)).year)
+        }
 
         self.field_to_max_widths = {
             "StudentID": 50,
@@ -438,14 +458,12 @@ class EFIParse:
 
         return value
 
-    def check_date(self, value: str, field: str, past: datetime, future: datetime, row_idx: int) -> str:
+    def check_date(self, value: str, field: str, row_idx: int) -> str:
         """Check date conforms to expected date within time range.
 
         Args:
             value (str): Date value
             field (str): Column header field value
-            past (datetime): Past datetime threshold
-            future (datetime): Future datetime threshold
             row_idx (int): Row number in file
 
         Returns:
@@ -468,15 +486,19 @@ class EFIParse:
                         val = datetime.strptime(value, pattern)
                         if idx != 0:
                             self.date_formats[0], self.date_formats[idx] = self.date_formats[idx], self.date_formats[0]
-                        if past <= val <= future:
-                            val = val.strftime('%Y/%m/%d')
-                            self.cache['date'][value] = val
-                            self.cache['sort_date'][val] = f"{val[5:7]}/{val[8:10]}/{val[:4]}"
-                            value = val
-                        else:
-                            LOG.warning(f"[{self.filename}] [row:{row_idx}] [{field}] - {val.date()}"
-                                        f" not between range of {past.date()} to {future.date()}")
-                            value = ''
+                        if field in self.filed_date_min_max:
+                            # we have date field with defined min/max range.
+                            dmin = self.filed_date_min_max[field][0]
+                            dmax = self.filed_date_min_max[field][1]
+                            if dmin <= val <= dmax:
+                                val = val.strftime('%Y/%m/%d')
+                                self.cache['date'][value] = val
+                                self.cache['sort_date'][val] = f"{val[5:7]}/{val[8:10]}/{val[:4]}"
+                                value = val
+                            else:
+                                LOG.warning(f"[{self.filename}] [row:{row_idx}] [{field}] - {val.date()}"
+                                            f" not between range of {dmin.date()} to {dmax.date()}")
+                                value = ''
                         break
                     except ValueError:
                         pass
@@ -486,14 +508,12 @@ class EFIParse:
 
         return value
 
-    def check_year(self, value: str, field: str, past: datetime, future: datetime, row_idx: int) -> str:
+    def check_year(self, value: str, field: str, row_idx: int) -> str:
         """Check year conforms to expected year within time range.
 
         Args:
             value (str): Year value
             field (str): Column header field value
-            past (datetime): Past datetime threshold
-            future (datetime): Future datetime threshold
             row_idx (int): Row number in file
 
         Returns:
@@ -509,14 +529,18 @@ class EFIParse:
                         val = datetime.strptime(value, pattern).year
                         if idx != 0:
                             self.year_formats[0], self.year_formats[idx] = self.year_formats[idx], self.year_formats[0]
-                        if past <= val <= future:
-                            val = str(val)
-                            self.cache['year'][value] = val
-                            value = val
-                        else:
-                            LOG.warning(f"[{self.filename}] [row:{row_idx}] [{field}] - {val} not between range of {past} to {future}")
-                            self.cache['year'][value] = ''
-                            value = ''
+                        if field in self.filed_year_min_max:
+                            # we have year field with defined min/max range.
+                            ymin = self.filed_year_min_max[field][0]
+                            ymax = self.filed_year_min_max[field][1]
+                            if ymin <= val <= ymax:
+                                val = str(val)
+                                self.cache['year'][value] = val
+                                value = val
+                            else:
+                                LOG.warning(f"[{self.filename}] [row:{row_idx}] [{field}] - {val} not between range of {ymin} to {ymax}")
+                                self.cache['year'][value] = ''
+                                value = ''
                         break
                     except ValueError:
                         pass
@@ -659,7 +683,7 @@ class EFIParse:
             for item in self.addr_suffix_list:
                 if value_lower.endswith(item):
                     # add space before item
-                    value = f"{value[:len(value)-2]} {value[len(value)-2:]}"
+                    value = f"{value[:len(value) - 2]} {value[len(value) - 2:]}"
                     break
 
         return value
@@ -737,8 +761,8 @@ class EFIParse:
                 word_length = len(word)
                 if word_length >= 4:
                     words.append(word[:4])
-                    if word[:4] != word[word_length-4:]:
-                        words.append(word[word_length-4:])
+                    if word[:4] != word[word_length - 4:]:
+                        words.append(word[word_length - 4:])
 
             for word in words:
                 if self.entry_year_filter['start'] <= self.season_year_map[word] <= self.entry_year_filter['end']:
@@ -786,13 +810,13 @@ class EFIParse:
         Args:
             records (list[str]): List of a specific columns values
             field (str): Column header field value
-            past (datetime): Past datetime threshold
-            future (datetime): Future datetime threshold
+            past (datetime): Past datetime threshold --> Deprecated, remove
+            future (datetime): Future datetime threshold --> Deprecated, remove
             row_idx (int): Row number in file
         """
 
         for idx in range(len(records)):
-            records[idx] = self.check_year(records[idx], field, past, future, row_idx + idx)
+            records[idx] = self.check_year(records[idx], field, row_idx + idx)
 
     def check_date_efi(self, records: list[str], field: str, past: datetime, future: datetime, row_idx: int):
         """Check date conforms to expected date within time range.
@@ -800,13 +824,13 @@ class EFIParse:
         Args:
             records (list[str]): List of a specific columns values
             field (str): Column header field value
-            past (datetime): Past datetime threshold
-            future (datetime): Future datetime threshold
+            past (datetime): Past datetime threshold --> Deprecated, remove
+            future (datetime): Future datetime threshold --> Deprecated, remove
             row_idx (int): Row number in file
         """
 
         for idx in range(len(records)):
-            records[idx] = self.check_date(records[idx], field, past, future, row_idx + idx)
+            records[idx] = self.check_date(records[idx], field, row_idx + idx)
             if field in self.non_prospect_fields and records[idx]:
                 self.non_prospect_row_idxs.add(idx)
 
@@ -1121,7 +1145,6 @@ async def unzip_file(filepath: str, directory: str) -> List[str]:
 
     filenames = []
     with zipfile.ZipFile(filepath) as zipped:
-
         # exclude __MACOSX directory that could be added when creating zip on macs
         filenames = [i for i in zipped.namelist() if '__MACOSX' not in i]
         zipped.extractall(directory)
@@ -1194,8 +1217,7 @@ async def send_emails_via_mandrill(
         subject: str,
         global_merge_vars: List[Dict[str, Any]],
         template_name: str,
-        template_content: List[Dict[str, Any]] = None
-        ) -> Any:
+        template_content: List[Dict[str, Any]] = None) -> Any:
     """Send emails via Mailchimp mandrill API.
 
     Args:
