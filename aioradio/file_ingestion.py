@@ -26,7 +26,7 @@ from asyncio import sleep
 from collections import defaultdict
 from dataclasses import dataclass
 from dataclasses import field as dc_field
-from datetime import datetime, timezone, tzinfo
+from datetime import datetime, timezone, tzinfo, timedelta
 from pathlib import Path
 from types import coroutine
 from typing import Any, Dict, List
@@ -79,6 +79,23 @@ class EFIParse:
                 "start": "2021",
                 "end": "2025"
             }
+
+        dtn = datetime.now()
+        self.filed_date_min_max = {
+            "BirthDate": (dtn - timedelta(days=80 * 365), dtn - timedelta(days=10 * 365)),
+            "EntryYear": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=10 * 365)),
+            "HSGradYear": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=10 * 365)),
+            "SrcDate": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
+            "Inquired": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
+            "Applied": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
+            "Completed": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
+            "Admitted": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
+            "Confirmed": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
+            "Enrolled": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
+            "Canceled": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
+            "Dropped": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365)),
+            "Graduated": (dtn - timedelta(days=50 * 365), dtn + timedelta(days=365))
+        }
 
         self.field_to_max_widths = {
             "StudentID": 50,
@@ -438,14 +455,12 @@ class EFIParse:
 
         return value
 
-    def check_date(self, value: str, field: str, past: datetime, future: datetime, row_idx: int) -> str:
+    def check_date(self, value: str, field: str, row_idx: int) -> str:
         """Check date conforms to expected date within time range.
 
         Args:
             value (str): Date value
             field (str): Column header field value
-            past (datetime): Past datetime threshold
-            future (datetime): Future datetime threshold
             row_idx (int): Row number in file
 
         Returns:
@@ -468,15 +483,19 @@ class EFIParse:
                         val = datetime.strptime(value, pattern)
                         if idx != 0:
                             self.date_formats[0], self.date_formats[idx] = self.date_formats[idx], self.date_formats[0]
-                        if past <= val <= future:
-                            val = val.strftime('%Y/%m/%d')
-                            self.cache['date'][value] = val
-                            self.cache['sort_date'][val] = f"{val[5:7]}/{val[8:10]}/{val[:4]}"
-                            value = val
-                        else:
-                            LOG.warning(f"[{self.filename}] [row:{row_idx}] [{field}] - {val.date()}"
-                                        f" not between range of {past.date()} to {future.date()}")
-                            value = ''
+                        if field in self.filed_date_min_max:
+                            # we have date field with defined min/max range.
+                            dmin = self.filed_date_min_max[field][0]
+                            dmax = self.filed_date_min_max[field][1]
+                            if dmin <= val <= dmax:
+                                val = val.strftime('%Y/%m/%d')
+                                self.cache['date'][value] = val
+                                self.cache['sort_date'][val] = f"{val[5:7]}/{val[8:10]}/{val[:4]}"
+                                value = val
+                            else:
+                                LOG.warning(f"[{self.filename}] [row:{row_idx}] [{field}] - {val.date()}"
+                                            f" not between range of {dmin.date()} to {dmax.date()}")
+                                value = ''
                         break
                     except ValueError:
                         pass
@@ -514,7 +533,8 @@ class EFIParse:
                             self.cache['year'][value] = val
                             value = val
                         else:
-                            LOG.warning(f"[{self.filename}] [row:{row_idx}] [{field}] - {val} not between range of {past} to {future}")
+                            LOG.warning(
+                                f"[{self.filename}] [row:{row_idx}] [{field}] - {val} not between range of {past} to {future}")
                             self.cache['year'][value] = ''
                             value = ''
                         break
@@ -659,7 +679,7 @@ class EFIParse:
             for item in self.addr_suffix_list:
                 if value_lower.endswith(item):
                     # add space before item
-                    value = f"{value[:len(value)-2]} {value[len(value)-2:]}"
+                    value = f"{value[:len(value) - 2]} {value[len(value) - 2:]}"
                     break
 
         return value
@@ -737,8 +757,8 @@ class EFIParse:
                 word_length = len(word)
                 if word_length >= 4:
                     words.append(word[:4])
-                    if word[:4] != word[word_length-4:]:
-                        words.append(word[word_length-4:])
+                    if word[:4] != word[word_length - 4:]:
+                        words.append(word[word_length - 4:])
 
             for word in words:
                 if self.entry_year_filter['start'] <= self.season_year_map[word] <= self.entry_year_filter['end']:
@@ -806,7 +826,7 @@ class EFIParse:
         """
 
         for idx in range(len(records)):
-            records[idx] = self.check_date(records[idx], field, past, future, row_idx + idx)
+            records[idx] = self.check_date(records[idx], field, row_idx + idx)
             if field in self.non_prospect_fields and records[idx]:
                 self.non_prospect_row_idxs.add(idx)
 
@@ -977,7 +997,8 @@ class EFIParse:
             canceled = records[header_to_index['Canceled']]
             dropped = records[header_to_index['Dropped']]
             for idx in range(len(records[0])):
-                enrolled[idx] = self.apply_fice_enrolled_logic(fice, confirmed[idx], enrolled[idx], canceled[idx], dropped[idx])
+                enrolled[idx] = self.apply_fice_enrolled_logic(fice, confirmed[idx], enrolled[idx], canceled[idx],
+                                                               dropped[idx])
 
 
 def async_wrapper(func: coroutine) -> Any:
@@ -1041,7 +1062,8 @@ def async_db_wrapper(db_info: List[Dict[str, Any]]) -> Any:
             for item in db_info:
 
                 if item['db'] in ['pyodbc', 'psycopg2']:
-                    creds = {**json.loads(await get_secret(item['secret'], item['region'])), **{'database': item.get('database', '')}}
+                    creds = {**json.loads(await get_secret(item['secret'], item['region'])),
+                             **{'database': item.get('database', '')}}
                     if item['db'] == 'pyodbc':
                         # Add import here because it requires extra dependencies many systems
                         # don't have out of the box so only import when explicitly being used
@@ -1121,7 +1143,6 @@ async def unzip_file(filepath: str, directory: str) -> List[str]:
 
     filenames = []
     with zipfile.ZipFile(filepath) as zipped:
-
         # exclude __MACOSX directory that could be added when creating zip on macs
         filenames = [i for i in zipped.namelist() if '__MACOSX' not in i]
         zipped.extractall(directory)
@@ -1174,7 +1195,8 @@ async def unzip_file_get_filepaths(
     return paths
 
 
-async def get_current_datetime_from_timestamp(dt_format: str = '%Y-%m-%d %H_%M_%S.%f', time_zone: tzinfo = timezone.utc) -> str:
+async def get_current_datetime_from_timestamp(dt_format: str = '%Y-%m-%d %H_%M_%S.%f',
+                                              time_zone: tzinfo = timezone.utc) -> str:
     """Get the datetime from the timestamp in the format and timezone desired.
 
     Args:
@@ -1195,7 +1217,7 @@ async def send_emails_via_mandrill(
         global_merge_vars: List[Dict[str, Any]],
         template_name: str,
         template_content: List[Dict[str, Any]] = None
-        ) -> Any:
+) -> Any:
     """Send emails via Mailchimp mandrill API.
 
     Args:
