@@ -2,6 +2,12 @@
 History
 =======
 
+
+v0.15.5 (2021-11-02)
+
+* Fix import of establish_pyodbc_connection to not check sys.modules for pyodbc.
+
+
 v0.15.4 (2021-11-01)
 
 * Dates and years checks now use values from constants and we do not need to pass min/max into the corresponding functions:

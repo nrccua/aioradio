@@ -19,7 +19,6 @@ import json
 import logging
 import os
 import re
-import sys
 import time
 import zipfile
 from asyncio import sleep
@@ -1069,9 +1068,7 @@ def async_db_wrapper(db_info: List[Dict[str, Any]]) -> Any:
                     if item['db'] == 'pyodbc':
                         # Add import here because it requires extra dependencies many systems
                         # don't have out of the box so only import when explicitly being used
-                        if 'pyodbc' not in sys.modules:
-                            from aioradio.pyodbc import \
-                                establish_pyodbc_connection
+                        from aioradio.pyodbc import establish_pyodbc_connection
                         conns[item['name']] = await establish_pyodbc_connection(**creds, autocommit=False)
                     elif item['db'] == 'psycopg2':
                         conns[item['name']] = await establish_psycopg2_connection(**creds)
