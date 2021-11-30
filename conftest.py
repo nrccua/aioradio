@@ -198,7 +198,8 @@ async def sqs_queue_url(sqs_client):
 
     async def _f(region_name, queue_name):
         nonlocal _queue_url
-        response = await sqs_client.create_queue(QueueName=queue_name)
+        fifo = "true" if queue_name.lower().endswith('.fifo') else "false"
+        response = await sqs_client.create_queue(QueueName=queue_name, Attributes={"FifoQueue": fifo})
         queue_url = response['QueueUrl']
         _queue_url = queue_url
         assert_status_code(response, 200)

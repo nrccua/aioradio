@@ -3,6 +3,18 @@ History
 =======
 
 
+v0.15.6 (2021-11-30)
+
+* Hard-code redis==3.5.3.
+* Update ddtrace==0.56.0.
+* Update fakeredis==1.7.0.
+* Update moto==2.2.17.
+* Update numpy==1.21.4.
+* Update psycopg2-binary==2.9.2.
+* Update pylint==2.12.1.
+* Update twine==3.6.0.
+
+
 v0.15.5 (2021-11-02)
 
 * Fix import of establish_pyodbc_connection to not check sys.modules for pyodbc.
