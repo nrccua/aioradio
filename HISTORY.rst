@@ -2,6 +2,10 @@
 History
 =======
 
+v0.15.7 (2022-01-06)
+
+* Add functions (move_file, copy_file_to_another_bucket).
+
 
 v0.15.6 (2021-11-30)
 

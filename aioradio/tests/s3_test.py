@@ -10,7 +10,7 @@ from aioradio.aws.s3 import (abort_multipart_upload, complete_multipart_upload,
                              create_multipart_upload, delete_s3_object,
                              download_file, get_object, get_s3_file_attributes,
                              list_parts, list_s3_objects, upload_file,
-                             upload_part)
+                             upload_part, move_file, create_bucket)
 
 LOG = logging.getLogger(__name__)
 
@@ -79,6 +79,25 @@ async def test_get_file_attributes():
     result = await get_s3_file_attributes(bucket=S3_BUCKET, s3_key=f'{S3_PREFIX}/hello_world.txt')
     assert result['ContentLength'] == 22
 
+
+async def test_move_file_from_s3_bucket_to_another():
+    filename_src = 'hello_world.txt'
+    s3_key_src = f'{S3_PREFIX}/{filename_src}'
+
+    NEW_S3_BUCKET = 'pytest-nrccua-backup'
+    await create_bucket(region_name='us-east-1', bucket_name=NEW_S3_BUCKET)
+    new_filename = 'hello_world_another_bucket.txt'
+    new_s3_key = f'{S3_PREFIX}/{new_filename}'
+
+    await move_file(S3_BUCKET, s3_key_src, NEW_S3_BUCKET, new_s3_key)
+
+    # Old s3_key in the other bucket should not be found
+    assert s3_key_src not in await list_s3_objects(bucket=S3_BUCKET, s3_prefix=S3_PREFIX)
+
+    # The file from s3 should be in the new s3 bucket with the new s3_key
+    assert new_s3_key in await list_s3_objects(bucket=NEW_S3_BUCKET, s3_prefix=S3_PREFIX)
+
+
 async def test_multipart_upload():
     """"Test a success case of multipart upload."""
 
@@ -120,6 +139,7 @@ async def test_multipart_upload():
     )
     # Confirm the file now exists in s3
     assert s3_key in await list_s3_objects(bucket=S3_BUCKET, s3_prefix=S3_PREFIX)
+
 
 async def test_abort_multipart_upload():
     """"Test aborting a multipart upload."""

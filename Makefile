@@ -1,3 +1,8 @@
+virtual:
+	virtualenv -p python3.8 env
+
+source:
+	source ./env/bin/activate
 
 clean:
 	find . -type f -name '*.pyc' -delete
