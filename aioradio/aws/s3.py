@@ -247,14 +247,14 @@ async def abort_multipart_upload(bucket: str, s3_key: str, upload_id: str) -> Di
 
 
 @AWS_SERVICE.active
-async def copy_file_to_another_bucket(bucket_src: str, s3_key_src: str, bucket_dest: str, s3_ket_dest: str) -> Dict[str, Any]:
+async def copy_file_to_another_bucket(bucket_src: str, s3_key_src: str, bucket_dest: str, s3_key_dest: str) -> Dict[str, Any]:
     """Copy a file object uploaded to s3 bucket to another bucket.
 
     Args:
         bucket_src (str): s3 bucket source
         s3_key_src (str): s3 prefix source
         bucket_dest (str): s3 bucket destination
-        s3_ket_dest (str): s3 prefix destination
+        s3_key_dest (str): s3 prefix destination
 
     Returns:
         Dict[str, Any]: response of operation
@@ -266,20 +266,20 @@ async def copy_file_to_another_bucket(bucket_src: str, s3_key_src: str, bucket_d
             'Key': s3_key_src,
         },
         Bucket=bucket_dest,
-        Key=s3_ket_dest)
+        Key=s3_key_dest)
 
     return response
 
 
 @AWS_SERVICE.active
-async def move_file(bucket_src: str, s3_key_src: str, bucket_dest: str, s3_ket_dest: str) -> Dict[str, Any]:
+async def move_file(bucket_src: str, s3_key_src: str, bucket_dest: str, s3_key_dest: str) -> Dict[str, Any]:
     """move a file object uploaded to s3 bucket to another bucket.
 
     Args:
         bucket_src (str): s3 bucket source
         s3_key_src (str): s3 prefix source
         bucket_dest (str): s3 bucket destination
-        s3_ket_dest (str): s3 prefix destination
+        s3_key_dest (str): s3 prefix destination
 
     Returns:
         Dict[str, Any]: response of operation
@@ -291,7 +291,7 @@ async def move_file(bucket_src: str, s3_key_src: str, bucket_dest: str, s3_ket_d
             'Key': s3_key_src,
         },
         Bucket=bucket_dest,
-        Key=s3_ket_dest)
+        Key=s3_key_dest)
 
     await delete_s3_object(bucket_src, s3_key_src)
 
