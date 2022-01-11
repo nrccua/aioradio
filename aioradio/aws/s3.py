@@ -285,13 +285,7 @@ async def move_file(bucket_src: str, s3_key_src: str, bucket_dest: str, s3_key_d
         Dict[str, Any]: response of operation
     """
 
-    response = await copy_file_to_another_bucket(
-        CopySource={
-            'Bucket': bucket_src,
-            'Key': s3_key_src,
-        },
-        Bucket=bucket_dest,
-        Key=s3_key_dest)
+    response = await copy_file_to_another_bucket( bucket_src, s3_key_src, bucket_dest, s3_key_dest)
 
     await delete_s3_object(bucket_src, s3_key_src)
 
