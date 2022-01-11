@@ -19,7 +19,7 @@ setup(name='aioradio',
         'aioradio/aws',
     ],
     install_requires=[
-        'aioboto3>=9.2.2',
+        'aioboto3>=9.3.0',
         'aiobotocore>=1.4.2',
         'aiojobs>=0.3.0',
         'boto3==1.17.106',
