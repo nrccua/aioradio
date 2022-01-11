@@ -2,7 +2,7 @@ default_language_version:
     python: python3.9
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: v4.1.0
     hooks:
     -   id: check-added-large-files
     -   id: check-ast
@@ -15,7 +15,7 @@ repos:
     -   id: requirements-txt-fixer
     -   id: trailing-whitespace
 -   repo: https://github.com/PyCQA/isort
-    rev: 5.8.0
+    rev: 5.10.1
     hooks:
     -   id: isort
 -   repo: https://github.com/myint/docformatter

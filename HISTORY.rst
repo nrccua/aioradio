@@ -3,6 +3,21 @@ History
 =======
 
 
+v0.16.0 (2022-01-11)
+
+* Update ddtrace==0.57.0.
+* Update moto==2.3.1.
+* Update numpy==1.22.0.
+* Update orjson==3.6.5
+* Update pre-commit==2.16.0.
+* Update psycopg2-binary==2.9.3.
+* Update pylint==2.12.2.
+* Update pytest-asyncio==0.16.0.
+* Update twine==3.7.1.
+* Update wheel==0.37.1
+* Add support for EL3 field parsing.
+
+
 v0.15.6 (2021-11-30)
 
 * Hard-code redis==3.5.3.

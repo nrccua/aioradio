@@ -75,8 +75,8 @@ class EFIParse:
 
         if not self.entry_year_filter:
             self.entry_year_filter = {
-                "start": "2021",
-                "end": "2025"
+                "start": "2022",
+                "end": "2026"
             }
 
         now = datetime.now()
@@ -91,7 +91,14 @@ class EFIParse:
             "Enrolled": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
             "Canceled": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
             "Dropped": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
-            "Graduated": (now - timedelta(days=50 * 365), now + timedelta(days=365))
+            "Graduated": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "ProspectDate": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "FAFSASubmitted": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "CustomDate1": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "CustomDate2": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "CustomDate3": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "CustomDate4": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "CustomDate5": (now - timedelta(days=50 * 365), now + timedelta(days=365))
         }
 
         self.filed_year_min_max = {
@@ -128,7 +135,40 @@ class EFIParse:
             "AcademicProgram": 256,
             "StudentAthlete": 50,
             "CampusLocation": 50,
-            "Email": 75
+            "Email": 75,
+            "CellPhoneNumber": 10,
+            "TextMessageOptIn": 5,
+            "HomePhone": 10,
+            "Ethnicity": 1,
+            "FirstGenFlag": 1,
+            "EFC": 20,
+            "HSCode": 6,
+            "ACTScore": 2,
+            "SATScore": 4,
+            "ProspectCode": 15,
+            "ProspectDate": 10,
+            "FAFSASubmitted": 10,
+            "ApplicationPlan": 30,
+            "AdmitCode": 20,
+            "College": 30,
+            "AdmittedProgram": 30,
+            "HonorsProgram": 5,
+            "StudentType": 20,
+            "International": 5,
+            "CountryOfOrigin": 30,
+            "StudentStatus": 20,
+            "Territory": 20,
+            "EngagementScore": 10,
+            "CustomFilter1": 20,
+            "CustomFilter2": 20,
+            "CustomFilter3": 20,
+            "CustomFilter4": 20,
+            "CustomFilter5": 20,
+            "CustomDate1": 10,
+            "CustomDate2": 10,
+            "CustomDate3": 10,
+            "CustomDate4": 10,
+            "CustomDate5": 10
         }
 
         self.gender_map = {
@@ -362,6 +402,19 @@ class EFIParse:
             'prospects': 0
         }
 
+        self.generic_bool_map = {
+            'YES': 'Y',
+            'NO': 'N',
+            'Y': 'Y',
+            'N': 'N',
+            'TRUE': 'Y',
+            'FALSE': 'N',
+            '1': 'Y',
+            '0': 'N'
+        }
+
+        self.ethnicity_federal_categories = {'1', '2', '3', '4', '5', '6', '7', '8'}
+
     def check_width(self, value: str, field: str, row_idx: int) -> str:
         """Check field value and truncate if it is longer than expected.
 
@@ -411,8 +464,7 @@ class EFIParse:
         """
 
         if value != '':
-            value_upper = value.upper()
-            value = self.gender_map[value_upper] if value_upper in self.gender_map else ''
+            value = self.gender_map.get(value.upper(), '')
 
         return value
 
@@ -432,8 +484,7 @@ class EFIParse:
             try:
                 value = '' if not (0 <= float(value) <= 200) else self.check_width(value, field, row_idx)
             except ValueError:
-                value_upper = value.upper()
-                value = self.grades_map[value_upper] if value_upper in self.grades_map else ''
+                value = self.grades_map.get(value.upper(), '')
 
         return value
 
@@ -450,9 +501,7 @@ class EFIParse:
         """
 
         if value != '':
-            value_upper = value.upper()
-            if value_upper in self.state_to_statecode:
-                value = self.state_to_statecode[value_upper]
+            value = self.state_to_statecode.get(value.upper(), value)
             value = self.check_width(value, field, row_idx)
 
         return value
@@ -576,8 +625,7 @@ class EFIParse:
         """
 
         if value != '':
-            value_upper = value.upper()
-            value = self.student_athlete_map[value_upper] if value_upper in self.student_athlete_map else 'Y'
+            value = self.student_athlete_map.get(value.upper(), 'Y')
 
         return value
 
@@ -799,9 +847,227 @@ class EFIParse:
 
         return skip_record
 
+
+    ###############################################################################################
+    ############################### New EL3 field parsing functions ###############################
+    ###############################################################################################
+    #
+    # CELLPHONENUMBER
+    # TEXTMESSAGEOPTIN
+    # HOMEPHONE
+    # ETHNICITY
+    # FIRSTGENFLAG
+    # EFC
+    # HSCODE
+    # ACTSCORE
+    # SATSCORE
+    # PROSPECTCODE
+    # PROSPECTDATE
+    # FAFSASUBMITTED
+    # APPLICATIONPLAN
+    # ADMITCODE
+    # COLLEGE
+    # ADMITTEDPROGRAM
+    # HONORSPROGRAM
+    # STUDENTTYPE
+    # INTERNATIONAL
+    # COUNTRYOFORIGIN
+    # STUDENTSTATUS
+    # TERRITORY
+    # ENGAGEMENTSCORE
+    # CUSTOMFILTER1, ..., CUSTOMFILTER5
+    # CUSTOMDATE1, ..., CUSTOMDATE5
+    #
+    # Many of these fields are parsed using the functions check_generic or check_date
+    # else they use a function below.
+
+    def check_generic_boolean(self, value: str) -> str:
+        """Check generic boolean value.
+
+        Args:
+            value (str): Generic Boolean value
+
+        Returns:
+            str: Generic Boolean value
+        """
+
+        if value != '':
+            value = self.generic_bool_map.get(value.upper(), '')
+
+        return value
+
+    def check_phone_number(self, value: str, field: str, row_idx: int) -> str:
+        """Check Cell/Home phone number logic.
+
+        Args:
+            value (str): Cell/Home phone number value
+            field (str): Column header field value
+            row_idx (int): Row number in file
+
+        Returns:
+            str: Cell/Home phone number value
+        """
+
+        if value != '':
+            value = ''.join(n for n in value if n.isdigit())
+            value = self.check_width(value, field, row_idx)
+
+        return value
+
+    def check_ethnicity(self, value: str) -> str:
+        """Check Ethnicity is a federal category value.
+
+        Args:
+            value (str): Ethnicity category
+
+        Returns:
+            str: Ethnicity category
+        """
+
+        if value != '' and value not in self.ethnicity_federal_categories:
+            value = ''
+
+        return value
+
+    @staticmethod
+    def check_act_score(value: str) -> str:
+        """Check ACT Score logic.
+
+        Args:
+            value (str): ACT score
+            field (str): Column header field value
+
+        Returns:
+            str: ACT score
+        """
+
+        if value != '':
+            try:
+                integer = int(value)
+                value = str(integer) if (1 <= integer <= 36) else ''
+            except ValueError:
+                value = ''
+
+        return value
+
+    @staticmethod
+    def check_sat_score(value: str) -> str:
+        """Check SAT Score logic.
+
+        Args:
+            value (str): SAT score
+            field (str): Column header field value
+
+        Returns:
+            str: SAT score
+        """
+
+        if value != '':
+            try:
+                integer = int(value)
+                value = str(integer) if (400 <= integer <= 1600) else ''
+            except ValueError:
+                value = ''
+
+        return value
+
+    @staticmethod
+    def check_hscode(value: str) -> str:
+        """Check HSCODE logic.
+
+        Args:
+            value (str): HSCODE value
+            field (str): Column header field value
+
+        Returns:
+            str: HSCODE value
+        """
+
+        if value != '' and len(value) == 6:
+            try:
+                _ = int(value)
+            except ValueError:
+                value = ''
+        else:
+            value = ''
+
+        return value
+
     ###############################################################################################
     ################################### Used by EFI exclusively ###################################
     ###############################################################################################
+
+    def check_generic_boolean_efi(self, records: list[str]):
+        """Check generic boolean logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_generic_boolean(records[idx])
+
+    def check_phone_number_efi(self, records: list[str], field: str, row_idx: int):
+        """Check phone number logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_phone_number(records[idx], field, row_idx + idx)
+
+    def check_ethnicity_efi(self, records: list[str]):
+        """Check ethnicity logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_ethnicity(records[idx])
+
+    def check_act_score_efi(self, records: list[str]):
+        """Check ACT score logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_act_score(records[idx])
+
+    def check_sat_score_efi(self, records: list[str]):
+        """Check SAT score logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_sat_score(records[idx])
+
+    def check_hscode_efi(self, records: list[str]):
+        """Check HSCode logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_hscode(records[idx])
 
     def check_year_efi(self, records: list[str], field: str, row_idx: int):
         """Check year conforms to expected year within time range.
