@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.16.2 (2022-01-13)
+
+* Update EL3 field lengths.
+
+
 v0.16.1 (2022-01-13)
 
 * Adding UniqueID as new el3 field, in place of StudentID
