@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.16.1 (2022-01-13)
+
+* Adding UniqueID as new el3 field, in place of StudentID
+* Removed logic for parsing phones numbers and text message opt in.
+
+
 v0.16.0 (2022-01-11)
 
 * Update ddtrace==0.57.0.

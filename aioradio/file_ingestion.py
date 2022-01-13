@@ -107,6 +107,7 @@ class EFIParse:
         }
 
         self.field_to_max_widths = {
+            "UniqueID": 20,
             "StudentID": 50,
             "LastName": 64,
             "FirstName": 64,
@@ -136,9 +137,6 @@ class EFIParse:
             "StudentAthlete": 50,
             "CampusLocation": 50,
             "Email": 75,
-            "CellPhoneNumber": 10,
-            "TextMessageOptIn": 5,
-            "HomePhone": 10,
             "Ethnicity": 1,
             "FirstGenFlag": 1,
             "EFC": 20,
@@ -852,9 +850,6 @@ class EFIParse:
     ############################### New EL3 field parsing functions ###############################
     ###############################################################################################
     #
-    # CELLPHONENUMBER
-    # TEXTMESSAGEOPTIN
-    # HOMEPHONE
     # ETHNICITY
     # FIRSTGENFLAG
     # EFC
@@ -893,24 +888,6 @@ class EFIParse:
 
         if value != '':
             value = self.generic_bool_map.get(value.upper(), '')
-
-        return value
-
-    def check_phone_number(self, value: str, field: str, row_idx: int) -> str:
-        """Check Cell/Home phone number logic.
-
-        Args:
-            value (str): Cell/Home phone number value
-            field (str): Column header field value
-            row_idx (int): Row number in file
-
-        Returns:
-            str: Cell/Home phone number value
-        """
-
-        if value != '':
-            value = ''.join(n for n in value if n.isdigit())
-            value = self.check_width(value, field, row_idx)
 
         return value
 
@@ -1008,18 +985,6 @@ class EFIParse:
 
         for idx in range(len(records)):
             records[idx] = self.check_generic_boolean(records[idx])
-
-    def check_phone_number_efi(self, records: list[str], field: str, row_idx: int):
-        """Check phone number logic.
-
-        Args:
-            records (list[str]): List of a specific columns values
-            field (str): Column header field value
-            row_idx (int): Row number in file
-        """
-
-        for idx in range(len(records)):
-            records[idx] = self.check_phone_number(records[idx], field, row_idx + idx)
 
     def check_ethnicity_efi(self, records: list[str]):
         """Check ethnicity logic.
