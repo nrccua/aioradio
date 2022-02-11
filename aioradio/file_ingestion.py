@@ -1300,9 +1300,9 @@ def async_db_wrapper(db_info: List[Dict[str, Any]]) -> Any:
                         # Add import here because it requires extra dependencies many systems
                         # don't have out of the box so only import when explicitly being used
                         from aioradio.pyodbc import establish_pyodbc_connection
-                        conns[item['name']] = await establish_pyodbc_connection(**creds, autocommit=False)
+                        conns[item['name']] = establish_pyodbc_connection(**creds, autocommit=False)
                     elif item['db'] == 'psycopg2':
-                        conns[item['name']] = await establish_psycopg2_connection(**creds)
+                        conns[item['name']] = establish_psycopg2_connection(**creds)
                     rollback[item['name']] = item['rollback']
                     print(f"ESTABLISHED CONNECTION for {item['name']}")
 

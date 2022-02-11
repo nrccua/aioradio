@@ -9,12 +9,14 @@ Besides what is shown below in the examples, there is also support for SQS, Dyna
 ```python
 import asyncio
 
-from aioradio.aws.s3 import create_bucket
-from aioradio.aws.s3 import delete_s3_object
-from aioradio.aws.s3 import download_file
-from aioradio.aws.s3 import get_object
-from aioradio.aws.s3 import list_s3_objects
-from aioradio.aws.s3 import upload_file
+from aioradio.aws.s3 import (
+    create_bucket,
+    delete_s3_object,
+    download_file,
+    get_object,
+    list_s3_objects,
+    upload_file
+)
 
 async def main():
     s3_bucket = 'aioradio'
@@ -58,15 +60,15 @@ from aioradio.pyodbc import establish_pyodbc_connection
 from aioradio.pyodbc import pyodbc_query_fetchone
 from aioradio.pyodbc import pyodbc_query_fetchall
 
-async def main():
-    conn = await establish_pyodbc_connection(host='your-host', user='your-user', pwd='your-password')
+def main():
+    conn = establish_pyodbc_connection(host='your-host', user='your-user', pwd='your-password')
 
     query = "SELECT homeruns FROM MLB.dbo.LosAngelesAngels WHERE lastname = 'Trout' AND year = '2020'"
-    row = await pyodbc_query_fetchone(conn=conn, query=query)
+    row = pyodbc_query_fetchone(conn=conn, query=query)
     print(row)
 
     query = "SELECT homeruns FROM MLB.dbo.LosAngelesAngels WHERE lastname = 'Trout'"
-    rows = await pyodbc_query_fetchall(conn=conn, query=query)
+    rows = pyodbc_query_fetchall(conn=conn, query=query)
     print(rows)
 
 
@@ -144,6 +146,5 @@ See also the list of [contributors](https://github.com/nrccua/aioradio/graphs/co
 
 ## ACKNOWLEDGEMENTS
 
-* **Bryan Cusatis** - Architect contributing to aioradio.
 * **Kyle Edwards** - Developer contributing to aioradio.
 * **Pedro Artiga** - Developer contributing to aioradio.

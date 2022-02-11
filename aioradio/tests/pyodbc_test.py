@@ -11,7 +11,7 @@ pytestmark = pytest.mark.asyncio
 async def test_bad_unixodbc_driver():
     """Test using a bad unixodbc_driver that the proper exception is raised."""
 
-    await establish_pyodbc_connection(host='unknown', port=5123, user='psuedo', pwd='no-way-jose', driver='/usr/lib/bogus.so')
+    establish_pyodbc_connection(host='unknown', port=5123, user='psuedo', pwd='no-way-jose', driver='/usr/lib/bogus.so')
 
 
 async def test_pyodbc_query_fetchone_and_fetchall():

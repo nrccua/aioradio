@@ -139,7 +139,7 @@ class AwsServiceManager:
             await service_dict['obj'].__aexit__(None, None, None)
 
         if self.module == 'aiobotocore':
-            service_dict['session'] = aiobotocore.get_session()
+            service_dict['session'] = aiobotocore.session.get_session()
             service_dict['obj'] = await service_dict['session'].create_client(**kwargs).__aenter__()
         elif self.module == 'aioboto3':
             service_dict['session'] = aioboto3.Session()
