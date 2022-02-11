@@ -21,7 +21,7 @@ UNIXODBC_DRIVER_PATHS = [
 ]
 
 
-async def get_unixodbc_driver_path(paths: List[str]) -> Union[str, None]:
+def get_unixodbc_driver_path(paths: List[str]) -> Union[str, None]:
     """Check the file system for the unixodbc driver.
 
     Args:
@@ -40,7 +40,7 @@ async def get_unixodbc_driver_path(paths: List[str]) -> Union[str, None]:
     return driver_path
 
 
-async def establish_pyodbc_connection(
+def establish_pyodbc_connection(
         host: str,
         user: str,
         pwd: str,
@@ -80,7 +80,7 @@ async def establish_pyodbc_connection(
     if OPERATING_SYSTEM == 'Windows':
         verified_driver = driver
     else:
-        verified_driver = driver if driver else await get_unixodbc_driver_path(UNIXODBC_DRIVER_PATHS)
+        verified_driver = driver if driver else get_unixodbc_driver_path(UNIXODBC_DRIVER_PATHS)
         if verified_driver is None:
             raise FileNotFoundError('Unable to locate unixodbc driver file: libtdsodbc.so')
 
@@ -101,7 +101,7 @@ async def establish_pyodbc_connection(
     return pyodbc.connect(conn_string, autocommit=autocommit)
 
 
-async def pyodbc_query_fetchone(conn: pyodbc.Connection, query: str) -> Union[List[Any], None]:
+def pyodbc_query_fetchone(conn: pyodbc.Connection, query: str) -> Union[List[Any], None]:
     """Execute pyodbc query and fetchone, see
     https://github.com/mkleehammer/pyodbc/wiki/Cursor.
 
@@ -120,7 +120,7 @@ async def pyodbc_query_fetchone(conn: pyodbc.Connection, query: str) -> Union[Li
     return result
 
 
-async def pyodbc_query_fetchall(conn: pyodbc.Connection, query: str) -> Union[List[Any], None]:
+def pyodbc_query_fetchall(conn: pyodbc.Connection, query: str) -> Union[List[Any], None]:
     """Execute pyodbc query and fetchone, see
     https://github.com/mkleehammer/pyodbc/wiki/Cursor.
 

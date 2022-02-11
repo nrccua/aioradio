@@ -3,6 +3,18 @@ History
 =======
 
 
+v0.17.0 (2022-02-11)
+
+* Modify pyobdc & psycopg2 functions to no longer be async
+* Update aiobotocore==2.1.0.
+* Update httpx==0.22.0.
+* Update moto==3.0.3.
+* Update numpy==1.22.2.
+* Update orjson==3.6.6.
+* Update twine==3.8.0.
+* Update pre-commit==2.17.0.
+* Update pytest==7.0.0.
+
 v0.16.2 (2022-01-13)
 
 * Update EL3 field lengths.
@@ -19,7 +31,7 @@ v0.16.0 (2022-01-11)
 * Update ddtrace==0.57.0.
 * Update moto==2.3.1.
 * Update numpy==1.22.0.
-* Update orjson==3.6.5
+* Update orjson==3.6.5.
 * Update pre-commit==2.16.0.
 * Update psycopg2-binary==2.9.3.
 * Update pylint==2.12.2.

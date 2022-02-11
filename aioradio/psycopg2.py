@@ -6,7 +6,7 @@
 import psycopg2
 
 
-async def establish_psycopg2_connection(
+def establish_psycopg2_connection(
         host: str,
         user: str,
         password: str,
