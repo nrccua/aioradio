@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.17.1 (2022-02-17)
+
+* Adding a data science utils script that can be shared across project easily.
+
+
 v0.17.0 (2022-02-11)
 
 * Modify pyobdc & psycopg2 functions to no longer be async
