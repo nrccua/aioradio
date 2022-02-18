@@ -3,10 +3,10 @@ aiobotocore==2.1.0
 aiojobs==0.3.0
 boto3==1.20.24
 ddtrace==0.58.2
+dominodatalab==1.0.6
 fakeredis==1.7.1
 flask==2.0.3
 flask-cors==3.0.10
-https://github.com/dominodatalab/python-domino/archive/refs/tags/1.0.6.zip
 httpx==0.22.0
 mandrill==1.0.60
 moto==3.0.3
