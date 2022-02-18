@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.17.3 (2022-02-18)
+
+* Use dominodatalab installed from pypi instead of github.
+
+
 v0.17.2 (2022-02-18)
 
 * Adding converted async to sync functions to ds_utils.py.
