@@ -5,8 +5,10 @@
 # pylint: disable=no-member
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-boolean-expressions
+# pylint: disable=unnecessary-comprehension
 # pylint: disable=unused-argument
 
+import base64
 import csv
 import json
 import logging
@@ -22,8 +24,8 @@ import pandas as pd
 from domino import Domino
 from smb.SMBConnection import SMBConnection
 
-from aioradio.pyodbc import establish_pyodbc_connection
 from aioradio.psycopg2 import establish_psycopg2_connection
+from aioradio.pyodbc import establish_pyodbc_connection, pyodbc_query_fetchall
 
 warnings.simplefilter(action='ignore', category=UserWarning)
 logging.basicConfig(level=logging.INFO)
@@ -38,6 +40,49 @@ def file_to_s3(s3_client, local_filepath, s3_bucket, key):
     start = time()
     s3_client.upload_file(Filename=local_filepath, Bucket=s3_bucket, Key=key)
     logger.info(f"Uploading s3://{s3_bucket}/{key} took {round(time() - start, 2)} seconds")
+
+
+def get_secret(s3_client, secret_name):
+    """Get secret from AWS Secrets Manager."""
+
+    secret = ''
+    response = s3_client.get_secret_value(SecretId=secret_name)
+    secret = response['SecretString'] if 'SecretString' in response else base64.b64decode(response['SecretBinary'])
+
+    return secret
+
+
+def list_s3_objects(s3_client, s3_bucket, s3_prefix, with_attributes=False):
+    """List all objects within s3 folder."""
+
+    arr = []
+    paginator = s3_client.get_paginator('list_objects')
+    for result in paginator.paginate(Bucket=s3_bucket, Prefix=s3_prefix):
+        for item in result.get('Contents', []):
+            if with_attributes:
+                arr.append(item)
+            else:
+                arr.append(item['Key'])
+
+    return arr
+
+
+def delete_s3_object(s3_client, bucket, s3_prefix):
+    """Delete object(s) from s3."""
+
+    return s3_client.delete_object(Bucket=bucket, Key=s3_prefix)
+
+
+def get_fice_institutions_map(db_config):
+    """Get mapping of fice to college from mssql table."""
+
+    result = {}
+    with DbInfo(db_config) as target_db:
+        query = "SELECT FICE, Institution FROM EESFileuploadAssignments WHERE FileCategory = 'EnrollmentLens'"
+        rows = pyodbc_query_fetchall(conn=target_db.conn, query=query)
+        result = {fice: institution for fice, institution in rows}
+
+    return result
 
 
 def bytes_to_s3(s3_client, s3_bucket, key, body):

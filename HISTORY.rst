@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.17.2 (2022-02-18)
+
+* Adding converted async to sync functions to ds_utils.py.
+
+
 v0.17.1 (2022-02-17)
 
 * Adding a data science utils script that can be shared across project easily.
