@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.17.4 (2022-03-25)
+
+* Update aioboto3==9.4.0
+* Update aiobotocore==2.2.0
+
+
 v0.17.3 (2022-02-18)
 
 * Use dominodatalab installed from pypi instead of github.
