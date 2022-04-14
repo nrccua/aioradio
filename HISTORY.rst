@@ -3,16 +3,23 @@ History
 =======
 
 
+v0.17.6 (2022-04-14)
+
+* Remove ip parameters from ds_utils function get_ftp_connection.
+* Update ddtrace==1.0.0.
+* Update pandas==1.4.2.
+
+
 v0.17.5 (2022-03-31)
 
-* Update aioboto3==9.5.0
-* Update aiobotocore==2.2.0
+* Update aioboto3==9.5.0.
+* Update aiobotocore==2.2.0.
 
 
 v0.17.4 (2022-03-25)
 
-* Update aioboto3==9.4.0
-* Update aiobotocore==2.1.2
+* Update aioboto3==9.4.0.
+* Update aiobotocore==2.1.2.
 
 
 v0.17.3 (2022-02-18)

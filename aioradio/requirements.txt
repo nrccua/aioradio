@@ -2,7 +2,7 @@ aioboto3==9.5.0
 aiobotocore==2.2.0
 aiojobs==0.3.0
 boto3==1.21.21
-ddtrace==0.60.1
+ddtrace==1.0.0
 dominodatalab==1.0.7
 fakeredis==1.7.1
 flask==2.1.1
@@ -11,7 +11,7 @@ httpx==0.22.0
 mandrill==1.0.60
 moto==3.0.3
 orjson==3.6.7
-pandas==1.4.1
+pandas==1.4.2
 pre-commit==2.17.0
 psycopg2-binary==2.9.3
 pylint==2.13.4
