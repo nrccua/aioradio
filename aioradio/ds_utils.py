@@ -174,13 +174,13 @@ def get_s3_pickle_to_object(s3_client, s3_bucket, key):
     return data
 
 
-def get_ftp_connection(secret_id, ip_address, port=139):
+def get_ftp_connection(secret_id, port=139):
     """Get SMB Connection."""
 
     secret_client = get_boto3_session(ENV).client("secretsmanager", region_name='us-east-1')
     creds = json.loads(secret_client.get_secret_value(SecretId=secret_id)['SecretString'])
     conn = SMBConnection(creds['user'], creds['password'], secret_id, creds['server'], use_ntlm_v2=True)
-    conn.connect(ip_address, port)
+    conn.connect(creds['server'], port)
 
     return conn
 
