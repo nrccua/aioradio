@@ -52,6 +52,12 @@ def get_secret(s3_client, secret_name):
     return secret
 
 
+def update_secret(s3_client, secret_name, secret_value):
+    """Update secret value in AWS Secrets Manager."""
+
+    return s3_client.put_secret_value(SecretId=secret_name, SecretString=secret_value)
+
+
 def list_s3_objects(s3_client, s3_bucket, s3_prefix, with_attributes=False):
     """List all objects within s3 folder."""
 
