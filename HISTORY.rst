@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.17.7 (2022-05-03)
+
+* Add update_secret function to ds_utils.
+
+
 v0.17.6 (2022-04-14)
 
 * Remove ip parameters from ds_utils function get_ftp_connection.
