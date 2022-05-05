@@ -3,6 +3,17 @@ History
 =======
 
 
+v0.17.8 (2022-05-05)
+
+* Update get_ftp_connection function in ds_utils to allow configuration of is_direct_tcp.
+* Update ddtrace==1.1.1.
+* Update flask==2.1.2.
+* Update orjson==3.6.8.
+* Update pre-commit==2.19.0.
+* Update pylint==2.13.8.
+* Update pytest==7.1.2.
+
+
 v0.17.7 (2022-05-03)
 
 * Add update_secret function to ds_utils.
