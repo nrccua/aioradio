@@ -87,7 +87,7 @@ class LongRunningJobs:
             if job_info[1] > (3600 * 5):
                 raise ValueError('Job timeout needs to be no more than 5 hours')
 
-        self.longest_job_timeout = max([i[1] for i in self.jobs.values()])
+        self.longest_job_timeout = max(i[1] for i in self.jobs.values())
         self.host_uuid = f'{socket.gethostname()}|{uuid4()}'
 
     async def stop_worker(self):

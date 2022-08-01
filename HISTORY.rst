@@ -3,6 +3,24 @@ History
 =======
 
 
+v0.17.9 (2022-08-01)
+
+* Update httpx==0.23.0 to remove security vulnerability issue in github.
+* Update aioboto3==9.6.0.
+* Update ddtrace==1.3.0.
+* Update dominodatalab==1.0.8.
+* Update fakeredis==1.9.0.
+* Update flask==2.1.3.
+* Update orjson==3.7.11.
+* Update pandas==1.4.3.
+* Update pre-commit==2.20.0.
+* Update pylint==2.14.5.
+* Update pyodbc==4.0.34.
+* Update pysmb==1.2.8.
+* Update pytest-asyncio==0.19.0.
+* Update python-json-logger==2.0.4.
+* Update twine==4.0.1.
+
 v0.17.8 (2022-05-05)
 
 * Update get_ftp_connection function in ds_utils to allow configuration of is_direct_tcp.

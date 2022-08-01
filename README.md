@@ -116,15 +116,15 @@ asyncio.get_event_loop().run_until_complete(main())
 
 ## INSTALLING FOR DIRECT DEVELOPMENT OF AIORADIO
 
-Install [python 3.9.X](https://www.python.org/downloads/)
+Install [python 3.10.X](https://www.python.org/downloads/)
 
-Make sure you've installed [ODBC drivers](https://docs.microsoft.com/en-us/sql/connect/python/pyodbc/step-1-configure-development-environment-for-pyodbc-python-development?view=sql-server-ver15), required for using the python package pyodbc.
+Make sure you've installed [ODBC drivers](https://docs.microsoft.com/en-us/sql/connect/python/pyodbc/step-1-configure-development-environment-for-pyodbc-python-development), required for using the python package pyodbc.
 
 Clone aioradio locally and navigate to the root directory
 
 Install and activate python VirtualEnv
 ```bash
-python3.9 -m venv env
+python3.10 -m venv env
 source env/bin/activate
 ```
 
@@ -146,5 +146,4 @@ See also the list of [contributors](https://github.com/nrccua/aioradio/graphs/co
 
 ## ACKNOWLEDGEMENTS
 
-* **Kyle Edwards** - Developer contributing to aioradio.
 * **Pedro Artiga** - Developer contributing to aioradio.
