@@ -7,6 +7,7 @@ from itertools import chain
 import aioboto3
 import aiobotocore
 import pytest
+import pytest_asyncio
 from aiobotocore.config import AioConfig
 
 from aioradio.aws.dynamodb import DYNAMO
@@ -103,7 +104,7 @@ def region():
 
 ######### aiobotocore s3 async moto fixtures #########
 
-@pytest.fixture(scope='module')
+@pytest_asyncio.fixture(scope='module')
 async def s3_client(session, region, s3_config, s3_server):
     kw = moto_config(s3_server)
     async with session.create_client('s3', region_name=region, config=s3_config, **kw) as client:
@@ -122,13 +123,13 @@ def signature_version():
 def s3_config(region, signature_version):
     return AioConfig(region_name=region, signature_version=signature_version, read_timeout=5, connect_timeout=5)
 
-@pytest.fixture(scope='module')
+@pytest_asyncio.fixture(scope='module')
 async def s3_server():
     async with MotoService('s3', port=5001) as svc:
         yield svc.endpoint_url
 
 
-@pytest.fixture(scope='module')
+@pytest_asyncio.fixture(scope='module')
 async def create_bucket(s3_client):
     _bucket_name = None
 
@@ -176,13 +177,13 @@ def sqs_config(region):
     return AioConfig(region_name=region, read_timeout=5, connect_timeout=5)
 
 
-@pytest.fixture(scope='module')
+@pytest_asyncio.fixture(scope='module')
 async def sqs_server():
     async with MotoService('sqs', port=5002) as svc:
         yield svc.endpoint_url
 
 
-@pytest.fixture(scope='module')
+@pytest_asyncio.fixture(scope='module')
 async def sqs_client(session, region, sqs_config, sqs_server):
     kw = moto_config(sqs_server)
     async with session.create_client('sqs', region_name=region, config=sqs_config, **kw) as client:
@@ -192,7 +193,7 @@ async def sqs_client(session, region, sqs_config, sqs_server):
         SQS[region]['client'] = real_client
 
 
-@pytest.fixture(scope='module')
+@pytest_asyncio.fixture(scope='module')
 async def sqs_queue_url(sqs_client):
     _queue_url = None
 
@@ -223,13 +224,13 @@ def secrets_manager_config(region):
     return AioConfig(region_name=region, read_timeout=5, connect_timeout=5)
 
 
-@pytest.fixture(scope='module')
+@pytest_asyncio.fixture(scope='module')
 async def secrets_manager_server():
     async with MotoService('secretsmanager', port=5003) as svc:
         yield svc.endpoint_url
 
 
-@pytest.fixture(scope='module')
+@pytest_asyncio.fixture(scope='module')
 async def secrets_manager_client(session, region, secrets_manager_config, secrets_manager_server):
     kw = moto_config(secrets_manager_server)
     async with session.create_client('secretsmanager', region_name=region, config=secrets_manager_config, **kw) as client:
@@ -239,7 +240,7 @@ async def secrets_manager_client(session, region, secrets_manager_config, secret
         SECRETS[region]['client'] = real_client
 
 
-@pytest.fixture(scope='module')
+@pytest_asyncio.fixture(scope='module')
 async def create_secret(secrets_manager_client):
     result = await secrets_manager_client.create_secret(Name="test-secret", SecretString="abc123")
     assert result["ARN"]
@@ -252,22 +253,22 @@ def dynamodb_config(region):
     return AioConfig(region_name=region, read_timeout=5, connect_timeout=5)
 
 
-@pytest.fixture(scope='module')
+@pytest_asyncio.fixture(scope='module')
 async def dynamodb2_server():
     async with MotoService('dynamodb2', port=5004) as svc:
         yield svc.endpoint_url
 
 
-@pytest.fixture(scope='module')
+@pytest_asyncio.fixture(scope='module')
 async def dynamodb_kw(dynamodb2_server):
     return moto_config(dynamodb2_server)
 
-@pytest.fixture(scope='module')
+@pytest_asyncio.fixture(scope='module')
 async def dynamodb_session(dynamodb2_server):
     return aioboto3.Session(region_name=region)
 
 
-@pytest.fixture(scope='module')
+@pytest_asyncio.fixture(scope='module')
 async def dynamodb_client(dynamodb_session, dynamodb_kw, region, dynamodb_config):
     async with dynamodb_session.client('dynamodb', config=dynamodb_config, **dynamodb_kw) as client:
         real_client = DYNAMO[region]['client']
@@ -276,7 +277,7 @@ async def dynamodb_client(dynamodb_session, dynamodb_kw, region, dynamodb_config
         DYNAMO[region]['client'] = real_client
 
 
-@pytest.fixture(scope='module')
+@pytest_asyncio.fixture(scope='module')
 async def dynamodb_resource(dynamodb_session, dynamodb_kw, region, dynamodb_config):
     async with dynamodb_session.resource('dynamodb', config=dynamodb_config, **dynamodb_kw) as resource:
         real_resource = DYNAMO[region]['resource']
@@ -285,7 +286,7 @@ async def dynamodb_resource(dynamodb_session, dynamodb_kw, region, dynamodb_conf
         DYNAMO[region]['resource'] = real_resource
 
 
-@pytest.fixture(scope='module')
+@pytest_asyncio.fixture(scope='module')
 async def create_table(dynamodb_client, dynamodb_resource):
     _table_name = None
 

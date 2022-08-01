@@ -19,7 +19,7 @@ lint:
 
 test:
 	. env/bin/activate; \
-	export AWS_PROFILE=sandbox; \
+	export AWS_PROFILE=efi; \
 	pytest -vss --cov=aioradio  --cov-config=.coveragerc --cov-report=html --cov-fail-under=50
 
 pre-commit:

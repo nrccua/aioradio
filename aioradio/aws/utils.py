@@ -4,6 +4,7 @@
 # pylint: disable=broad-except
 # pylint: disable=logging-fstring-interpolation
 # pylint: disable=protected-access
+# pylint: disable=unnecessary-dunder-call
 
 import asyncio
 from asyncio import sleep
