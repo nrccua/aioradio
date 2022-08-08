@@ -123,6 +123,7 @@ def signature_version():
 def s3_config(region, signature_version):
     return AioConfig(region_name=region, signature_version=signature_version, read_timeout=5, connect_timeout=5)
 
+
 @pytest_asyncio.fixture(scope='module')
 async def s3_server():
     async with MotoService('s3', port=5001) as svc:

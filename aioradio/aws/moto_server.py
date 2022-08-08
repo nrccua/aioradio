@@ -11,10 +11,9 @@ import socket
 import threading
 import time
 
-# Third Party
 import aiohttp
-import moto.server
 import werkzeug.serving
+from moto.server import DomainDispatcherApplication, create_backend_app
 
 HOST = '127.0.0.1'
 
@@ -50,7 +49,7 @@ class MotoService:
     """
 
     _services = {}  # {name: instance}
-    _main_app: moto.server.DomainDispatcherApplication = None
+    _main_app: DomainDispatcherApplication = None
 
     def __init__(self, service_name: str, port: int = None):
         self._service_name = service_name
@@ -113,8 +112,7 @@ class MotoService:
             await self._stop()
 
     def _server_entry(self):
-        self._main_app = moto.server.DomainDispatcherApplication(
-            moto.server.create_backend_app, service=self._service_name)
+        self._main_app = DomainDispatcherApplication(create_backend_app, service=self._service_name)
         self._main_app.debug = True
 
         if self._socket:

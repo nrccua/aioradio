@@ -3,6 +3,13 @@ History
 =======
 
 
+v0.17.10 (2022-08-08)
+
+* Update aiobotocore==2.3.0.
+* Update aiojobs==1.0.0.
+* Update ddtrace==1.3.2.
+
+
 v0.17.9 (2022-08-01)
 
 * Update httpx==0.23.0 to remove security vulnerability issue in github.
