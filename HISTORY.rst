@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.17.11 (2022-08-17)
+
+* Update aioboto3==10.0.0.
+* Update aiobotocore==2.3.4.
+
+
 v0.17.10 (2022-08-08)
 
 * Update aiobotocore==2.3.0.
