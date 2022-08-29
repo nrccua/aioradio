@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.17.12 (2022-08-29)
+
+* Add missing EL3 fields to file_injestion.py.
+
+
 v0.17.11 (2022-08-17)
 
 * Update aioboto3==10.0.0.
