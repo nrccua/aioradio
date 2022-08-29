@@ -157,6 +157,8 @@ class EFIParse:
             "StudentStatus": 20,
             "Territory": 30,
             "EngagementScore": 10,
+            "CellPhoneNumber": 10,
+            "TextMessageOptIn": 5,
             "CustomFilter1": 20,
             "CustomFilter2": 20,
             "CustomFilter3": 20,
