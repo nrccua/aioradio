@@ -31,7 +31,6 @@ warnings.simplefilter(action='ignore', category=UserWarning)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 MAX_SSL_CONTENT_LENGTH = (2 ** 31) - 1
-ENV = os.getenv('ENVIRONMENT', 'sandbox')
 
 
 def file_to_s3(s3_client, local_filepath, s3_bucket, key):
@@ -180,10 +179,10 @@ def get_s3_pickle_to_object(s3_client, s3_bucket, key):
     return data
 
 
-def get_ftp_connection(secret_id, port=139, is_direct_tcp=False):
+def get_ftp_connection(secret_id, port=139, is_direct_tcp=False, env='sandbox'):
     """Get SMB Connection."""
 
-    secret_client = get_boto3_session(ENV).client("secretsmanager", region_name='us-east-1')
+    secret_client = get_boto3_session(env).client("secretsmanager", region_name='us-east-1')
     creds = json.loads(secret_client.get_secret_value(SecretId=secret_id)['SecretString'])
     conn = SMBConnection(
         creds['user'],
@@ -254,10 +253,10 @@ def get_boto3_session(env):
     return boto3_session
 
 
-def get_domino_connection(secret_id, project, host):
+def get_domino_connection(secret_id, project, host, env='sandbox'):
     """Get domino connection."""
 
-    secret_client = get_boto3_session(ENV).client("secretsmanager", region_name='us-east-1')
+    secret_client = get_boto3_session(env).client("secretsmanager", region_name='us-east-1')
     api_key = secret_client.get_secret_value(SecretId=secret_id)['SecretString']
     return Domino(project=project, api_key=api_key, host=host)
 
@@ -296,7 +295,7 @@ class DbInfo():
         connection is returned
         """
 
-        secret_client = get_boto3_session(ENV).client("secretsmanager", region_name='us-east-1')
+        secret_client = get_boto3_session(self.config['env']).client("secretsmanager", region_name='us-east-1')
         creds = json.loads(secret_client.get_secret_value(SecretId=self.config['secret'])['SecretString'])
         if self.config['db'] == 'psycopg2':
             self.conn = establish_psycopg2_connection(

@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.17.13 (2022-08-30)
+
+* Add 'env' key-value for dict object passed into Dbinfo.
+
+
 v0.17.12 (2022-08-29)
 
 * Add missing EL3 fields to file_injestion.py.
