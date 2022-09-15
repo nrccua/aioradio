@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.17.15 (2022-09-15)
+
+* Add python backoff library to install_requires in setup.
+
+
 v0.17.14 (2022-09-15)
 
 * Add backoff algorithm in aws/utils.py establish_client_resource function.
