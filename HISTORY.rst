@@ -3,6 +3,17 @@ History
 =======
 
 
+v0.17.14 (2022-09-15)
+
+* Add backoff algorithm in aws/utils.py establish_client_resource function.
+* Update ddtrace==1.3.6.
+* Update fakeredis==1.9.1.
+* Update orjson==3.8.0.
+* Update pandas==1.4.4.
+* Update pylint==2.15.2.
+* Update pytest==7.1.3.
+
+
 v0.17.13 (2022-08-30)
 
 * Add 'env' key-value for dict object passed into Dbinfo.
