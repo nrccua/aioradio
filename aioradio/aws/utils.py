@@ -17,6 +17,8 @@ from typing import Any, Dict, List
 import aioboto3
 import aiobotocore
 import aiojobs
+import backoff
+import botocore
 
 
 @dataclass
@@ -120,6 +122,7 @@ class AwsServiceManager:
 
             await self.establish_client_resource(service_dict[item], item=item, region=region, reestablish=True)
 
+    @backoff.on_exception(backoff.expo, botocore.exceptions.ConnectTimeoutError, max_time=120)
     async def establish_client_resource(self, service_dict: Dict[str, Any], item: str, region: str='', reestablish: bool=False):
         """Establish the AioSession client or resource, then re-establish every
         self.sleep_interval seconds.
