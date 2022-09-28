@@ -255,17 +255,17 @@ def dynamodb_config(region):
 
 
 @pytest_asyncio.fixture(scope='module')
-async def dynamodb2_server():
-    async with MotoService('dynamodb2', port=5004) as svc:
+async def dynamodb_server():
+    async with MotoService('dynamodb', port=5004) as svc:
         yield svc.endpoint_url
 
 
 @pytest_asyncio.fixture(scope='module')
-async def dynamodb_kw(dynamodb2_server):
-    return moto_config(dynamodb2_server)
+async def dynamodb_kw(dynamodb_server):
+    return moto_config(dynamodb_server)
 
 @pytest_asyncio.fixture(scope='module')
-async def dynamodb_session(dynamodb2_server):
+async def dynamodb_session(dynamodb_server):
     return aioboto3.Session(region_name=region)
 
 

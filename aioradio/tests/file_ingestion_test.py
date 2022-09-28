@@ -20,7 +20,6 @@ from aioradio.file_ingestion import (async_db_wrapper, async_wrapper,
                                      write_file_to_ftp)
 
 LOG = logging.getLogger(__name__)
-pytestmark = pytest.mark.asyncio
 
 CREDS = {
     'mandrill': os.getenv('MANDRILL_API_KEY'),
@@ -31,6 +30,7 @@ CREDS = {
 }
 
 
+@pytest.mark.asyncio
 async def test_unzip_file_get_filepaths(request, tmpdir_factory):
     """Test unzip_file_get_filepaths."""
 
@@ -50,6 +50,7 @@ async def test_unzip_file_get_filepaths(request, tmpdir_factory):
     assert not result
 
 
+@pytest.mark.asyncio
 async def test_get_current_datetime_from_timestamp():
     """Test get_current_datetime_from_timestamp."""
 
@@ -65,6 +66,7 @@ async def test_get_current_datetime_from_timestamp():
     assert len(date) == 10
 
 
+@pytest.mark.asyncio
 async def test_send_emails_via_mandrill():
     """Test send_emails_via_mandrill."""
 
@@ -87,6 +89,7 @@ async def test_send_emails_via_mandrill():
     assert result[0]['status'] in ['sent', 'queued']
 
 
+@pytest.mark.asyncio
 async def test_write_file_to_ftp(request):
     """Test write_file_to_ftp."""
 
@@ -117,6 +120,7 @@ async def test_write_file_to_ftp(request):
     assert now > last_write_time and now - last_write_time < 10
 
 
+@pytest.mark.asyncio
 async def test_list_ftp_objects():
     """Test test_list_ftp_objects."""
 
@@ -139,6 +143,7 @@ async def test_list_ftp_objects():
     assert results[0].filename == 'test_file_ingestion.zip'
 
 
+@pytest.mark.asyncio
 async def test_list_ftp_objects_with_regex():
     """Test test_list_ftp_objects with regex."""
 
@@ -163,6 +168,7 @@ async def test_list_ftp_objects_with_regex():
     assert results[0].filename == 'test_file_ingestion.zip'
 
 
+@pytest.mark.asyncio
 async def test_delete_ftp_file():
     """Test delete_ftp_file."""
 
