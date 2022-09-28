@@ -3,6 +3,18 @@ History
 =======
 
 
+v0.17.16 (2022-09-28)
+
+* Fix werkzeug version to 2.1.2.
+* Update aioboto3==10.1.0.
+* Update aiobotocore==2.4.0.
+* Update boto3==1.24.59.
+* Update dominodatalab==1.1.1.
+* Update fakeredis==1.9.3.
+* Update pylint==2.15.3.
+* Update moto==3.1.18.
+
+
 v0.17.15 (2022-09-15)
 
 * Add python backoff library to install_requires in setup.
