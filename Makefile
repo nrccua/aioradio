@@ -6,7 +6,7 @@ clean:
 
 install:
 	. env/bin/activate; \
-	pip install -r aioradio/requirements.txt  --use-deprecated=legacy-resolver
+	pip install -r aioradio/requirements.txt
 
 setup:
 	. env/bin/activate; \
