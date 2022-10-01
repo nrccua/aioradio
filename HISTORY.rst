@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.17.17 (2022-10-01)
+
+* Fixed botocore version to 1.27.59.
+
+
 v0.17.16 (2022-09-28)
 
 * Fix werkzeug version to 2.1.2.
