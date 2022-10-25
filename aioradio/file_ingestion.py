@@ -14,6 +14,7 @@
 # pylint: disable=too-many-public-methods
 
 import asyncio
+import csv
 import functools
 import json
 import logging
@@ -32,6 +33,7 @@ from typing import Any, Dict, List
 
 import mandrill
 import numpy as np
+from openpyxl import load_workbook
 from smb.base import SharedFile
 from smb.smb_structs import OperationFailure
 from smb.SMBConnection import SMBConnection
@@ -1616,3 +1618,47 @@ async def get_ftp_file_attributes(conn: SMBConnection, service_name: str, ftp_pa
     """
 
     return conn.getAttributes(service_name=service_name, path=ftp_path)
+
+
+def xlsx_to_tsv(source: str, destination: str, delimiter: str='\t') -> str | None:
+    """Convert and xlsx file to csv/tsv file.
+
+    Args:
+        source (str): XLSX filepath to convert
+        destination (str): Destination CSV/TSV filepath
+        delimiter (str, optional): Delimiter. Defaults to '\t'.
+
+    Returns:
+        str | None: Error message during process else None
+    """
+
+    try:
+        records = []
+        header = None
+        workbook = load_workbook(source, read_only=True)
+        for sheet in workbook:
+            sheet.calculate_dimension(force=True)
+
+            for idx, row in enumerate(sheet.values):
+                items = [str(value) if value is not None else "" for value in row]
+
+                if idx == 0:
+                    if header is None:
+                        header = items
+                    elif header != items:
+                        raise ValueError("Excel sheets must contain the exact same header")
+                    else:
+                        continue
+
+                records.append(items)
+        workbook.close()
+
+        with open(destination, 'w', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile, delimiter=delimiter)
+            writer.writerows(records)
+
+    except Exception as err:
+        print(err)
+        return str(err)
+
+    return None

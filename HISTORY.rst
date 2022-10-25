@@ -3,6 +3,13 @@ History
 =======
 
 
+v0.17.18 (2022-10-21)
+
+* Add a function in file_ingestion to convert an xlsx file to csv/tsv.
+* Update fakeredis==1.9.4.
+* Update pylint==2.15.4.
+
+
 v0.17.17 (2022-10-01)
 
 * Fixed botocore version to 1.27.59.
