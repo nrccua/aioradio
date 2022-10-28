@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.17.19 (2022-10-28)
+
+* Update xlsx_to_tsv function to use s3 instead of local directories for origin/destination files.
+
+
 v0.17.18 (2022-10-21)
 
 * Add a function in file_ingestion to convert an xlsx file to csv/tsv.

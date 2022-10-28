@@ -28,6 +28,7 @@ from dataclasses import dataclass
 from dataclasses import field as dc_field
 from datetime import datetime, timedelta, timezone, tzinfo
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from types import coroutine
 from typing import Any, Dict, List
 
@@ -38,6 +39,7 @@ from smb.base import SharedFile
 from smb.smb_structs import OperationFailure
 from smb.SMBConnection import SMBConnection
 
+from aioradio.aws.s3 import download_file, upload_file
 from aioradio.aws.secrets import get_secret
 from aioradio.psycopg2 import establish_psycopg2_connection
 
@@ -1620,12 +1622,20 @@ async def get_ftp_file_attributes(conn: SMBConnection, service_name: str, ftp_pa
     return conn.getAttributes(service_name=service_name, path=ftp_path)
 
 
-def xlsx_to_tsv(source: str, destination: str, delimiter: str='\t') -> str | None:
+async def xlsx_to_tsv(
+    s3_source_bucket: str,
+    s3_source_key: str,
+    s3_destination_bucket: str,
+    s3_destination_key: str,
+    delimiter: str='\t'
+) -> str | None:
     """Convert and xlsx file to csv/tsv file.
 
     Args:
-        source (str): XLSX filepath to convert
-        destination (str): Destination CSV/TSV filepath
+        s3_source_bucket (str): source xlsx file s3 bucket
+        s3_source_key (str): source xlsx file s3 key
+        s3_destination_bucket (str): destination xlsx file s3 bucket
+        s3_destination_key (str): destination xlsx file s3 key
         delimiter (str, optional): Delimiter. Defaults to '\t'.
 
     Returns:
@@ -1635,27 +1645,31 @@ def xlsx_to_tsv(source: str, destination: str, delimiter: str='\t') -> str | Non
     try:
         records = []
         header = None
-        workbook = load_workbook(source, read_only=True)
-        for sheet in workbook:
-            sheet.calculate_dimension(force=True)
 
-            for idx, row in enumerate(sheet.values):
-                items = [str(value) if value is not None else "" for value in row]
+        with NamedTemporaryFile(suffix='.xlsx') as tmp:
+            await download_file(bucket=s3_source_bucket, filepath=tmp.name, s3_key=s3_source_key)
+            workbook = load_workbook(tmp.name, read_only=True)
+            for sheet in workbook:
+                sheet.calculate_dimension(force=True)
 
-                if idx == 0:
-                    if header is None:
-                        header = items
-                    elif header != items:
-                        raise ValueError("Excel sheets must contain the exact same header")
-                    else:
-                        continue
+                for idx, row in enumerate(sheet.values):
+                    items = [str(value) if value is not None else "" for value in row]
 
-                records.append(items)
-        workbook.close()
+                    if idx == 0:
+                        if header is None:
+                            header = items
+                        elif header != items:
+                            raise ValueError("Excel sheets must contain the exact same header")
+                        else:
+                            continue
 
-        with open(destination, 'w', encoding='utf-8') as csvfile:
-            writer = csv.writer(csvfile, delimiter=delimiter)
+                    records.append(items)
+            workbook.close()
+
+        with NamedTemporaryFile(mode='w') as tmp:
+            writer = csv.writer(tmp, delimiter=delimiter)
             writer.writerows(records)
+            await upload_file(bucket=s3_destination_bucket, filepath=tmp.name, s3_key=s3_destination_key)
 
     except Exception as err:
         print(err)
