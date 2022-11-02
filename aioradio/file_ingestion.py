@@ -30,7 +30,7 @@ from datetime import datetime, timedelta, timezone, tzinfo
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from types import coroutine
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import mandrill
 import numpy as np
@@ -1628,7 +1628,7 @@ async def xlsx_to_tsv(
     s3_destination_bucket: str,
     s3_destination_key: str,
     delimiter: str='\t'
-) -> str | None:
+) -> Union[str, None]:
     """Convert and xlsx file to csv/tsv file.
 
     Args:
@@ -1639,7 +1639,7 @@ async def xlsx_to_tsv(
         delimiter (str, optional): Delimiter. Defaults to '\t'.
 
     Returns:
-        str | None: Error message during process else None
+        Union[str, None]: Error message during process else None
     """
 
     try:
