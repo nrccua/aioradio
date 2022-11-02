@@ -3,6 +3,20 @@ History
 =======
 
 
+v0.17.20 (2022-11-02)
+
+* Allow xlsx_to_tsv function to work on python3.7+ by removing python3.10 specific typing using |.
+* Add openpyxl as a required dependency for aioradio.
+* Update aiojobs==1.1.0.
+* Update backoff==2.2.1.
+* Update dominodatalab==1.2.0.
+* Update orjson==3.8.1.
+* Update pylint==2.15.5.
+* Update pytest==7.2.0.
+* Update pytest-asyncio==0.20.1.
+* Update pytest-cov==4.0.0.
+
+
 v0.17.19 (2022-10-28)
 
 * Update xlsx_to_tsv function to use s3 instead of local directories for origin/destination files.
