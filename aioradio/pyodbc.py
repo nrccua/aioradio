@@ -17,7 +17,8 @@ UNIXODBC_DRIVER_PATHS = [
     '/usr/lib/libtdsodbc.so',
     '/usr/local/lib/libtdsodbc.so',
     '/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so',
-    '/opt/microsoft/msodbcsql/lib64/opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.7.so.2.1'
+    '/opt/microsoft/msodbcsql/lib64/opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.7.so.2.1',
+    '/opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.10.so.1.1'
 ]
 
 
