@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.17.21 (2022-11-08)
+
+* Add zipfile to tsv/csv file function in file_ingestion.py.
+* Add new unixodbc driver path: /opt/microsoft/msodbcsql17/lib64/libmsodbcsql-17.10.so.1.1.
+
+
 v0.17.20 (2022-11-02)
 
 * Allow xlsx_to_tsv function to work on python3.7+ by removing python3.10 specific typing using |.
