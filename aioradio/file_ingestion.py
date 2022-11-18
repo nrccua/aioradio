@@ -1811,6 +1811,7 @@ async def tsv_to_s3(records: str, delimiter: str, s3_bucket: str, s3_key: str):
     with NamedTemporaryFile(mode='w') as tmp:
         writer = csv.writer(tmp, delimiter=delimiter)
         writer.writerows(records)
+        tmp.seek(0)
         await upload_file(bucket=s3_bucket, filepath=tmp.name, s3_key=s3_key)
 
 

@@ -3,6 +3,16 @@ History
 =======
 
 
+v0.17.22 (2022-11-17)
+
+* Fix issue with writing excel data to s3 for data ingestion project.
+* Update dominodatalab==1.2.1.
+* Update fakeredis==1.10.1.
+* Update pyodbc==4.0.35.
+* Update pytest-asyncio==0.20.2.
+* Update wheel==0.38.4.
+
+
 v0.17.21 (2022-11-08)
 
 * Add zipfile to tsv/csv file function in file_ingestion.py.
