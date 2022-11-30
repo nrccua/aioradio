@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.17.23 (2022-11-30)
+
+* Add account_id argument to SQS functions for cross account functionality.
+
+
 v0.17.22 (2022-11-17)
 
 * Fix issue with writing excel data to s3 for data ingestion project.
