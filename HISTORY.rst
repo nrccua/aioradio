@@ -3,6 +3,15 @@ History
 =======
 
 
+v0.17.24 (2022-12-01)
+
+* Fix overwrite of delimiter parameter value in zipfile_to_tsv function.
+* Update httpx==0.23.1.
+* Update orjson==3.8.2.
+* Update pylint==2.15.7.
+* Update twine==4.0.2.
+
+
 v0.17.23 (2022-11-30)
 
 * Add account_id argument to SQS functions for cross account functionality.

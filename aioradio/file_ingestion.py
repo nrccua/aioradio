@@ -1697,10 +1697,10 @@ async def zipfile_to_tsv(
                         encodings = [encoding] + [i for i in ['UTF-8', 'LATIN-1', 'UTF-16'] if i != encoding]
                         for encoding in encodings:
                             try:
-                                delimiter = detect_delimiter(path, encoding)
-                                if delimiter:
+                                detected_delimiter = detect_delimiter(path, encoding)
+                                if detected_delimiter:
                                     try:
-                                        records_from_path, header = tsv_to_records(path, encoding, delimiter, header)
+                                        records_from_path, header = tsv_to_records(path, encoding, detected_delimiter, header)
                                         records.extend(records_from_path)
                                         break
                                     except Exception as err:
