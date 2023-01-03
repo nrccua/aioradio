@@ -3,6 +3,14 @@ History
 =======
 
 
+v0.17.25 (2023-01-03)
+
+* Update httpx==0.23.2.
+* Update aioboto3==10.2.0.
+* Update orjson==3.8.3.
+* Update psycopg2-binary==2.9.5.
+
+
 v0.17.24 (2022-12-01)
 
 * Fix overwrite of delimiter parameter value in zipfile_to_tsv function.
