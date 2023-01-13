@@ -3,6 +3,13 @@ History
 =======
 
 
+v0.17.26 (2023-01-12)
+
+* Add option to pass aws_creds argument in get_secret function.
+* Update httpx==0.23.3.
+* Update orjson==3.8.5.
+
+
 v0.17.25 (2023-01-03)
 
 * Update httpx==0.23.2.

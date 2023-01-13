@@ -1,41 +1,27 @@
 """Generic async AWS functions for Secrets Manager."""
 
-import base64
-from typing import List
+from base64 import b64decode
+from typing import Dict
 
-from aioradio.aws.utils import AwsServiceManager
-
-AWS_SERVICE = AwsServiceManager(service='secretsmanager', regions=['us-east-1'])
-SECRETS = AWS_SERVICE.service_dict
+import boto3
 
 
-async def add_regions(regions: List[str]):
-    """Add regions to Secret Manager AWS service.
-
-    Args:
-        regions (List[str]): List of AWS regions
-    """
-
-    AWS_SERVICE.add_regions(regions)
-
-
-@AWS_SERVICE.active
-async def get_secret(secret_name: str, region: str) -> str:
+async def get_secret(secret_name: str, region: str, aws_creds: Dict[str, str]=None) -> str:
     """Get secret from AWS Secrets Manager.
 
     Args:
         secret_name (str): secret name
         region (str): AWS region
+        aws_creds (Dict[str, str], optional): AWS credentials
 
     Returns:
         str: secret value
     """
 
-    secret = ''
-    response = await SECRETS[region]['client']['obj'].get_secret_value(SecretId=secret_name)
-    if 'SecretString' in response:
-        secret = response['SecretString']
+    if aws_creds:
+        client = boto3.client(service_name='secretsmanager', region_name=region, **aws_creds)
     else:
-        secret = base64.b64decode(response['SecretBinary'])
+        client = boto3.client(service_name='secretsmanager', region_name=region)
 
-    return secret
+    resp = client.get_secret_value(SecretId=secret_name)
+    return resp['SecretString'] if 'SecretString' in resp else b64decode(resp['SecretBinary'])
