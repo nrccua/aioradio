@@ -6,6 +6,7 @@ from itertools import chain
 
 import aioboto3
 import aiobotocore
+import boto3
 import pytest
 import pytest_asyncio
 from aiobotocore.config import AioConfig
@@ -13,7 +14,6 @@ from aiobotocore.config import AioConfig
 from aioradio.aws.dynamodb import DYNAMO
 from aioradio.aws.moto_server import MotoService
 from aioradio.aws.s3 import S3
-from aioradio.aws.secrets import SECRETS
 from aioradio.aws.sqs import SQS
 from aioradio.redis import Redis
 
@@ -216,35 +216,6 @@ async def sqs_queue_url(sqs_client):
 async def delete_sqs_queue(sqs_client, queue_url):
     response = await sqs_client.delete_queue(QueueUrl=queue_url)
     assert_status_code(response, 200)
-
-
-######### aiobotocore secretsmanager async moto fixtures #########
-
-@pytest.fixture(scope='module')
-def secrets_manager_config(region):
-    return AioConfig(region_name=region, read_timeout=5, connect_timeout=5)
-
-
-@pytest_asyncio.fixture(scope='module')
-async def secrets_manager_server():
-    async with MotoService('secretsmanager', port=5003) as svc:
-        yield svc.endpoint_url
-
-
-@pytest_asyncio.fixture(scope='module')
-async def secrets_manager_client(session, region, secrets_manager_config, secrets_manager_server):
-    kw = moto_config(secrets_manager_server)
-    async with session.create_client('secretsmanager', region_name=region, config=secrets_manager_config, **kw) as client:
-        real_client = SECRETS[region]['client']
-        SECRETS[region]['client']['obj'] = client
-        yield client
-        SECRETS[region]['client'] = real_client
-
-
-@pytest_asyncio.fixture(scope='module')
-async def create_secret(secrets_manager_client):
-    result = await secrets_manager_client.create_secret(Name="test-secret", SecretString="abc123")
-    assert result["ARN"]
 
 
 ######### aioboto3 dynamodb async moto fixtures  #########

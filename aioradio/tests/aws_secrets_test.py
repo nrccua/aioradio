@@ -2,23 +2,27 @@
 
 # pylint: disable=unused-argument
 
-import pytest
+import asyncio
 
-from aioradio.aws.secrets import add_regions, get_secret
+import boto3
+import pytest
+from moto import mock_secretsmanager
+
+from aioradio.aws.secrets import get_secret
 
 pytestmark = pytest.mark.asyncio
 
 
-async def test_add_regions():
-    """Add us-east-2 region."""
-
-    await add_regions(['us-east-2'])
-
-
-async def test_secrets_get_secret(create_secret):
+@mock_secretsmanager
+def test_secrets_get_secret():
     """Test getting secret from Secrets Manager."""
 
-    secret = await get_secret(secret_name='test-secret', region='us-east-2')
+    client = boto3.client('secretsmanager', region_name='us-east-1')
+    result = client.create_secret(Name="test-secret-aioradio", SecretString="abc123")
+    assert result["ARN"]
+
+    loop = asyncio.get_event_loop()
+    secret = loop.run_until_complete(get_secret(secret_name='test-secret-aioradio', region='us-east-1'))
     assert secret == 'abc123'
 
 

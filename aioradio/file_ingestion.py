@@ -1303,7 +1303,11 @@ def async_db_wrapper(db_info: List[Dict[str, Any]]) -> Any:
             for item in db_info:
 
                 if item['db'] in ['pyodbc', 'psycopg2']:
-                    creds = {**json.loads(await get_secret(item['secret'], item['region'])), **{'database': item.get('database', '')}}
+                    if 'aws_creds' in item:
+                        secret = await get_secret(item['secret'], item['region'], item['aws_creds'])
+                    else:
+                        secret = await get_secret(item['secret'], item['region'])
+                    creds = {**json.loads(secret), **{'database': item.get('database', '')}}
                     if item['db'] == 'pyodbc':
                         # Add import here because it requires extra dependencies many systems
                         # don't have out of the box so only import when explicitly being used
