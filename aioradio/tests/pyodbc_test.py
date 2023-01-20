@@ -17,8 +17,8 @@ async def test_bad_unixodbc_driver():
 async def test_pyodbc_query_fetchone_and_fetchall():
     """Test pyodbc_query_fetchone.
 
-    Make sure you have unixodbc and freetds installed;
-    see here: http://www.christophers.tips/pages/pyodbc_mac.html.
+    Make sure you have unixodbc and freetds installed; see here:
+    http://www.christophers.tips/pages/pyodbc_mac.html.
     """
 
     pytest.skip('Skip test_pyodbc_query_fetchone_and_fetchall since it contains sensitive info')

@@ -3,6 +3,13 @@ History
 =======
 
 
+v0.17.27 (2023-01-20)
+
+* Raise errors instead of printing in file_ingestion function zipfile_to_tsv.
+* Update dominodatalab==1.2.2.
+* Update pysmb==1.2.9.1.
+
+
 v0.17.26 (2023-01-12)
 
 * Add option to pass aws_creds argument in get_secret function.

@@ -57,7 +57,6 @@ class EFIParse:
     entry_year_filter: dict = dc_field(default_factory=dict)
 
     def __post_init__(self):
-
         if not self.fice_enrolled_logic:
             self.fice_enrolled_logic = {
                 "001100",
@@ -1681,49 +1680,44 @@ async def zipfile_to_tsv(
         Union[str, None]: Error message during process else None
     """
 
-    try:
-        extensions = ['xlsx', 'txt', 'csv', 'tsv']
-        records = []
-        header = None
 
-        with NamedTemporaryFile(suffix='.zip') as tmp:
-            await download_file(bucket=s3_source_bucket, filepath=tmp.name, s3_key=s3_source_key)
-            with TemporaryDirectory() as tmp_directory:
-                for path in await unzip_file_get_filepaths(tmp.name, tmp_directory, include_extensions=extensions):
-                    ext = os.path.splitext(path)[1].lower()
-                    if ext == '.xlsx':
-                        records_from_path, header = xlsx_to_records(path, header)
-                        records.extend(records_from_path)
+    extensions = ['xlsx', 'txt', 'csv', 'tsv']
+    records = []
+    header = None
+
+    with NamedTemporaryFile(suffix='.zip') as tmp:
+        await download_file(bucket=s3_source_bucket, filepath=tmp.name, s3_key=s3_source_key)
+        with TemporaryDirectory() as tmp_directory:
+            for path in await unzip_file_get_filepaths(tmp.name, tmp_directory, include_extensions=extensions):
+                ext = os.path.splitext(path)[1].lower()
+                if ext == '.xlsx':
+                    records_from_path, header = xlsx_to_records(path, header)
+                    records.extend(records_from_path)
+                else:
+                    encoding = detect_encoding(path)
+                    if encoding is None:
+                        raise IOError(f"Failed to detect proper encoding for {path}")
+                    encodings = [encoding] + [i for i in ['UTF-8', 'LATIN-1', 'UTF-16'] if i != encoding]
+                    for encoding in encodings:
+                        try:
+                            detected_delimiter = detect_delimiter(path, encoding)
+                            if detected_delimiter:
+                                try:
+                                    records_from_path, header = tsv_to_records(path, encoding, detected_delimiter, header)
+                                    records.extend(records_from_path)
+                                    break
+                                except Exception as err:
+                                    if str(err) == 'Every file must contain the exact same header':
+                                        raise ValueError('Every file must contain the exact same header') from err
+                                    continue
+                        except Exception as err:
+                            if str(err) == 'Every file must contain the exact same header':
+                                raise ValueError('Every file must contain the exact same header') from err
+                            continue
                     else:
-                        encoding = detect_encoding(path)
-                        if encoding is None:
-                            raise IOError(f"Failed to detect proper encoding for {path}")
-                        encodings = [encoding] + [i for i in ['UTF-8', 'LATIN-1', 'UTF-16'] if i != encoding]
-                        for encoding in encodings:
-                            try:
-                                detected_delimiter = detect_delimiter(path, encoding)
-                                if detected_delimiter:
-                                    try:
-                                        records_from_path, header = tsv_to_records(path, encoding, detected_delimiter, header)
-                                        records.extend(records_from_path)
-                                        break
-                                    except Exception as err:
-                                        if str(err) == 'Every file must contain the exact same header':
-                                            raise ValueError('Every file must contain the exact same header') from err
-                                        continue
-                            except Exception as err:
-                                if str(err) == 'Every file must contain the exact same header':
-                                    raise ValueError('Every file must contain the exact same header') from err
-                                continue
-                        else:
-                            raise IOError(f"Failed to detect proper encoding for {path}")
+                        raise IOError(f"Failed to detect proper encoding for {path}")
 
-
-        await tsv_to_s3(records, delimiter, s3_destination_bucket, s3_destination_key)
-
-    except Exception as err:
-        print(err)
-        return str(err)
+    await tsv_to_s3(records, delimiter, s3_destination_bucket, s3_destination_key)
 
     return None
 

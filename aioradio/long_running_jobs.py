@@ -64,7 +64,6 @@ class LongRunningJobs:
     httpx_client: httpx.AsyncClient = httpx.AsyncClient()
 
     def __post_init__(self):
-
         self.queue_service = self.queue_service.lower()
         if self.queue_service not in ['sqs', 'redis']:
             raise ValueError("queue_service must be either 'sqs' or 'redis'.")
