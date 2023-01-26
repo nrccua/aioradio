@@ -10,8 +10,6 @@ from moto import mock_secretsmanager
 
 from aioradio.aws.secrets import get_secret
 
-pytestmark = pytest.mark.asyncio
-
 
 @mock_secretsmanager
 def test_secrets_get_secret():
@@ -27,6 +25,7 @@ def test_secrets_get_secret():
 
 
 @pytest.mark.xfail
+@pytest.mark.asyncio
 async def test_secrets_get_secret_with_bad_key():
     """Test exception raised when using a bad key retrieving from Secrets
     Manager."""

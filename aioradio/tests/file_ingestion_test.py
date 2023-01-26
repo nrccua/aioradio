@@ -200,31 +200,25 @@ def test_async_wrapper(user):
     assert result == 'Hello World'
 
 
-
-def test_async_db_wrapper(user):
+@pytest.mark.asyncio
+async def test_async_db_wrapper(user):
     """Test async_db_wrapper with database connections."""
 
     if user != 'tim.reichard':
         pytest.skip('Skip test_async_db_wrapper since user is not Tim Reichard')
 
-    db_info=[
-            {
-                'name': 'test1',
-                'db': 'pyodbc',
-                'secret': 'production/airflowCluster/sqloltp',
-                'region': 'us-east-1',
-                'rollback': True
-            },
-            {
-                'name': 'test2',
-                'db': 'psycopg2',
-                'secret': 'datalab/dev/classplanner_db',
-                'region': 'us-east-1',
-                'database': 'student',
-                'is_audit': False,
-                'rollback': True
-            }
-    ]
+    db_info=[{
+        'db': 'pyodbc',
+        'name': 'test1',
+        'database': 'DataStage',
+        'secret': 'efi/sandbox/all',
+        'secret_json_key': 'mssql',
+        'region': 'us-east-1',
+        'rollback': True,
+        'trusted_connection': 'no',
+        'application_intent': 'ReadOnly',
+        'tds_version': '7.4'
+    }]
 
     @async_db_wrapper(db_info=db_info)
     async def func(**kwargs):
@@ -232,4 +226,4 @@ def test_async_db_wrapper(user):
         for name, conn in conns.items():
             print(f"Connection name: {name}\tConnection object: {conn}")
 
-    func()
+    await func()

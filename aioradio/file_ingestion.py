@@ -1306,7 +1306,12 @@ def async_db_wrapper(db_info: List[Dict[str, Any]]) -> Any:
                         secret = await get_secret(item['secret'], item['region'], item['aws_creds'])
                     else:
                         secret = await get_secret(item['secret'], item['region'])
-                    creds = {**json.loads(secret), **{'database': item.get('database', '')}}
+
+                    secret = json.loads(secret)
+                    if 'secret_json_key' in item:
+                        secret = secret[item['secret_json_key']]
+
+                    creds = {**secret, **{'database': item.get('database', '')}}
                     if item['db'] == 'pyodbc':
                         # Add import here because it requires extra dependencies many systems
                         # don't have out of the box so only import when explicitly being used
