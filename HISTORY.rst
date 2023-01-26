@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.17.28 (2023-01-26)
+
+* Add support to filter secrets in async_db_wrapper using the argument secret_json_key.
+
+
 v0.17.27 (2023-01-20)
 
 * Raise errors instead of printing in file_ingestion function zipfile_to_tsv.
