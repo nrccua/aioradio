@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.17.29 (2023-01-31)
+
+* Update sleep time from 30 to 5 seconds in long running jobs after exception.
+* Refactor long running jobs to no longer use redis queue.
+
+
 v0.17.28 (2023-01-26)
 
 * Add support to filter secrets in async_db_wrapper using the argument secret_json_key.
