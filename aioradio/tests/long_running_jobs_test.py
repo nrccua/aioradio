@@ -1,6 +1,5 @@
 """pytest Long Running Jobs."""
 
-import time
 from asyncio import create_task, sleep
 from random import randint
 from typing import Any, Dict
