@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.17.31 (2023-02-03)
+
+* Remove results from callback when error in LongRunningJobs.
+
+
 v0.17.30 (2023-02-03)
 
 * Update LongRunningJobs to gracefully deal with exceptions during narwhal execution.

@@ -207,6 +207,7 @@ class LongRunningJobs:
                 json = {'results': data, 'uuid': body['uuid']}
                 if error:
                     json['error'] = error
+                    del json['results']
                 create_task(self.httpx_client.post(callback_url, json=json, timeout=30))
 
             # Update the hashed UUID with processing results
