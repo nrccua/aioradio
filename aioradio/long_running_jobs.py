@@ -104,6 +104,8 @@ class LongRunningJobs:
             result["job_done"] = data['job_done']
             if result["job_done"]:
                 result["results"] = data['results']
+                if 'error' in data:
+                    result['error'] = data['error']
         else:
             result["error"] = f"Cannot find {uuid} in Redis Cache"
 
@@ -188,24 +190,30 @@ class LongRunningJobs:
             body['params'].pop('callback_url', None)
 
             data = None if key is None else await self.cache.get(key)
+            error = ''
             if data is None:
                 # No results found in cache so run the job
-                data = await self.jobs[job_name][0](body['params'])
+                try:
+                    data = await self.jobs[job_name][0](body['params'])
 
-                # Set the cached parameter based key with results
-                if key is not None and not await self.cache.set(key, data, expire=self.expire_cached_result):
-                    raise IOError(f"Setting cache string failed for cache_key: {key}")
+                    # Set the cached parameter based key with results
+                    if key is not None and not await self.cache.set(key, data, expire=self.expire_cached_result):
+                        raise IOError(f"Setting cache string failed for cache_key: {key}")
+                except Exception as err:
+                    error = str(err)
 
             # Send results via POST request if necessary
             if callback_url:
-                create_task(self.httpx_client.post(callback_url, json={'results': data, 'uuid': body['uuid']}, timeout=30))
+                json = {'results': data, 'uuid': body['uuid']}
+                if error:
+                    json['error'] = error
+                create_task(self.httpx_client.post(callback_url, json=json, timeout=30))
 
             # Update the hashed UUID with processing results
-            await self.cache.hmset(
-                key=body['uuid'],
-                items={**body, **{'results': data, 'job_done': True}},
-                expire=self.expire_job_data
-            )
+            items = {**body, **{'results': data, 'job_done': True}}
+            if error:
+                items['error'] = error
+            await self.cache.hmset(key=body['uuid'], items=items, expire=self.expire_job_data)
 
             entries = [{'Id': str(uuid4()), 'ReceiptHandle': msg[0]['ReceiptHandle']}]
             await sqs.delete_messages(queue=self.sqs_queue, region=self.sqs_region, entries=entries)
