@@ -3,6 +3,13 @@ History
 =======
 
 
+v0.17.30 (2023-02-03)
+
+* Update LongRunningJobs to gracefully deal with exceptions during narwhal execution.
+* Update aioboto3==10.4.0.
+* Update openpyxl==3.1.0.
+
+
 v0.17.29 (2023-01-31)
 
 * Update sleep time from 30 to 5 seconds in long running jobs after exception.
