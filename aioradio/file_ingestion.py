@@ -1744,7 +1744,7 @@ def tsv_to_records(path: str, encoding: str, delimiter: str, header: str) -> tup
     records = []
     with open(path, newline='', encoding=encoding) as csvfile:
 
-        dialect = csv.Sniffer().sniff(csvfile.read(4096))
+        dialect = csv.Sniffer().sniff(csvfile.read(8192))
         csvfile.seek(0)
 
         # remove any null characters in the file

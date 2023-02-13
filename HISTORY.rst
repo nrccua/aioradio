@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.17.32 (2023-02-03)
+
+* Update csv sniffer to read 8192 bytes instea of 4096.
+
+
 v0.17.31 (2023-02-03)
 
 * Remove results from callback when error in LongRunningJobs.
