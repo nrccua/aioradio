@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.17.33 (2023-02-03)
+
+* Hardcode openpyxl version to 3.0.10.
+
+
 v0.17.32 (2023-02-03)
 
 * Update csv sniffer to read 8192 bytes instea of 4096.
