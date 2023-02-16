@@ -142,7 +142,7 @@ class EFIParse:
             "StudentAthlete": 50,
             "CampusLocation": 50,
             "Email": 75,
-            "Ethnicity": 1,
+            "Ethnicity": 50,
             "FirstGenFlag": 1,
             "EFC": 20,
             "HSCode": 6,
@@ -417,8 +417,6 @@ class EFIParse:
             '1': 'Y',
             '0': 'N'
         }
-
-        self.ethnicity_federal_categories = {'1', '2', '3', '4', '5', '6', '7', '8'}
 
     def check_width(self, value: str, field: str, row_idx: int) -> str:
         """Check field value and truncate if it is longer than expected.
@@ -898,21 +896,6 @@ class EFIParse:
 
         return value
 
-    def check_ethnicity(self, value: str) -> str:
-        """Check Ethnicity is a federal category value.
-
-        Args:
-            value (str): Ethnicity category
-
-        Returns:
-            str: Ethnicity category
-        """
-
-        if value != '' and value not in self.ethnicity_federal_categories:
-            value = ''
-
-        return value
-
     @staticmethod
     def check_act_score(value: str) -> str:
         """Check ACT Score logic.
@@ -992,18 +975,6 @@ class EFIParse:
 
         for idx in range(len(records)):
             records[idx] = self.check_generic_boolean(records[idx])
-
-    def check_ethnicity_efi(self, records: list[str]):
-        """Check ethnicity logic.
-
-        Args:
-            records (list[str]): List of a specific columns values
-            field (str): Column header field value
-            row_idx (int): Row number in file
-        """
-
-        for idx in range(len(records)):
-            records[idx] = self.check_ethnicity(records[idx])
 
     def check_act_score_efi(self, records: list[str]):
         """Check ACT score logic.

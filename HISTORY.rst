@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.17.34 (2023-02-16)
+
+* Revise ethnicity check in EFI and increase truncation limit.
+
+
 v0.17.33 (2023-02-14)
 
 * Hardcode openpyxl version to 3.0.10.
