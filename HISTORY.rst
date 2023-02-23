@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.17.35 (2023-02-23)
+
+* Create function check_phone_number in efi parsing.
+* Update bytes read in detect_delimiter function from 4096 to 8192.
+
+
 v0.17.34 (2023-02-16)
 
 * Revise ethnicity check in EFI and increase truncation limit.

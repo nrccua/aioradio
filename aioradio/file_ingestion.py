@@ -418,20 +418,24 @@ class EFIParse:
             '0': 'N'
         }
 
-    def check_width(self, value: str, field: str, row_idx: int) -> str:
+    def check_width(self, value: str, field: str, row_idx: int, truncate_backward: bool=False) -> str:
         """Check field value and truncate if it is longer than expected.
 
         Args:
             value (str): Value
             field (str): Column header field value
             row_idx (int): Row index
+            truncate_backward (bool, optional): Truncate from back of value
 
         Returns:
             str: [description]
         """
 
         if len(value) > self.field_to_max_widths[field]:
-            new_value = value[:self.field_to_max_widths[field]].rstrip()
+            if truncate_backward:
+                new_value = value[-self.field_to_max_widths[field]:].lstrip()
+            else:
+                new_value = value[:self.field_to_max_widths[field]].rstrip()
             LOG.warning(f"[{self.filename}] [row:{row_idx}] [{field}] - '{value}' "
                         f"exceeds max width of {self.field_to_max_widths[field]}. Trimming value to {new_value}")
             value = new_value
@@ -453,6 +457,25 @@ class EFIParse:
         if value != '':
             value = value.replace('"', '')
             value = self.check_width(value, field, row_idx)
+
+        return value
+
+    def check_phone_number(self, value: str, field: str, row_idx: int) -> str:
+        """Check Phone Number logic.
+
+        Args:
+            value (str): Phone number value
+            field (str): Column header field value
+            row_idx (int): Row number in file
+
+        Returns:
+            str: Phone number value
+        """
+
+        if value != '':
+            value = value.replace(' ', '')
+            value = "".join(filter(str.isdigit, value))
+            value = self.check_width(value, field, row_idx, truncate_backward=True)
 
         return value
 
@@ -1053,6 +1076,18 @@ class EFIParse:
 
         for idx in range(len(records)):
             records[idx] = self.check_name(records[idx], field, row_idx + idx)
+
+    def check_phone_number_efi(self, records: list[str], field: str, row_idx: int):
+        """Check Phone Number logic.
+
+        Args:
+            records (list[str]): List of a specific columns values
+            field (str): Column header field value
+            row_idx (int): Row number in file
+        """
+
+        for idx in range(len(records)):
+            records[idx] = self.check_phone_number(records[idx], field, row_idx + idx)
 
     def check_gender_efi(self, records: list[str]):
         """Check Gender logic.
@@ -1821,7 +1856,7 @@ def detect_delimiter(path: str, encoding: str) -> str:
 
     delimiter = ''
     with open(path, newline='', encoding=encoding) as csvfile:
-        data = csvfile.read(4096)
+        data = csvfile.read(8192)
         count = -1
         for item in [',', '\t', '|']:
             char_count = data.count(item)

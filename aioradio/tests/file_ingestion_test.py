@@ -11,7 +11,7 @@ from datetime import timedelta, timezone
 
 import pytest
 
-from aioradio.file_ingestion import (async_db_wrapper, async_wrapper,
+from aioradio.file_ingestion import (EFIParse, async_db_wrapper, async_wrapper,
                                      delete_ftp_file, establish_ftp_connection,
                                      get_current_datetime_from_timestamp,
                                      list_ftp_objects,
@@ -227,3 +227,14 @@ async def test_async_db_wrapper(user):
             print(f"Connection name: {name}\tConnection object: {conn}")
 
     await func()
+
+
+def test_check_phone_number():
+    """Test check_phone_number in EFIParse."""
+
+    efi = EFIParse('')
+    number = efi.check_phone_number('+1 (512) 573-5819', 'CellPhoneNumber', 0)
+    assert number == '5125735819'
+
+    number = efi.check_phone_number('215â€"863-79', 'CellPhoneNumber', 0)
+    assert number == '21586379'
