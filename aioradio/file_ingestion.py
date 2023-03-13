@@ -1665,8 +1665,7 @@ async def xlsx_to_tsv(
 
         await tsv_to_s3(records, delimiter, s3_destination_bucket, s3_destination_key)
     except Exception as err:
-        print(err)
-        return str(err)
+        raise ValueError('xlsx_to_tsv function failed') from err
 
     return None
 
