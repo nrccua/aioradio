@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.17.36 (2023-03-13)
+
+* Raise error instead of printing in file_ingestion function xlsx_to_tsv.
+
+
 v0.17.35 (2023-02-23)
 
 * Create function check_phone_number in efi parsing.
