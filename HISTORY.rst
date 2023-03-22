@@ -3,6 +3,17 @@ History
 =======
 
 
+v0.18.0 (2023-03-22)
+
+* Add support for python3.11.
+* Make sure to pip install cython before installing the requirements file when using python3.11.
+* Update ddtrace==1.9.4.
+* Update dominodatalab==1.2.3.
+* Update pandas==1.5.3.
+* Update python-json-logger==2.0.7.
+* Update wheel==0.40.0.
+
+
 v0.17.36 (2023-03-13)
 
 * Raise error instead of printing in file_ingestion function xlsx_to_tsv.
