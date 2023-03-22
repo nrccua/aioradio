@@ -6,6 +6,7 @@ clean:
 
 install:
 	. env/bin/activate; \
+	pip install cython==0.29.33; \
 	pip install -r aioradio/requirements.txt
 
 setup:

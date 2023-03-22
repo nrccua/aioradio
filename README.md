@@ -116,7 +116,7 @@ asyncio.get_event_loop().run_until_complete(main())
 
 ## INSTALLING FOR DIRECT DEVELOPMENT OF AIORADIO
 
-Install [python 3.10.X](https://www.python.org/downloads/)
+Install [python 3.11.X](https://www.python.org/downloads/)
 
 Make sure you've installed [ODBC drivers](https://docs.microsoft.com/en-us/sql/connect/python/pyodbc/step-1-configure-development-environment-for-pyodbc-python-development), required for using the python package pyodbc.
 
@@ -124,12 +124,13 @@ Clone aioradio locally and navigate to the root directory
 
 Install and activate python VirtualEnv
 ```bash
-python3.10 -m venv env
+python3.11 -m venv env
 source env/bin/activate
 ```
 
 Install python modules included in requirements.txt
 ```bash
+pip install cython
 pip install -r aioradio/requirements.txt
 ```
 

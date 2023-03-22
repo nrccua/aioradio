@@ -3,7 +3,8 @@
 # pylint: disable=ungrouped-imports
 # pylint: disable=wrong-import-position
 
-from asyncio import coroutine, create_task, sleep, to_thread
+from asyncio import create_task, sleep, to_thread
+from types import coroutine
 from typing import Any, Dict, List, Tuple
 
 
