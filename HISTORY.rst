@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.18.1 (2023-04-13)
+
+* Remove psycopg2 as a required install with aioradio.
+
+
 v0.18.0 (2023-03-22)
 
 * Add support for python3.11.
