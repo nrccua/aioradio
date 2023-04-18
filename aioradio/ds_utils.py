@@ -1,5 +1,6 @@
 """utils.py."""
 
+# pylint: disable=import-outside-toplevel
 # pylint: disable=invalid-name
 # pylint: disable=logging-fstring-interpolation
 # pylint: disable=no-member
@@ -23,9 +24,6 @@ import boto3
 import pandas as pd
 from domino import Domino
 from smb.SMBConnection import SMBConnection
-
-from aioradio.psycopg2 import establish_psycopg2_connection
-from aioradio.pyodbc import establish_pyodbc_connection, pyodbc_query_fetchall
 
 warnings.simplefilter(action='ignore', category=UserWarning)
 logging.basicConfig(level=logging.INFO)
@@ -80,6 +78,8 @@ def delete_s3_object(s3_client, bucket, s3_prefix):
 
 def get_fice_institutions_map(db_config):
     """Get mapping of fice to college from mssql table."""
+
+    from aioradio.pyodbc import pyodbc_query_fetchall
 
     result = {}
     with DbInfo(db_config) as target_db:
@@ -298,6 +298,7 @@ class DbInfo():
         secret_client = get_boto3_session(self.config['env']).client("secretsmanager", region_name='us-east-1')
         creds = json.loads(secret_client.get_secret_value(SecretId=self.config['secret'])['SecretString'])
         if self.config['db'] == 'psycopg2':
+            from aioradio.psycopg2 import establish_psycopg2_connection
             self.conn = establish_psycopg2_connection(
                 host = creds['host'],
                 user = creds['user'],
@@ -307,6 +308,7 @@ class DbInfo():
             )
             self.conn.autocommit = not self.config['rollback']
         elif self.config['db'] == 'pyodbc':
+            from aioradio.pyodbc import establish_pyodbc_connection
             self.conn = establish_pyodbc_connection(
                 host = creds['host'],
                 user = creds['user'],

@@ -39,7 +39,6 @@ from smb.SMBConnection import SMBConnection
 
 from aioradio.aws.s3 import download_file, upload_file
 from aioradio.aws.secrets import get_secret
-from aioradio.psycopg2 import establish_psycopg2_connection
 
 DIRECTORY = Path(__file__).parent.absolute()
 LOG = logging.getLogger('file_ingestion')
@@ -122,6 +121,8 @@ def async_db_wrapper(db_info: List[Dict[str, Any]]) -> Any:
                         from aioradio.pyodbc import establish_pyodbc_connection
                         conns[item['name']] = establish_pyodbc_connection(**creds, autocommit=False)
                     elif item['db'] == 'psycopg2':
+                        from aioradio.psycopg2 import \
+                            establish_psycopg2_connection
                         conns[item['name']] = establish_psycopg2_connection(**creds)
                     rollback[item['name']] = item['rollback']
                     print(f"ESTABLISHED CONNECTION for {item['name']}")
