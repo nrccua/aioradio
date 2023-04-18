@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.18.2 (2023-04-18)
+
+* Add psycopg2 imports inside functions and not at the top of the file.
+
+
 v0.18.1 (2023-04-13)
 
 * Remove psycopg2 as a required install with aioradio.
