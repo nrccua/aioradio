@@ -31,6 +31,7 @@ from types import coroutine
 from typing import Any, Dict, List, Union
 
 import cchardet as chardet
+import httpx
 import mandrill
 from openpyxl import load_workbook
 from smb.base import SharedFile
@@ -442,6 +443,7 @@ async def xlsx_to_tsv(
         s3_source_key: str,
         s3_destination_bucket: str,
         s3_destination_key: str,
+        fice: str='',
         delimiter: str='\t'
 ) -> Union[str, None]:
     """Convert xlsx file to csv/tsv file.
@@ -451,6 +453,7 @@ async def xlsx_to_tsv(
         s3_source_key (str): source xlsx file s3 key
         s3_destination_bucket (str): destination xlsx file s3 bucket
         s3_destination_key (str): destination xlsx file s3 key
+        fice (str): Institution unique identifier
         delimiter (str, optional): Delimiter. Defaults to '\t'.
 
     Returns:
@@ -460,7 +463,7 @@ async def xlsx_to_tsv(
     try:
         with NamedTemporaryFile(suffix='.xlsx') as tmp:
             await download_file(bucket=s3_source_bucket, filepath=tmp.name, s3_key=s3_source_key)
-            records, _ = xlsx_to_records(tmp)
+            records, _ = xlsx_to_records(fice, tmp)
 
         await tsv_to_s3(records, delimiter, s3_destination_bucket, s3_destination_key)
     except Exception as err:
@@ -474,6 +477,7 @@ async def zipfile_to_tsv(
         s3_source_key: str,
         s3_destination_bucket: str,
         s3_destination_key: str,
+        fice: str='',
         delimiter: str='\t'
 ) -> Union[str, None]:
     """Convert zipfile to csv/tsv file.
@@ -483,6 +487,7 @@ async def zipfile_to_tsv(
         s3_source_key (str): source zipfile s3 key
         s3_destination_bucket (str): destination zipfile s3 bucket
         s3_destination_key (str): destination zipfile s3 key
+        fice (str): Institution unique identifier
         delimiter (str, optional): Delimiter. Defaults to '\t'.
 
     Returns:
@@ -500,7 +505,7 @@ async def zipfile_to_tsv(
             for path in await unzip_file_get_filepaths(tmp.name, tmp_directory, include_extensions=extensions):
                 ext = os.path.splitext(path)[1].lower()
                 if ext == '.xlsx':
-                    records_from_path, header = xlsx_to_records(path, header)
+                    records_from_path, header = xlsx_to_records(fice, path, header)
                     records.extend(records_from_path)
                 else:
                     encoding = detect_encoding(path)
@@ -568,10 +573,11 @@ def tsv_to_records(path: str, encoding: str, delimiter: str, header: str) -> tup
     return records, header
 
 
-def xlsx_to_records(filepath: str, header: Union[str, None]=None) -> tuple:
+def xlsx_to_records(fice: str, filepath: str, header: Union[str, None]=None) -> tuple:
     """Load excel file to records object as list of lists.
 
     Args:
+        fice (str): Institution unique identifier
         filepath (str): Temporary Filepath
         header (Union[str, None], optional): Header. Defaults to None.
 
@@ -582,10 +588,14 @@ def xlsx_to_records(filepath: str, header: Union[str, None]=None) -> tuple:
         tuple: Records as list of lists, header
     """
 
+    excel_sheet_filter = get_efi_excel_sheet_filter()
+
     records = []
     workbook = load_workbook(filepath, read_only=True)
     for sheet in workbook:
-        if sheet.title != 'hiddenSheet':
+        # Make sure excel sheet hasn't been marked to skip for particular fice
+        if fice not in excel_sheet_filter or sheet.title not in excel_sheet_filter[fice]:
+
             sheet.calculate_dimension(force=True)
 
             for idx, row in enumerate(sheet.values):
@@ -663,3 +673,25 @@ def detect_delimiter(path: str, encoding: str) -> str:
                 count = char_count
 
     return delimiter
+
+
+def get_efi_excel_sheet_filter() -> dict[str, set]:
+    """Get the Excel sheet filter from the EFI api.
+
+    Returns:
+        dict[str, set]: Excel sheet filter with fice as key and sheet names as value
+    """
+
+    excel_sheet_filter = {}
+    try:
+        with httpx.Client() as client:
+            resp = client.get(url="http://efi.nrccua-app.org/filter/excel-sheet", timeout=30.0)
+            for fice, item in resp.json()["excel_sheet_filter"].items():
+                excel_sheet_filter[fice] = set()
+                for name, value in item.items():
+                    if value:
+                        excel_sheet_filter[fice].add(name)
+    except Exception:
+        pass
+
+    return excel_sheet_filter
