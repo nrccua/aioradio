@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.18.3 (2023-06-07)
+
+* Add excel sheet filter to file ingestion efi functions.
+
+
 v0.18.2 (2023-04-18)
 
 * Add psycopg2 imports inside functions and not at the top of the file.
