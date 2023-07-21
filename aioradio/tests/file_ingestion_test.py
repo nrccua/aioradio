@@ -1,4 +1,4 @@
-"""pytest file_ingestion script."""
+"""Pytest file_ingestion script."""
 
 # pylint: disable=broad-except
 # pylint: disable=c-extension-no-member

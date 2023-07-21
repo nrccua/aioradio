@@ -3,10 +3,11 @@ aiojobs==1.1.0
 backoff==2.2.1
 boto3==1.24.59
 botocore==1.27.59
-cchardet==2.1.7
+cython==0.29.36
 ddtrace==1.11.2
-dominodatalab==1.2.3
+dominodatalab==1.2.4
 fakeredis==1.10.1
+faust-cchardet==2.1.18
 flask==2.1.2
 flask-cors==3.0.10
 httpx==0.24.0
@@ -14,15 +15,15 @@ mandrill==1.0.60
 moto==3.1.18
 openpyxl==3.0.10
 orjson==3.8.10
-pandas==2.0.0
-pre-commit==3.2.2
+pandas==2.0.3
+pre-commit==3.3.3
 psycopg2-binary==2.9.6
-pylint==2.17.2
-pyodbc==4.0.39
+pylint==2.17.4
+pyodbc==4.0.39 --no-binary=pyodbc
 pysmb==1.2.9.1
-pytest==7.3.1
-pytest-asyncio==0.21.0
-pytest-cov==4.0.0
+pytest==7.4.0
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
 python-json-logger==2.0.7
 redis==3.5.3
 twine==4.0.2

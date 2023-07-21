@@ -1,4 +1,4 @@
-"""aioradio utils cache script."""
+"""Aioradio utils cache script."""
 
 # pylint: disable=ungrouped-imports
 # pylint: disable=wrong-import-position

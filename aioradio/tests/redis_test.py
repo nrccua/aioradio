@@ -1,4 +1,4 @@
-"""pytest redis cache."""
+"""Pytest redis cache."""
 
 # pylint: disable=c-extension-no-member
 

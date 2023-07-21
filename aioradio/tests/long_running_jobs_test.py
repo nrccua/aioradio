@@ -1,4 +1,4 @@
-"""pytest Long Running Jobs."""
+"""Pytest Long Running Jobs."""
 
 from asyncio import create_task, sleep
 from random import randint

@@ -1,4 +1,4 @@
-"""pytest secrets."""
+"""Pytest secrets."""
 
 # pylint: disable=unused-argument
 

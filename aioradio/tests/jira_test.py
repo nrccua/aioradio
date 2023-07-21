@@ -1,4 +1,4 @@
-"""pytest Jira."""
+"""Pytest Jira."""
 
 # pylint: disable=c-extension-no-member
 

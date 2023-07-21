@@ -1,4 +1,4 @@
-"""pytest logger."""
+"""Pytest logger."""
 
 import logging
 
