@@ -1,4 +1,4 @@
-"""pytest pyodbc script."""
+"""Pytest pyodbc script."""
 
 import pytest
 

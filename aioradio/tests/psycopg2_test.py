@@ -1,4 +1,4 @@
-"""pytest psycopg2 script."""
+"""Pytest psycopg2 script."""
 
 import pytest
 

@@ -1,4 +1,4 @@
-"""aioradio redis cache script."""
+"""Aioradio redis cache script."""
 
 # pylint: disable=c-extension-no-member
 # pylint: disable=no-member
@@ -30,7 +30,7 @@ HASH_ALGO_MAP = {
 
 @dataclass
 class Redis:
-    """class dealing with redis functions."""
+    """Class dealing with redis functions."""
 
     config: Dict[str, Any] = dataclass_field(default_factory=dict)
     pool: redis.Redis = dataclass_field(init=False, repr=False)
@@ -411,7 +411,7 @@ class Redis:
         return self.pool.hexists(key, field)
 
     async def build_cache_key(self, payload: Dict[str, Any], separator='|', use_hashkey: bool=None) -> str:
-        """build a cache key from a dictionary object. Concatenate and
+        """Build a cache key from a dictionary object. Concatenate and
         normalize key-values from an unnested dict, taking care of sorting the
         keys and each of their values (if a list).
 

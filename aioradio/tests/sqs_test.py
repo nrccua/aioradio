@@ -1,4 +1,4 @@
-"""pytest sqs."""
+"""Pytest sqs."""
 
 # pylint: disable=c-extension-no-member
 # pylint: disable=no-member

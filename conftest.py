@@ -1,4 +1,4 @@
-"""pytest configuration."""
+"""Pytest configuration."""
 
 import asyncio
 import os

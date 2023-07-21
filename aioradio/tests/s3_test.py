@@ -1,4 +1,4 @@
-"""pytest s3."""
+"""Pytest s3."""
 
 # pylint: disable=logging-fstring-interpolation
 

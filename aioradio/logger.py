@@ -15,7 +15,7 @@ class CustomJsonFormatter(jsonlogger.JsonFormatter):
     """Custom Json Formatter."""
 
     def add_fields(self, log_record: Dict[str, Any], record: logging.LogRecord, message_dict: Dict[str, Any]):
-        """normalize default set of fields.
+        """Normalize default set of fields.
 
         Args:
             log_record (Dict[str, Any]): dict object containing log record info

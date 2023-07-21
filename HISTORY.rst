@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.18.4 (2023-07-21)
+
+* Replace cchardet with faust-cchardet.
+* Update cython==0.29.36.
+* Update dominodatalab==1.2.4.
+
 v0.18.3 (2023-06-07)
 
 * Add excel sheet filter to file ingestion efi functions.

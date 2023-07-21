@@ -1,4 +1,4 @@
-"""moto server for pytesting aws services."""
+"""Moto server for pytesting aws services."""
 
 # pylint: disable=broad-exception-raised
 # pylint: disable=too-many-instance-attributes

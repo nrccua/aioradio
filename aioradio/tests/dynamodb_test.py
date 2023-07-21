@@ -1,4 +1,4 @@
-"""pytest dynamodb."""
+"""Pytest dynamodb."""
 
 from decimal import Decimal
 from random import randint

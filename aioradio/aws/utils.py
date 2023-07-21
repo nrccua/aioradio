@@ -1,4 +1,3 @@
-
 """Generic async utility functions."""
 
 # pylint: disable=broad-except
