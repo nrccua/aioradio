@@ -3,6 +3,17 @@ History
 =======
 
 
+v0.18.5 (2023-08-31)
+
+* Remove dominodatalab as an install dependency.
+* Update aioboto3==11.3.0.
+* Update aiojobs==1.2.0.
+* Update boto3==1.28.17.
+* Update botocore==1.31.17.
+* Update cython==3.0.2.
+* Update faust-cchardet==2.1.19.
+
+
 v0.18.4 (2023-07-21)
 
 * Replace cchardet with faust-cchardet.
