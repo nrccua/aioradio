@@ -28,6 +28,7 @@ warnings.simplefilter(action='ignore', category=UserWarning)
 MAX_SSL_CONTENT_LENGTH = (2 ** 31) - 1
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 logger.propagate = False
 c_handler = logging.StreamHandler()
 c_handler.setLevel(logging.INFO)

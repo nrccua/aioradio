@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.19.1 (2023-09-07)
+
+* Set logging level in ds_utils.
+
+
 v0.19.0 (2023-09-07)
 
 * Only import domino within domino specific functions so it doesn't need to be installed when using ds_utils.
