@@ -22,13 +22,18 @@ from time import sleep, time
 
 import boto3
 import pandas as pd
-from domino import Domino
 from smb.SMBConnection import SMBConnection
 
 warnings.simplefilter(action='ignore', category=UserWarning)
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 MAX_SSL_CONTENT_LENGTH = (2 ** 31) - 1
+
+logger = logging.getLogger(__name__)
+logger.propagate = False
+c_handler = logging.StreamHandler()
+c_handler.setLevel(logging.INFO)
+c_format = logging.Formatter('%(asctime)s:   %(message)s')
+c_handler.setFormatter(c_format)
+logger.addHandler(c_handler)
 
 
 def file_to_s3(s3_client, local_filepath, s3_bucket, key):
@@ -256,6 +261,7 @@ def get_boto3_session(env):
 def get_domino_connection(secret_id, project, host, env='sandbox'):
     """Get domino connection."""
 
+    from domino import Domino
     secret_client = get_boto3_session(env).client("secretsmanager", region_name='us-east-1')
     api_key = secret_client.get_secret_value(SecretId=secret_id)['SecretString']
     return Domino(project=project, api_key=api_key, host=host)
