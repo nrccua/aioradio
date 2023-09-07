@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.19.0 (2023-09-07)
+
+* Only import domino within domino specific functions so it doesn't need to be installed when using ds_utils.
+* Improve logging in ds_utils to log with timestamp before message.
+
+
 v0.18.5 (2023-08-31)
 
 * Remove dominodatalab as an install dependency.
