@@ -3,6 +3,20 @@ History
 =======
 
 
+v0.19.2 (2023-10-19)
+
+* Add new DB_CONNECT class that uses env vars instead of AWS secret manager for sensitive creds.
+* Update aioboto3==11.3.1.
+* Update cython==3.0.4.
+* Update httpx==0.25.0.
+* Update pandas==2.1.1.
+* Update pre-commit==3.5.0.
+* Update psycopg2-binary==2.9.9.
+* Update pylint==3.0.1.
+* Update pytest==7.4.2.
+* Update
+
+
 v0.19.1 (2023-09-07)
 
 * Set logging level in ds_utils.
