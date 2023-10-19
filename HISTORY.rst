@@ -14,7 +14,6 @@ v0.19.2 (2023-10-19)
 * Update psycopg2-binary==2.9.9.
 * Update pylint==3.0.1.
 * Update pytest==7.4.2.
-* Update
 
 
 v0.19.1 (2023-09-07)
