@@ -268,6 +268,75 @@ def get_domino_connection(secret_id, project, host, env='sandbox'):
     return Domino(project=project, api_key=api_key, host=host)
 
 
+class DB_CONNECT():
+    """[Class for database connection]
+
+    DB_CONNECT can be used to return a connection object, and will work
+    within the "with" context to appropriately commit or rollback
+    transactions based on the current environment.  Uses env vars
+    instead of AWS secret manager for sensitive creds.
+    """
+    config = None
+    conn = None
+
+    def __init__(self, config: dict):
+        self.config = config
+
+    def __enter__(self):
+        self.conn = self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.conn is not None:
+            if self.config.get('rollback', True):
+                self.conn.rollback()
+            else:
+                self.conn.commit()
+            self.conn.close()
+
+    def connect(self):
+        """[Setup database connection.]
+
+        Create and return a connection using the config info. Autocommit
+        will be on by default unless the rollback setting is set to true
+        in db_info Autocommit can be changed if needed once the
+        connection is returned
+        """
+
+        if self.config['db'] == 'psycopg2':
+
+            from aioradio.psycopg2 import establish_psycopg2_connection
+
+            self.conn = establish_psycopg2_connection(
+                host=self.config['host'],
+                user=self.config['user'],
+                password=self.config['password'],
+                database=self.config.get('database', ''),
+                port=self.config['port']
+            )
+            self.conn.autocommit = not self.config['rollback']
+
+        elif self.config['db'] == 'pyodbc':
+
+            from aioradio.pyodbc import establish_pyodbc_connection
+
+            self.conn = establish_pyodbc_connection(
+                host=self.config['host'],
+                user=self.config['user'],
+                pwd=self.config['pwd'],
+                port=self.config.get('port', None),
+                multi_subnet_failover=self.config.get('multi_subnet_failover', None),
+                database=self.config.get('database', ''),
+                driver=self.config.get('driver', '{ODBC Driver 17 for SQL Server}'),
+                autocommit = not self.config.get('rollback', True),
+                trusted_connection=self.config.get('trusted_connection', 'no'),
+                tds_version=self.config.get('tds_version', '7.4'),
+                application_intent=self.config.get('application_intent', '')
+            )
+
+        return self.conn
+
+
 class DbInfo():
     """[Class for database connection]
 
