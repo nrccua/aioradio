@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.19.3 (2023-10-20)
+
+* Add TrustServerCertificate option in sqlserver connection string, enabling use of driver {ODBC Driver 18 for SQL Server}.
+
+
 v0.19.2 (2023-10-19)
 
 * Add new DB_CONNECT class that uses env vars instead of AWS secret manager for sensitive creds.

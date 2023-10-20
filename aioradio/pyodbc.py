@@ -49,6 +49,7 @@ def establish_pyodbc_connection(
         database: str='',
         tds_version: str='7.4',
         trusted_connection: str='',
+        trust_server_certificate: str='',
         multi_subnet_failover: str='',
         driver: str='',
         application_intent: str='',
@@ -65,6 +66,7 @@ def establish_pyodbc_connection(
         database (str, optional): database. Defaults to ''.
         tds_version (str, optional): TDS_Version. Defaults to '7.4'.
         trusted_connection (str, optional): Trusted_Connection. Defaults to ''.
+        trust_server_certificate (str, optional): TrustServerCertificate. Defaults to ''.
         multi_subnet_failover (str, optional): MultiSubnetFailover. Defaults to ''.
         driver (str, optional): unixodbc driver. Defaults to ''.
         application_intent (str, optional): ReadOnly | ReadWrite. Defaults to ''.
@@ -98,6 +100,8 @@ def establish_pyodbc_connection(
         conn_string += f';MultiSubnetFailover={multi_subnet_failover}'
     if application_intent:
         conn_string += f';ApplicationIntent={application_intent}'
+    if trust_server_certificate:
+        conn_string += f';TrustServerCertificate={trust_server_certificate}'
 
     return pyodbc.connect(conn_string, autocommit=autocommit)
 
