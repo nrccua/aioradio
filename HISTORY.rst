@@ -3,6 +3,21 @@ History
 =======
 
 
+v0.19.4 (2023-11-03)
+
+* Add common data science functions to ds_utils.py.
+* Update cython==3.0.5.
+* Update httpx==0.25.1.
+* Update pandas==2.1.2.
+* Update pylint==3.0.2.
+* Update pytest==7.4.3.
+* Update wheel==0.41.3.
+* Add python library haversine==2.8.0.
+* Add python library polars==0.19.12.
+* Add python library pyarrow==13.0.0.
+* Add python library pyspark==3.4.1.
+
+
 v0.19.3 (2023-10-20)
 
 * Add TrustServerCertificate option in sqlserver connection string, enabling use of driver {ODBC Driver 18 for SQL Server}.
