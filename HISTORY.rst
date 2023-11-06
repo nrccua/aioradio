@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.20.0 (2023-11-06)
+
+* Update redis==5.0.1.
+* Update fakeredis==2.20.0.
+
+
 v0.19.4 (2023-11-03)
 
 * Add common data science functions to ds_utils.py.
