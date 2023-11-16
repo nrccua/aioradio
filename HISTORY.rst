@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.20.2 (2023-11-16)
+
+* Hard-code 'us-east-1' and 'us-east-2' as regions in SQS AwsServiceManager.
+
+
 v0.20.1 (2023-11-16)
 
 * Add sqs.sync_add_regions for setting region besides us-east-1 during instantiation of LongRunningJobs.
