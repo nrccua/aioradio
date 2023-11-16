@@ -25,6 +25,16 @@ async def add_regions(regions: List[str]):
     AWS_SERVICE.add_regions(regions)
 
 
+def sync_add_regions(regions: List[str]):
+    """Add regions to SQS AWS service.
+
+    Args:
+        regions (List[str]): List of AWS regions
+    """
+
+    AWS_SERVICE.add_regions(regions)
+
+
 @AWS_SERVICE.active
 async def create_queue(queue: str, region: str, attributes: Dict[str, str], account_id: str='') -> Dict[str, Any]:
     """Create SQS queue in region defined.
