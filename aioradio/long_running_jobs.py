@@ -51,6 +51,7 @@ class LongRunningJobs:
     # define the queue name and aws region
     sqs_queue: str = None
     sqs_region: str = None
+    sqs.sync_add_regions([sqs_region])
 
     # If running test cases use fakeredis
     fakeredis: bool = False

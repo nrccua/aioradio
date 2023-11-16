@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.20.1 (2023-11-16)
+
+* Add sqs.sync_add_regions for setting region besides us-east-1 during instantiation of LongRunningJobs.
+
+
 v0.20.0 (2023-11-06)
 
 * Update redis==5.0.1.
