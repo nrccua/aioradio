@@ -145,6 +145,35 @@ def merge_pandas_df_in_db(df, target, on, partition_by=None):
             raise
 
 
+def write_constants_to_db(df, df_library='pandas'):
+    """Write constants defined in a dataframe to databricks.
+
+    Each constant value is defined as a JSON string. See schema of
+    dsc_prd.student_data.constants.
+    """
+
+    table = f"{db_catalog('prod')}.student_data.constants"
+
+    if df_library.lower() == 'pandas':
+        merge_spark_df_in_db(spark.createDataFrame(df), table, on=['key'])
+    elif df_library.lower() == 'polars':
+        merge_spark_df_in_db(spark.createDataFrame(df.to_pandas()), table, on=['key'])
+    elif df_library.lower() == 'spark':
+        merge_spark_df_in_db(df, table, on=['key'])
+    else:
+        logger.info(f'Unknown dataframe library {df_library}')
+
+
+def read_constants_from_db(constants_list=None):
+    """Read all constants or pass in a list to filter constants."""
+
+    table = f"{db_catalog('prod')}.student_data.constants"
+    constants = '*' if constants_list is None else ','.join(constants_list)
+    mapping = {i['key']: json.loads(i['value']) for i in sql_to_polars_df(f'SELECT {constants} FROM {table}').to_dicts()}
+
+    return mapping
+
+
 ################################## DataFrame functions ####################################
 
 
