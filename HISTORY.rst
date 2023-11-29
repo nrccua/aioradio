@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.20.3 (2023-11-29)
+
+* Add Databricks functions to read/write constants for Data Science to use across projects.
+
+
 v0.20.2 (2023-11-16)
 
 * Hard-code 'us-east-1' and 'us-east-2' as regions in SQS AwsServiceManager.
