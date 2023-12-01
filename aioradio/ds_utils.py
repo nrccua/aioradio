@@ -168,8 +168,8 @@ def read_constants_from_db(constants_list=None):
     """Read all constants or pass in a list to filter constants."""
 
     table = f"{db_catalog('prod')}.student_data.constants"
-    constants = '*' if constants_list is None else ','.join(constants_list)
-    mapping = {i['key']: json.loads(i['value']) for i in sql_to_polars_df(f'SELECT {constants} FROM {table}').to_dicts()}
+    where_clause = f'WHERE key in ({str(constants_list)[1:-1]})' if constants_list is not None else ''
+    mapping = {i['key']: json.loads(i['value']) for i in sql_to_polars_df(f'SELECT * FROM {table} {where_clause}').to_dicts()}
 
     return mapping
 
