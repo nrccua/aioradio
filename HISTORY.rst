@@ -3,6 +3,13 @@ History
 =======
 
 
+v0.20.4 (2023-12-01)
+
+* Fix bug with sql statement in function ds_utils.read_constants_from_db.
+* Update aiojobs==1.2.1.
+* Update polars==0.19.18.
+
+
 v0.20.3 (2023-11-29)
 
 * Add Databricks functions to read/write constants for Data Science to use across projects.
