@@ -3,6 +3,13 @@ History
 =======
 
 
+v0.20.5 (2023-12-08)
+
+* Add function ese_db_catalog in ds_utils.
+* Update pandas==2.1.4.
+* Update polars==0.19.19.
+
+
 v0.20.4 (2023-12-01)
 
 * Fix bug with sql statement in function ds_utils.read_constants_from_db.
