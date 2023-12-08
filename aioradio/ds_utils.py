@@ -62,6 +62,20 @@ def db_catalog(env):
     return catalog
 
 
+def ese_db_catalog(env):
+    """Return the ESE DataBricks catalog based on the passed in environment."""
+
+    catalog = ''
+    if env == 'sandbox':
+        catalog = 'ese_dev'
+    elif env == 'stage':
+        catalog = 'ese_stg'
+    elif env == 'prod':
+        catalog = 'ese_prd'
+
+    return catalog
+
+
 def sql_to_polars_df(sql):
     """Get polars DataFrame from SQL query results."""
 
