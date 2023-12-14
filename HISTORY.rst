@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.20.7 (2023-12-14)
+
+* In merge_spark_df_in_db make separation explicit in the operation condition to avoid ConcurrentAppendException.
+
+
 v0.20.6 (2023-12-14)
 
 * Add stage_table optional argument to merge_spark_df_in_db ds.utils function.

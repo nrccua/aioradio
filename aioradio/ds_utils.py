@@ -95,7 +95,7 @@ def does_db_table_exists(name):
     return exists
 
 
-def merge_spark_df_in_db(df, target, on, partition_by=None, stage_table=None):
+def merge_spark_df_in_db(df, target, on, partition_by=None, stage_table=None, partition_by_values=None):
     """Convert spark DF to staging table than merge with target table in
     Databricks."""
 
@@ -113,6 +113,9 @@ def merge_spark_df_in_db(df, target, on, partition_by=None, stage_table=None):
             df.write.option("delta.columnMapping.mode", "name").mode('overwrite').partitionBy(partition_by).saveAsTable(stage)
 
         on_clause = ' AND '.join(f'{target}.{col} = {stage}.{col}' for col in on)
+        if partition_by_values is not None:
+            explicit_separation = ' AND '.join(f'{target}.{col} IN ({str(values)[1:-1]})' for col, values in partition_by_values.items())
+            on_clause += f' AND {explicit_separation}'
         match_clause = ', '.join(f'{target}.{col} = {stage}.{col}' for col in df.columns if col != 'CREATED_DATETIME')
 
         try:
