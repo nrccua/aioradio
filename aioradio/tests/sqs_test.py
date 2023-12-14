@@ -8,8 +8,13 @@ from uuid import uuid4
 import orjson
 import pytest
 
-from aioradio.aws.sqs import (add_regions, delete_messages, get_messages,
-                              purge_messages, send_messages)
+from aioradio.aws.sqs import (
+    add_regions,
+    delete_messages,
+    get_messages,
+    purge_messages,
+    send_messages
+)
 
 QUEUE = 'pytest'
 REGION = 'us-east-2'

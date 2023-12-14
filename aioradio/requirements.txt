@@ -1,8 +1,8 @@
-aioboto3==11.3.1
+aioboto3==12.1.0
 aiojobs==1.2.1
 backoff==2.2.1
-boto3==1.28.17
-botocore==1.31.17
+boto3==1.33.1
+botocore==1.33.1
 cython==3.0.6
 ddtrace==1.11.2
 dominodatalab==1.2.4
@@ -18,15 +18,15 @@ openpyxl==3.0.10
 orjson==3.8.10
 pandas==2.1.4
 polars==0.19.19
-pre-commit==3.5.0
+pre-commit==3.6.0
 psycopg2-binary==2.9.9
 pyarrow==14.0.1
-pylint==3.0.2
+pylint==3.0.3
 pyodbc==4.0.39 --no-binary=pyodbc
 pysmb==1.2.9.1
 pyspark==3.4.1
 pytest==7.4.3
-pytest-asyncio==0.23.2
+pytest-asyncio==0.21.1
 pytest-cov==4.1.0
 python-json-logger==2.0.7
 redis==5.0.1

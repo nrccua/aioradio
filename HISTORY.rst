@@ -3,6 +3,14 @@ History
 =======
 
 
+v0.20.6 (2023-12-14)
+
+* Add stage_table optional argument to merge_spark_df_in_db ds.utils function.
+* Update aioboto3==12.1.0.
+* Update boto3==1.33.1.
+* Update botocore==1.33.1.
+
+
 v0.20.5 (2023-12-08)
 
 * Add function ese_db_catalog in ds_utils.

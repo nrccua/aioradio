@@ -6,7 +6,6 @@ from itertools import chain
 
 import aioboto3
 import aiobotocore
-import boto3
 import pytest
 import pytest_asyncio
 from aiobotocore.config import AioConfig
