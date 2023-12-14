@@ -95,11 +95,11 @@ def does_db_table_exists(name):
     return exists
 
 
-def merge_spark_df_in_db(df, target, on, partition_by=None):
+def merge_spark_df_in_db(df, target, on, partition_by=None, stage_table=None):
     """Convert spark DF to staging table than merge with target table in
     Databricks."""
 
-    stage = f"{target}_stage"
+    stage = f"{target}_stage" if stage_table is None else stage_table
 
     if not does_db_table_exists(target):
         if partition_by is None:
@@ -123,11 +123,11 @@ def merge_spark_df_in_db(df, target, on, partition_by=None):
             raise
 
 
-def merge_pandas_df_in_db(df, target, on, partition_by=None):
+def merge_pandas_df_in_db(df, target, on, partition_by=None, stage_table=None):
     """Convert pandas DF to staging table than merge with target table in
     Databricks."""
 
-    stage = f"{target}_stage"
+    stage = f"{target}_stage" if stage_table is None else stage_table
 
     for col, dtype in df.dtypes.apply(lambda x: x.name).to_dict().items():
         if dtype == 'object':
