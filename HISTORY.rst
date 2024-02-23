@@ -10,7 +10,6 @@ v0.20.8 (2024-02-19)
 * Update botocore==1.34.34.
 * Update dominodatalab==1.3.0.
 * Update fakeredis==2.21.1.
-
 * Update httpx==0.26.0.
 * Update polars==0.20.10.
 * Update pre-commit==3.6.2.
