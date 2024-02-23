@@ -3,6 +3,21 @@ History
 =======
 
 
+v0.20.8 (2024-02-19)
+
+* Update aioboto3==12.3.0.
+* Update boto3==1.34.34.
+* Update botocore==1.34.34.
+* Update dominodatalab==1.3.0.
+* Update fakeredis==2.21.1.
+
+* Update httpx==0.26.0.
+* Update polars==0.20.10.
+* Update pre-commit==3.6.2.
+* Update pytest==8.0.1.
+* Update twine==5.0.0.
+
+
 v0.20.7 (2023-12-14)
 
 * In merge_spark_df_in_db make separation explicit in the operation condition to avoid ConcurrentAppendException.

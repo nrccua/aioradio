@@ -205,12 +205,12 @@ def convert_pyspark_dtypes_to_pandas(df):
 
         if dtype == 'object':
             df[col] = df[col].astype('string[pyarrow]')
-            df[col].mask(df[col] == '', pd.NA, inplace=True)
+            df[col] = df[col].mask(df[col] == '', pd.NA)
         elif (dtype.startswith('int') or dtype.startswith('float')) and not dtype.endswith('[pyarrow]'):
             df[col] = df[col].astype(f'{dtype}[pyarrow]')
         elif 'string' in dtype:
             df[col] = df[col].astype('string[pyarrow]')
-            df[col].mask(df[col] == '', pd.NA, inplace=True)
+            df[col] = df[col].mask(df[col] == '', pd.NA)
 
     return df
 
