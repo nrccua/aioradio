@@ -3,6 +3,20 @@ History
 =======
 
 
+v0.20.9 (2024-02-29)
+
+* Add new function promote_model_to_production in ds_utils.
+* Update ddtrace==2.6.5.
+* Update httpx==0.27.0.
+* Update orjson==3.9.15.
+* Update pandas==2.2.1.
+* Update pyodbc==5.1.0.
+* Update polars==0.20.13.
+* Update redis==5.0.2.
+* Update python to 3.12.2.
+* Add .show() to end of spark.sql(...) to display merge statistics.
+
+
 v0.20.8 (2024-02-19)
 
 * Update aioboto3==12.3.0.

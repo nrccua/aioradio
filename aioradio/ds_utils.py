@@ -29,6 +29,8 @@ import pyarrow as pa
 import pandas as pd
 import polars as pl
 from haversine import haversine, Unit
+from mlflow.entities.model_registry.model_version_status import ModelVersionStatus
+from mlflow.tracking.client import MlflowClient
 from pyspark.sql import SparkSession
 from smb.SMBConnection import SMBConnection
 
@@ -119,7 +121,7 @@ def merge_spark_df_in_db(df, target, on, partition_by=None, stage_table=None, pa
         match_clause = ', '.join(f'{target}.{col} = {stage}.{col}' for col in df.columns if col != 'CREATED_DATETIME')
 
         try:
-            spark.sql(f'MERGE INTO {target} USING {stage} ON {on_clause} WHEN MATCHED THEN UPDATE SET {match_clause} WHEN NOT MATCHED THEN INSERT *')
+            spark.sql(f'MERGE INTO {target} USING {stage} ON {on_clause} WHEN MATCHED THEN UPDATE SET {match_clause} WHEN NOT MATCHED THEN INSERT *').show()
             spark.sql(f'DROP TABLE {stage}')
         except Exception:
             spark.sql(f'DROP TABLE {stage}')
@@ -155,7 +157,7 @@ def merge_pandas_df_in_db(df, target, on, partition_by=None, stage_table=None):
         match_clause = ', '.join(f'{target}.{col} = {stage}.{col}' for col in df.columns if col != 'CREATED_DATETIME')
 
         try:
-            spark.sql(f'MERGE INTO {target} USING {stage} ON {on_clause} WHEN MATCHED THEN UPDATE SET {match_clause} WHEN NOT MATCHED THEN INSERT *')
+            spark.sql(f'MERGE INTO {target} USING {stage} ON {on_clause} WHEN MATCHED THEN UPDATE SET {match_clause} WHEN NOT MATCHED THEN INSERT *').show()
             spark.sql(f'DROP TABLE {stage}')
         except Exception:
             spark.sql(f'DROP TABLE {stage}')
@@ -189,6 +191,50 @@ def read_constants_from_db(constants_list=None):
     mapping = {i['key']: json.loads(i['value']) for i in sql_to_polars_df(f'SELECT * FROM {table} {where_clause}').to_dicts()}
 
     return mapping
+
+
+def promote_model_to_production(model_name, tags):
+    """Transition new model to production in Databricks."""
+
+    client = MlflowClient()
+
+    # current registered version
+    new_model = client.get_latest_versions(name=model_name, stages=["None"])
+    logger.info(f"new_model: {new_model}")
+    new_version = new_model[0].version
+    logger.info(f"new_version: {new_version}")
+
+    # Add tags to registered model
+    for key in tags:
+        value = client.get_run(new_model[0].run_id).data.tags[key]
+        client.set_model_version_tag(model_name, new_version, key, value)
+
+    # current production version
+    current_production = client.get_latest_versions(name=model_name, stages=["Production"])
+    if len(current_production) > 0:
+        current_production_version = current_production[0].version
+        logger.info(f"current_production_version: {current_production_version}")
+    else:
+        current_production_version = None
+
+    # ensure current version is ready
+    for _ in range(10):
+        model_version_details = client.get_model_version(name=model_name, version=new_version)
+        status = ModelVersionStatus.from_string(model_version_details.status)
+        logger.info(f"Model status: {ModelVersionStatus.to_string(status)}")
+        if status == ModelVersionStatus.READY:
+            break
+        time.sleep(1)
+
+    registered_model = client.get_registered_model(model_name)
+    logger.info(f"registered_model: {registered_model}")
+
+    # transition to production
+    client.transition_model_version_stage(name=model_name, version=new_version, stage="Production")
+
+    # archive previous model (can also delete, but that is permanent)
+    if current_production_version is not None and new_version != current_production_version:
+        client.transition_model_version_stage(name=model_name, version=current_production_version, stage="Archived")
 
 
 ################################## DataFrame functions ####################################
