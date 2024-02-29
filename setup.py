@@ -42,7 +42,7 @@ setup(name='aioradio',
         'pysmb>=1.2.7',
         'python-json-logger>=2.0.2',
         'pyspark>=3.4.1',
-        'redis==5.0.1'
+        'redis>=5.0.1'
     ],
     include_package_data=True,
     tests_require=[
