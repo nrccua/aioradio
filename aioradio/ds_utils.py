@@ -10,6 +10,8 @@
 # pylint: disable=too-many-boolean-expressions
 # pylint: disable=unnecessary-comprehension
 # pylint: disable=unused-argument
+# pylint: disable=unused-import
+# pylint: disable=used-before-assignment
 
 import base64
 import csv
@@ -46,7 +48,10 @@ c_format = logging.Formatter('%(asctime)s:   %(message)s')
 c_handler.setFormatter(c_format)
 logger.addHandler(c_handler)
 
-spark = SparkSession.builder.getOrCreate()
+try:
+    from databricks.connect import DatabricksSession
+except ImportError:
+    spark = SparkSession.builder.getOrCreate()
 
 
 ############################### Databricks functions ################################
