@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.20.11 (2024-03-12)
+
+* Add pyspark back in as install requirement.
+
+
 v0.20.10 (2024-03-12)
 
 * Remove pyspark as an install requirement.
