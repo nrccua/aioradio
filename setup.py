@@ -7,7 +7,7 @@ with open('README.md', 'r') as fileobj:
     long_description = fileobj.read()
 
 setup(name='aioradio',
-    version='0.20.9',
+    version='0.20.11',
     description='Generic asynchronous i/o python utilities for AWS services (SQS, S3, DynamoDB, Secrets Manager), Redis, MSSQL (pyodbc), JIRA and more',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -41,7 +41,6 @@ setup(name='aioradio',
         'pyarrow>=13.0.0',
         'pysmb>=1.2.7',
         'python-json-logger>=2.0.2',
-        'pyspark>=3.4.1',
         'redis>=5.0.1'
     ],
     include_package_data=True,
