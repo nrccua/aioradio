@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.20.12 (2024-03-12)
+
+* Avoid instantiating spark if databricks-connect installed.
+
+
 v0.20.11 (2024-03-12)
 
 * Add pyspark back in as install requirement.
