@@ -50,6 +50,7 @@ logger.addHandler(c_handler)
 
 try:
     from databricks.connect import DatabricksSession
+    spark = DatabricksSession.builder.getOrCreate()
 except ImportError:
     spark = SparkSession.builder.getOrCreate()
 
