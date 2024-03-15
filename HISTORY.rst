@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.20.14 (2024-03-15)
+
+* Fix bug with spark not being instantiated.
+
+
 v0.20.13 (2024-03-15)
 
 * Use spark df.toPandas() function instead of private function converted spark df -> pandas -> polars.
