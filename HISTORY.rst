@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.20.13 (2024-03-15)
+
+* Use spark df.toPandas() function instead of private function converted spark df -> pandas -> polars.
+
+
 v0.20.12 (2024-03-12)
 
 * Avoid instantiating spark if databricks-connect installed.
