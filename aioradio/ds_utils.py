@@ -5,6 +5,7 @@
 # pylint: disable=invalid-name
 # pylint: disable=logging-fstring-interpolation
 # pylint: disable=no-member
+# pylint: disable=not-an-iterable
 # pylint: disable=protected-access
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-boolean-expressions
@@ -27,7 +28,6 @@ from time import sleep, time
 
 import boto3
 import numpy as np
-import pyarrow as pa
 import pandas as pd
 import polars as pl
 from haversine import haversine, Unit
@@ -86,7 +86,7 @@ def ese_db_catalog(env):
 def sql_to_polars_df(sql):
     """Get polars DataFrame from SQL query results."""
 
-    return pl.from_arrow(pa.Table.from_batches(spark.sql(sql)._collect_as_arrow()))
+    return pl.from_pandas(spark.sql(sql).toPandas())
 
 
 def does_db_table_exists(name):
