@@ -4,6 +4,7 @@ backoff==2.2.1
 boto3==1.34.34
 botocore==1.34.34
 cython==3.0.8
+databricks-connect==14.3.1
 ddtrace==2.6.5
 dominodatalab==1.3.0
 fakeredis==2.21.1
