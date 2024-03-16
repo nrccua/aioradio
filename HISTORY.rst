@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.20.15 (2024-03-16)
+
+* Explicitly add databricks config to DatabricksSession.
+
+
 v0.20.14 (2024-03-15)
 
 * Fix bug with spark not being instantiated.
