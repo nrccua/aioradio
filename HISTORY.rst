@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.20.16 (2024-03-19)
+
+* Remove databricks session spark object and use original method to convert spark to polars df.
+
+
 v0.20.15 (2024-03-16)
 
 * Explicitly add databricks config to DatabricksSession.

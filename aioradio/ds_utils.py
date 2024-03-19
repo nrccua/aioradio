@@ -30,6 +30,7 @@ import boto3
 import numpy as np
 import pandas as pd
 import polars as pl
+import pyarrow as pa
 from haversine import haversine, Unit
 from mlflow.entities.model_registry.model_version_status import ModelVersionStatus
 from mlflow.tracking.client import MlflowClient
@@ -48,15 +49,7 @@ c_format = logging.Formatter('%(asctime)s:   %(message)s')
 c_handler.setFormatter(c_format)
 logger.addHandler(c_handler)
 
-try:
-    from databricks.connect import DatabricksSession
-    spark = DatabricksSession.builder.remote(
-        host=os.environ['DATABRICKS_HOST'],
-        token=os.environ['DATABRICKS_TOKEN'],
-        cluster_id=os.environ['DATABRICKS_CLUSTER_ID']
-    ).getOrCreate()
-except Exception:
-    spark = SparkSession.builder.getOrCreate()
+spark = SparkSession.builder.getOrCreate()
 
 
 ############################### Databricks functions ################################
@@ -91,7 +84,7 @@ def ese_db_catalog(env):
 def sql_to_polars_df(sql):
     """Get polars DataFrame from SQL query results."""
 
-    return pl.from_pandas(spark.sql(sql).toPandas())
+    return pl.from_arrow(pa.Table.from_batches(spark.sql(sql)._collect_as_arrow()))
 
 
 def does_db_table_exists(name):
