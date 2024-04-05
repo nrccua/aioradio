@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.20.17 (2024-04-05)
+
+* Improve logging spark merge query results using logger instead of show.
+
+
 v0.20.16 (2024-03-19)
 
 * Remove databricks session spark object and use original method to convert spark to polars df.

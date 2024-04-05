@@ -124,7 +124,9 @@ def merge_spark_df_in_db(df, target, on, partition_by=None, stage_table=None, pa
         match_clause = ', '.join(f'{target}.{col} = {stage}.{col}' for col in df.columns if col != 'CREATED_DATETIME')
 
         try:
-            spark.sql(f'MERGE INTO {target} USING {stage} ON {on_clause} WHEN MATCHED THEN UPDATE SET {match_clause} WHEN NOT MATCHED THEN INSERT *').show()
+            sql = f'MERGE INTO {target} USING {stage} ON {on_clause} WHEN MATCHED THEN UPDATE SET {match_clause} WHEN NOT MATCHED THEN INSERT *'
+            stats = spark.sql(sql).toPandas()
+            logger.info(f"New records: {stats['num_inserted_rows'][0]:,}  |  Updated records: {stats['num_updated_rows'][0]:,}")
             spark.sql(f'DROP TABLE {stage}')
         except Exception:
             spark.sql(f'DROP TABLE {stage}')
@@ -160,7 +162,9 @@ def merge_pandas_df_in_db(df, target, on, partition_by=None, stage_table=None):
         match_clause = ', '.join(f'{target}.{col} = {stage}.{col}' for col in df.columns if col != 'CREATED_DATETIME')
 
         try:
-            spark.sql(f'MERGE INTO {target} USING {stage} ON {on_clause} WHEN MATCHED THEN UPDATE SET {match_clause} WHEN NOT MATCHED THEN INSERT *').show()
+            sql = f'MERGE INTO {target} USING {stage} ON {on_clause} WHEN MATCHED THEN UPDATE SET {match_clause} WHEN NOT MATCHED THEN INSERT *'
+            stats = spark.sql(sql).toPandas()
+            logger.info(f"New records: {stats['num_inserted_rows'][0]:,}  |  Updated records: {stats['num_updated_rows'][0]:,}")
             spark.sql(f'DROP TABLE {stage}')
         except Exception:
             spark.sql(f'DROP TABLE {stage}')
