@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.20.18 (2024-04-06)
+
+* Add all variations of env names to ds_utils databricks catalog functions.
+
+
 v0.20.17 (2024-04-05)
 
 * Improve logging spark merge query results using logger instead of show.

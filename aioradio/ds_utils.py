@@ -59,9 +59,9 @@ def db_catalog(env):
     """Return the DataBricks catalog based on the passed in environment."""
 
     catalog = ''
-    if env == 'sandbox':
+    if env in ['sandbox', 'dev']:
         catalog = 'dsc_sbx'
-    elif env == 'prod':
+    elif env in ['prod', 'prd']:
         catalog = 'dsc_prd'
 
     return catalog
@@ -71,11 +71,11 @@ def ese_db_catalog(env):
     """Return the ESE DataBricks catalog based on the passed in environment."""
 
     catalog = ''
-    if env == 'sandbox':
+    if env in ['sandbox', 'dev']:
         catalog = 'ese_dev'
-    elif env == 'stage':
+    elif env in ['stage', 'stg']:
         catalog = 'ese_stg'
-    elif env == 'prod':
+    elif env in ['prod', 'prd']:
         catalog = 'ese_prd'
 
     return catalog
