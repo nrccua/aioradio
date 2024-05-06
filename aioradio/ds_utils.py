@@ -31,6 +31,7 @@ import numpy as np
 import pandas as pd
 import polars as pl
 import pyarrow as pa
+import pyarrow.dataset as ds
 from haversine import haversine, Unit
 from mlflow.entities.model_registry.model_version_status import ModelVersionStatus
 from mlflow.tracking.client import MlflowClient
@@ -81,10 +82,15 @@ def ese_db_catalog(env):
     return catalog
 
 
-def sql_to_polars_df(sql):
+def sql_to_polars_df(sql, lazy=False, batch_size=None):
     """Get polars DataFrame from SQL query results."""
 
-    return pl.from_arrow(pa.Table.from_batches(spark.sql(sql)._collect_as_arrow()))
+    if lazy:
+        df = pl.scan_pyarrow_dataset(ds.dataset(spark.sql(sql)._collect_as_arrow()), batch_size=batch_size)
+    else:
+        df = pl.from_arrow(pa.Table.from_batches(spark.sql(sql)._collect_as_arrow()))
+
+    return df
 
 
 def does_db_table_exists(name):

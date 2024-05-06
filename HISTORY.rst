@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.20.19 (2024-05-06)
+
+* Add option to create polars LazyFrame from databricks query via pyarrow.
+
+
 v0.20.18 (2024-04-06)
 
 * Add all variations of env names to ds_utils databricks catalog functions.
