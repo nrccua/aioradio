@@ -45,7 +45,7 @@ setup(name='aioradio',
     ],
     include_package_data=True,
     tests_require=[
-        'flask==2.1.2',
+        'flask==2.2.5',
         'flask-cors>=3.0.10',
         'moto==3.1.18',
         'pre-commit>=2.15.0',
