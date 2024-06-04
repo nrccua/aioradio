@@ -10,7 +10,7 @@ dominodatalab==1.4.0
 fakeredis==2.22.0
 faust-cchardet==2.1.19
 flask==2.1.2
-flask-cors==3.0.10
+flask-cors==4.0.1
 haversine==2.8.0
 httpx==0.27.0
 mandrill==1.0.60
