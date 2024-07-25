@@ -3,6 +3,21 @@ History
 =======
 
 
+v0.20.23 (2024-07-25)
+
+* Update install requires grpcio==1.62.2 & grpcio-status==1.62.2.
+
+
+v0.20.22 (2024-07-25)
+
+* Update install require numpy==1.26.4.
+
+
+v0.20.21 (2024-07-25)
+
+* Fix broken dependencies.
+
+
 v0.20.20 (2024-07-25)
 
 * Update mlflow, flask, flask-cors & werkzeug to remove vulnerability alert.
