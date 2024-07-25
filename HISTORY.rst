@@ -3,6 +3,13 @@ History
 =======
 
 
+v0.20.20 (2024-07-25)
+
+* Update mlflow, flask, flask-cors & werkzeug to remove vulnerability alert.
+* Update python libs.
+* Remove python lib dominodatalab.
+
+
 v0.20.19 (2024-05-06)
 
 * Add option to create polars LazyFrame from databricks query via pyarrow.
