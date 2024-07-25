@@ -529,33 +529,6 @@ def get_ftp_connection(secret_id, port=139, is_direct_tcp=False, env='sandbox'):
     return conn
 
 
-def monitor_domino_run(domino, run_id, sleep_time=10):
-    """Monitor domino job run and return True/False depending if job was
-    successful."""
-
-    status = None
-    while status is None:
-        sleep(sleep_time)
-        result = domino.runs_status(run_id)
-        if result['status'] in ["Finished", "Succeeded"]:
-            status = True
-            break
-        if result['status'] in ["Failed", "Error"]:
-            status = False
-            break
-
-    return status
-
-
-def get_domino_connection(secret_id, project, host, env='sandbox'):
-    """Get domino connection."""
-
-    from domino import Domino
-    secret_client = get_boto3_session(env).client("secretsmanager", region_name='us-east-1')
-    api_key = secret_client.get_secret_value(SecretId=secret_id)['SecretString']
-    return Domino(project=project, api_key=api_key, host=host)
-
-
 ######################## Postgres or MSSQL Connection Classes #######################
 
 
