@@ -39,7 +39,7 @@ setup(name='aioradio',
         'openpyxl==3.0.10',
         'orjson>=3.6.8',
         'pandas>=1.3.5',
-        'pkginfo==1.10.0'
+        'pkginfo==1.10.0',
         'polars>=0.19.12',
         'protobuf==4.25.4',
         'pyarrow>=13.0.0',
