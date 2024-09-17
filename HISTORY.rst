@@ -3,6 +3,20 @@ History
 =======
 
 
+v0.21.0 (2024-09-17)
+
+* Update cython==3.0.11.
+* Update fakeredis==2.24.1.
+* Update httpx==0.27.2.
+* Update numpy==1.26.4.
+* Update polars==1.7.1.
+* Update pre-commit==3.8.0.
+* Update pylint==3.2.7.
+* Update redis==5.0.8.
+* Update werkzeug==3.0.4.
+* Update wheel==0.44.0.
+
+
 v0.20.24 (2024-07-26)
 
 * Update install require numpy==1.23.5.
