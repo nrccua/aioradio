@@ -1,6 +1,7 @@
 """Generic async AWS functions for DynamoDB."""
 
 # pylint: disable=too-many-arguments
+# pylint: disable=too-many-positional-arguments
 
 from typing import Any, Dict, List
 

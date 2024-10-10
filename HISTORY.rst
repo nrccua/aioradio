@@ -3,6 +3,19 @@ History
 =======
 
 
+v0.21.1 (2024-10-10)
+
+* Add convenience funtion alter_db_table_column to add/drop databricks table columns.
+* No longer require installing haversine.
+* Update fakeredis==2.25.1.
+* Update mlflow==2.16.2.
+* Update pandas==2.2.3.
+* Update polars==1.9.0.
+* Update pylint==3.3.1.
+* Update pysmb==1.2.10.
+* Update redis==5.1.1.
+
+
 v0.21.0 (2024-09-17)
 
 * Update cython==3.0.11.
