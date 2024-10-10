@@ -202,11 +202,10 @@ def test_async_wrapper(user):
 
 
 @pytest.mark.asyncio
-async def test_async_db_wrapper(user):
+async def test_async_db_wrapper():
     """Test async_db_wrapper with database connections."""
 
-    if user != 'tim.reichard':
-        pytest.skip('Skip test_async_db_wrapper since user is not Tim Reichard')
+    pytest.skip('Skip test_async_db_wrapper since we no longer have access to aws secrets locally.')
 
     db_info=[{
         'db': 'pyodbc',

@@ -9,6 +9,7 @@
 # pylint: disable=protected-access
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-boolean-expressions
+# pylint: disable=too-many-positional-arguments
 # pylint: disable=unnecessary-comprehension
 # pylint: disable=unused-argument
 # pylint: disable=unused-import
@@ -32,7 +33,6 @@ import pandas as pd
 import polars as pl
 import pyarrow as pa
 import pyarrow.dataset as ds
-from haversine import haversine, Unit
 from mlflow.entities.model_registry.model_version_status import ModelVersionStatus
 from mlflow.tracking.client import MlflowClient
 from pyspark.sql import SparkSession
@@ -54,6 +54,17 @@ spark = SparkSession.builder.getOrCreate()
 
 
 ############################### Databricks functions ################################
+
+
+def alter_db_table_column(table: str, column: str, cmd: str, dtype: str=''):
+    """Convenience function to either add or drop a single column in a
+    databricks table."""
+
+    cmd = cmd.upper()
+    if cmd == 'ADD':
+        spark.sql(f'ALTER TABLE {table} ADD COLUMN ({column} {dtype})')
+    elif cmd == 'DROP':
+        spark.sql(f'ALTER TABLE {table} DROP COLUMN IF EXISTS ({column})')
 
 
 def db_catalog(env):
@@ -237,7 +248,7 @@ def promote_model_to_production(model_name, tags):
         logger.info(f"Model status: {ModelVersionStatus.to_string(status)}")
         if status == ModelVersionStatus.READY:
             break
-        time.sleep(1)
+        sleep(1)
 
     registered_model = client.get_registered_model(model_name)
     logger.info(f"registered_model: {registered_model}")
@@ -477,12 +488,6 @@ def apply_bearing(dataframe, latitude, longitude):
     """Apply bearing function on split dataframe."""
 
     return dataframe.apply(lambda x: bearing(x.LATITUDE, latitude, x.LONGITUDE, longitude), axis=1)
-
-
-def apply_haversine(dataframe, latitude, longitude):
-    """Apply haversine function on split dataframe."""
-
-    return dataframe.apply(lambda x: haversine((x.LATITUDE, x.LONGITUDE), (latitude, longitude), unit=Unit.MILES), axis=1)
 
 
 def logit(x, a, b, c, d):
