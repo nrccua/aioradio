@@ -2,6 +2,7 @@
 
 # pylint: disable=broad-except
 # pylint: disable=c-extension-no-member
+# pylint: disable=import-error
 # pylint: disable=too-many-nested-blocks
 
 import logging
@@ -14,7 +15,6 @@ import pytest
 from aioradio.file_ingestion import (async_db_wrapper, async_wrapper,
                                      delete_ftp_file, establish_ftp_connection,
                                      get_current_datetime_from_timestamp,
-                                     get_efi_excel_sheet_filter,
                                      list_ftp_objects,
                                      send_emails_via_mandrill,
                                      unzip_file_get_filepaths,
@@ -227,11 +227,3 @@ async def test_async_db_wrapper():
             print(f"Connection name: {name}\tConnection object: {conn}")
 
     await func()
-
-
-def test_get_efi_excel_sheet_filter():
-    """Test get_efi_excel_sheet_filter."""
-
-    excel_sheet_filter = get_efi_excel_sheet_filter()
-    assert '001055' in excel_sheet_filter
-    assert 'hiddensheet' in excel_sheet_filter['001055']
