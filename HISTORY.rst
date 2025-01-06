@@ -3,6 +3,28 @@ History
 =======
 
 
+v0.21.2 (2025-01-06)
+
+* Update allowable python version to be greater than or equal to 3.10.
+* Update aioboto3==13.3.0.
+* Update boto3==1.35.81.
+* Update botocore==1.35.81.
+* Update ddtrace==2.18.1.
+* Update fakeredis==2.26.2.
+* Update flask==3.1.0.
+* Update httpx==0.28.1.
+* Update mlflow==2.19.0.
+* Update polars==1.17.1.
+* Update psycopg2-binary==2.9.10.
+* Update pylint==3.3.3.
+* Update pyodbc==5.2.0.
+* Update pyspark==3.4.4.
+* Update python-json-logger==3.2.1.
+* Update redis==5.2.1.
+* Update twine==6.0.1.
+* Update werkzeug==3.1.3.
+
+
 v0.21.1 (2024-10-10)
 
 * Add convenience funtion alter_db_table_column to add/drop databricks table columns.

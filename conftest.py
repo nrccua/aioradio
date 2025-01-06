@@ -1,5 +1,7 @@
 """Pytest configuration."""
 
+# pylint: disable=import-error
+
 import asyncio
 import os
 from itertools import chain
