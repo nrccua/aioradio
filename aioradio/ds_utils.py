@@ -93,6 +93,35 @@ def ese_db_catalog(env):
     return catalog
 
 
+def does_db_table_exists(name):
+    """Check if delta table exists in databricks."""
+
+    exists = False
+    if spark.version >= '3.5':
+        exists = spark.catalog.tableExists(name)
+    else:
+        try:
+            spark.sql(f"describe formatted {name}")
+            exists = True
+        except Exception:
+            pass
+
+    return exists
+
+
+def sql_to_polars(sql):
+    """Get polars DataFrame from SQL query results."""
+
+    if spark.version >= '3.5.2':
+        return pl.from_arrow(spark.sql(sql).toArrow())
+
+    if spark.version >= '3.5':
+        return pl.from_arrow(spark.sql(sql).toPandas())
+
+    return pl.from_arrow(pa.Table.from_batches(spark.sql(sql)._collect_as_arrow()))
+
+
+# Deprecate this once databricks jobs codebases have migrated to using sql_to_polars instead
 def sql_to_polars_df(sql, lazy=False, batch_size=None):
     """Get polars DataFrame from SQL query results."""
 
@@ -104,17 +133,13 @@ def sql_to_polars_df(sql, lazy=False, batch_size=None):
     return df
 
 
-def does_db_table_exists(name):
-    """Check if delta table exists in databricks."""
+def polars_to_spark(df):
+    """Create spark DataFrame from polars DataFrame."""
 
-    exists = False
-    try:
-        spark.sql(f"describe formatted {name}")
-        exists = True
-    except Exception:
-        pass
+    if spark.version >= '3.5.2':
+        return spark.createDataFrame(df.to_arrow())
 
-    return exists
+    return spark.createDataFrame(df.to_pandas())
 
 
 def merge_spark_df_in_db(df, target, on, partition_by=None, stage_table=None, partition_by_values=None):

@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.21.3 (2025-01-13)
+
+* Update spark/polars functions to use arrow for better memory performance with databricks runtime 16.1+.
+
+
 v0.21.2 (2025-01-06)
 
 * Update allowable python version to be greater than or equal to 3.10.
