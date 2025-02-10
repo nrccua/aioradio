@@ -9,7 +9,7 @@ ddtrace==2.20.0
 fakeredis==2.26.2
 faust-cchardet==2.1.19
 flask==3.1.0
-flask-cors==4.0.1
+flask-cors==4.0.2
 httpx==0.28.1
 mandrill==1.0.60
 mlflow==2.19.0
