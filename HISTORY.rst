@@ -3,6 +3,21 @@ History
 =======
 
 
+v0.21.4 (2025-02-10)
+
+* Update numpy==2.0.2.
+* Update aioboto3==13.4.0.
+* Update boto3==1.36.1.
+* Update botocore==1.36.1.
+* Update ddtrace==2.20.0.
+* Update numpy==2.0.2.
+* Update polars==1.22.0.
+* Update pylint==3.3.4.
+* Update setuptools==75.8.0.
+* Update twine==6.1.0.
+* Update typing_extensions==4.12.2.
+
+
 v0.21.3 (2025-01-13)
 
 * Update spark/polars functions to use arrow for better memory performance with databricks runtime 16.1+.
