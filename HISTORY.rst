@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.21.5 (2025-02-10)
+
+* Update flask-cors==4.0.2.
+
+
 v0.21.4 (2025-02-10)
 
 * Update numpy==2.0.2.
