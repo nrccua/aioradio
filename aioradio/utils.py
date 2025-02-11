@@ -8,7 +8,7 @@ from types import coroutine
 from typing import Any, Dict, List, Tuple
 
 
-async def manage_async_tasks(items: List[Tuple[coroutine, str]], concurrency: int, polling_interval: int = 0.001) -> Dict[str, Any]:
+async def manage_async_tasks(items: List[Tuple[coroutine, str]], concurrency: int, polling_interval: float = 0.001) -> Dict[str, Any]:
     """Manages a grouping of async tasks, keeping number of active tasks at the
     concurrency level by starting new tasks whenver one completes.
 
