@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.21.6 (2025-02-12)
+
+* Add configurable polling_interval parameter to pass into manage_async_tasks function.
+
+
 v0.21.5 (2025-02-10)
 
 * Update flask-cors==4.0.2.
