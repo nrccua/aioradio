@@ -9,6 +9,7 @@
 # pylint: disable=protected-access
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-boolean-expressions
+# pylint: disable=too-many-locals
 # pylint: disable=too-many-positional-arguments
 # pylint: disable=unnecessary-comprehension
 # pylint: disable=unused-argument
@@ -54,6 +55,42 @@ spark = SparkSession.builder.getOrCreate()
 
 
 ############################### Databricks functions ################################
+
+
+def merge_polars_in_db(df, target, merge_on, db_host, aws_region='us-east-2', partition_by=None):
+    """Merge polars dataframe into databricks."""
+
+    stats = None
+    partition_keys = list(partition_by.keys()) if partition_by is not None else None
+    if not spark.catalog.tableExists(target):
+        # Currently we need to disable DeletionVectors and columnMapping mode because it isn't supported in deltalake==0.25.4
+        #obj = polars_to_spark(df).write.option("delta.enableDeletionVectors", False).option("delta.columnMapping.mode", "name")
+        obj = polars_to_spark(df).write.option("delta.enableDeletionVectors", False) #.option("delta.columnMapping.mode", "name")
+        if partition_keys is not None:
+            obj.partitionBy(partition_keys)
+        obj.saveAsTable(target)
+    else:
+        predicate = ' AND '.join(f's.{col} = t.{col}' for col in merge_on)
+        if partition_by is not None:
+            explicit_separation = ' AND '.join(f't.{col} IN ({str(values)[1:-1]})' for col, values in partition_by.items())
+            predicate += f' AND {explicit_separation}'
+
+        match_clause = {f't.{col}': f's.{col}' for col in df.columns if col not in merge_on + ['CREATED_DATETIME']}
+        catalog, schema, table = target.split('.')
+        params = {
+            'df': df,
+            'catalog_name': catalog,
+            'namespace': schema,
+            'table_name': table,
+            'storage_options': {"AWS_REGION": aws_region},
+            'delta_mode': 'merge',
+            'delta_write_options': {'partition_by': partition_keys} if partition_keys else None,
+            'delta_merge_options': {'predicate': predicate, 'source_alias': 's', 'target_alias': 't'}
+        }
+        stats = pl.Catalog(db_host).write_table(**params).when_matched_update(match_clause).when_not_matched_insert_all().execute()
+        stats = {'new': stats['num_target_rows_inserted'], 'updated': stats['num_target_rows_updated']}
+
+    return stats
 
 
 def alter_db_table_column(table: str, column: str, cmd: str, dtype: str=''):

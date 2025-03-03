@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.21.7 (2025-03-03)
+
+* Add new ds utils function merge_polars_in_db to directly merge polars df into databricks unity catalog tables.
+
+
 v0.21.6 (2025-02-12)
 
 * Add configurable polling_interval parameter to pass into manage_async_tasks function.
