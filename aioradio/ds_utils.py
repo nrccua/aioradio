@@ -57,6 +57,13 @@ spark = SparkSession.builder.getOrCreate()
 ############################### Databricks functions ################################
 
 
+def scan_db_table(target, db_host, aws_region='us-east-2'):
+    """Scan delta table directly in polars."""
+
+    catalog, schema, table = target.split('.')
+    return pl.Catalog(db_host).scan_table(catalog, schema, table, storage_options={"AWS_REGION": aws_region})
+
+
 def merge_polars_in_db(df, target, merge_on, db_host, aws_region='us-east-2', partition_by=None):
     """Merge polars dataframe into databricks."""
 
@@ -75,7 +82,7 @@ def merge_polars_in_db(df, target, merge_on, db_host, aws_region='us-east-2', pa
             explicit_separation = ' AND '.join(f't.{col} IN ({str(values)[1:-1]})' for col, values in partition_by.items())
             predicate += f' AND {explicit_separation}'
 
-        match_clause = {f't.{col}': f's.{col}' for col in df.columns if col not in merge_on + ['CREATED_DATETIME']}
+        match_clause = {f't."{col}"': f's."{col}"' for col in df.columns if col not in merge_on + ['CREATED_DATETIME']}
         catalog, schema, table = target.split('.')
         params = {
             'df': df,

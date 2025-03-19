@@ -3,6 +3,17 @@ History
 =======
 
 
+v0.21.8 (2025-03-19)
+
+* Add quotes in match clause for merge_polars_in_db function, fixes an issue with merging when column names start with numbers.
+* Add convenience function scan_db_table that breaks down the catalog, schema and table.
+* Update aioboto3==14.1.0.
+* Update boto3==1.37.1.
+* Update botocore==1.37.1.
+* Update ddtrace==3.2.1.
+* Update polars==1.25.2.
+
+
 v0.21.7 (2025-03-03)
 
 * Add new ds utils function merge_polars_in_db to directly merge polars df into databricks unity catalog tables.
