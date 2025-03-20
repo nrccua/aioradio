@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.21.9 (2025-03-20)
+
+* Replace when_matched_update with when_matched_update_all adding exclude_cols parameter.
+
+
 v0.21.8 (2025-03-19)
 
 * Add quotes in match clause for merge_polars_in_db function, fixes an issue with merging when column names start with numbers.
