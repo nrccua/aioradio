@@ -93,8 +93,8 @@ def merge_polars_in_db(df, target, merge_on, db_host, aws_region='us-east-2', pa
             'delta_write_options': {'partition_by': partition_keys} if partition_keys else None,
             'delta_merge_options': {'predicate': predicate, 'source_alias': 's', 'target_alias': 't'}
         }
-        exclude_cols = merge_on + ['CREATED_DATETIME']
-        stats = pl.Catalog(db_host).write_table(**params).when_matched_update_all(exclude_cols=exclude_cols).when_not_matched_insert_all().execute()
+        except_cols = merge_on + ['CREATED_DATETIME']
+        stats = pl.Catalog(db_host).write_table(**params).when_matched_update_all(except_cols=except_cols).when_not_matched_insert_all().execute()
         stats = {'new': stats['num_target_rows_inserted'], 'updated': stats['num_target_rows_updated']}
 
     return stats

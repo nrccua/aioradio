@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.21.10 (2025-03-20)
+
+* Fix issue with param name exclude_cols, should be except_cols.
+
+
 v0.21.9 (2025-03-20)
 
 * Replace when_matched_update with when_matched_update_all adding exclude_cols parameter.
