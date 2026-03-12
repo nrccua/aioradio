@@ -44,7 +44,7 @@ setup(name='aioradio',
     ],
     include_package_data=True,
     tests_require=[
-        'flask==3.1.0',
+        'flask==3.1.3',
         'flask-cors>=4.0.2',
         'moto==4.2.14',
         'pre-commit>=2.15.0',
@@ -53,7 +53,7 @@ setup(name='aioradio',
         'pytest-asyncio>=0.15.1',
         'pytest-cov>=3.0.0',
         'typing_extensions>=4.10.0',
-        'werkzeug==3.1.3'
+        'werkzeug==3.1.6'
     ],
     zip_safe=False,
     classifiers=[
