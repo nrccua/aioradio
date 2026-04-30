@@ -103,7 +103,16 @@ class EFIParse:
             "CustomDate2": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
             "CustomDate3": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
             "CustomDate4": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
-            "CustomDate5": (now - timedelta(days=50 * 365), now + timedelta(days=365))
+            "CustomDate5": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            # 2024 date fields
+            "CAMPUSVISITDATE": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "ORIENTREGDATE": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "ORIENTATTENDDATE": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "HOUSINGDATE": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            # EN-5537 date fields
+            "DEFERRED": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "DENIED": (now - timedelta(days=50 * 365), now + timedelta(days=365)),
+            "WAITLISTED": (now - timedelta(days=50 * 365), now + timedelta(days=365))
         }
 
         self.filed_year_min_max = {
@@ -173,7 +182,26 @@ class EFIParse:
             "CustomDate2": 10,
             "CustomDate3": 10,
             "CustomDate4": 10,
-            "CustomDate5": 10
+            "CustomDate5": 10,
+            # 2024 fields
+            "PREFERREDFIRSTNAME": 64, "HISPANIC": 1, "SAI": 20,
+            "CAMPUSVISITDATE": 10, "ORIENTREGDATE": 10, "ORIENTATTENDDATE": 10,
+            "HOUSINGDATE": 10, "APPLICATIONTYPE": 30, "COUNSELORNAME": 30,
+            "PARENT1FIRSTNAME": 20, "PARENT1LASTNAME": 20, "PARENT1EMAIL": 50,
+            "PARENT2FIRSTNAME": 20, "PARENT2LASTNAME": 20, "PARENT2EMAIL": 50,
+            "INDEXSCORE": 10,
+            # 2025 field
+            "HOUSINGTYPE": 30,
+            # EN-5537 fields
+            "ALTERNATEID": 50, "TESTOPTIONAL": 20, "TRANSFERCOLLEGE": 20,
+            "COLLEGEGPA": 20, "DEFERRED": 10, "DEFERREDFLAG": 10,
+            "DENIED": 10, "WAITLISTED": 10, "WAITLISTFLAG": 10,
+            "CAMPUSVISITTYPE": 256, "ADMITPLAN": 30,
+            "APPLIEDPROGRAM": 256, "ENROLLEDPROGRAM": 256,
+            "CUSTOMFILTER6": 20, "CUSTOMFILTER7": 20, "CUSTOMFILTER8": 20,
+            "CUSTOMFILTER9": 20, "CUSTOMFILTER10": 20,
+            # Score fields
+            "AWARD_PLUS_SCORE": 20, "INQUIRY_PLUS_SCORE": 20
         }
 
         self.gender_map = {
