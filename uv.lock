@@ -218,7 +218,7 @@ wheels = [
 
 [[package]]
 name = "aioradio"
-version = "0.1.0"
+version = "0.21.11"
 source = { editable = "." }
 dependencies = [
     { name = "aioboto3" },
@@ -248,7 +248,7 @@ dependencies = [
     { name = "redis" },
 ]
 
-[package.dev-dependencies]
+[package.optional-dependencies]
 dev = [
     { name = "flask" },
     { name = "flask-cors" },
@@ -273,37 +273,34 @@ requires-dist = [
     { name = "ddtrace", specifier = "==3.2.1" },
     { name = "fakeredis", specifier = "==2.27.0" },
     { name = "faust-cchardet", specifier = "==2.1.19" },
+    { name = "flask", marker = "extra == 'dev'", specifier = "==3.1.0" },
+    { name = "flask-cors", marker = "extra == 'dev'", specifier = ">=4.0.2" },
     { name = "httpx", specifier = "==0.28.1" },
     { name = "mandrill", specifier = ">=1.0.60" },
     { name = "mlflow", specifier = "==2.19.0" },
+    { name = "moto", marker = "extra == 'dev'", specifier = "==4.2.14" },
     { name = "numpy", specifier = "==2.0.2" },
     { name = "openpyxl", specifier = "==3.0.10" },
     { name = "orjson", specifier = "==3.9.15" },
     { name = "pandas", specifier = "==2.2.3" },
     { name = "polars", specifier = "==1.25.2" },
+    { name = "pre-commit", marker = "extra == 'dev'", specifier = "==3.8.0" },
     { name = "protobuf", specifier = ">=5.29.6" },
     { name = "psycopg2-binary", specifier = "==2.9.10" },
     { name = "pyarrow", specifier = "==18.1.0" },
+    { name = "pylint", marker = "extra == 'dev'", specifier = "==3.3.5" },
     { name = "pyodbc", specifier = "==5.2.0" },
     { name = "pysmb", specifier = "==1.2.10" },
     { name = "pyspark", specifier = "==3.5.5" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = "==8.1.2" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = "==0.21.1" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = "==5.0.0" },
     { name = "python-json-logger", specifier = ">=2.0.2" },
     { name = "redis", specifier = ">=5.0.1" },
+    { name = "typing-extensions", marker = "extra == 'dev'", specifier = ">=4.10.0" },
+    { name = "werkzeug", marker = "extra == 'dev'", specifier = "==3.1.3" },
 ]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "flask", specifier = "==3.1.0" },
-    { name = "flask-cors", specifier = ">=4.0.2" },
-    { name = "moto", specifier = "==4.2.14" },
-    { name = "pre-commit", specifier = "==3.8.0" },
-    { name = "pylint", specifier = "==3.3.5" },
-    { name = "pytest", specifier = "==8.1.2" },
-    { name = "pytest-asyncio", specifier = "==0.21.1" },
-    { name = "pytest-cov", specifier = "==5.0.0" },
-    { name = "typing-extensions", specifier = ">=4.10.0" },
-    { name = "werkzeug", specifier = "==3.1.3" },
-]
+provides-extras = ["dev"]
 
 [[package]]
 name = "aiosignal"
@@ -648,14 +645,14 @@ wheels = [
 
 [[package]]
 name = "click"
-version = "8.3.3"
+version = "8.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/bb/63/f9e1ea081ce35720d8b92acde70daaedace594dc93b693c869e0d5910718/click-8.3.3.tar.gz", hash = "sha256:398329ad4837b2ff7cbe1dd166a4c0f8900c3ca3a218de04466f38f6497f18a2", size = 328061, upload-time = "2026-04-22T15:11:27.506Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/23/e4/796662cd90cf80e3a363c99db2b88e0e394b988a575f60a17e16440cd011/click-8.4.0.tar.gz", hash = "sha256:638f1338fe1235c8f4e008e4a8a254fb5c5fbdcbb40ece3c9142ebb78e792973", size = 350843, upload-time = "2026-05-17T00:47:58.425Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ae/44/c1221527f6a71a01ec6fbad7fa78f1d50dfa02217385cf0fa3eec7087d59/click-8.3.3-py3-none-any.whl", hash = "sha256:a2bf429bb3033c89fa4936ffb35d5cb471e3719e1f3c8a7c3fff0b8314305613", size = 110502, upload-time = "2026-04-22T15:11:25.044Z" },
+    { url = "https://files.pythonhosted.org/packages/ee/ae/8e92f8058baf87f6c7d86ee7e457668690195cc77efedb8d3797a06e3940/click-8.4.0-py3-none-any.whl", hash = "sha256:40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81", size = 116147, upload-time = "2026-05-17T00:47:56.842Z" },
 ]
 
 [[package]]
@@ -1066,16 +1063,16 @@ wheels = [
 
 [[package]]
 name = "databricks-sdk"
-version = "0.108.0"
+version = "0.109.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "google-auth" },
     { name = "protobuf" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d3/13/05a1dbf9c2c43639b032128c18227953777a2a2da66e4b97d1914ceacb68/databricks_sdk-0.108.0.tar.gz", hash = "sha256:c43f1099b8228e5e9ecb4569381ec8f49b739129d35a826be72a61bc5eaaf1a6", size = 940266, upload-time = "2026-05-12T09:04:03.75Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b2/ab/067704013b24b2d1a479174571f0181b137bc2ae0ac54da4f1dc4abda808/databricks_sdk-0.109.0.tar.gz", hash = "sha256:96b90f5ee2e0fac89f351aa77348263e1e0ed5d4d867cdfaefd2e0acc01b1e81", size = 944643, upload-time = "2026-05-18T09:18:44.571Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/56/38/9b59ebb34ccaef79095f168eff1fab5f8d645b961680c7bcbc320434acd0/databricks_sdk-0.108.0-py3-none-any.whl", hash = "sha256:010528183abb475acf7f4058e331049dc7932e73a314d9808b123f5cbb722579", size = 887647, upload-time = "2026-05-12T09:04:01.771Z" },
+    { url = "https://files.pythonhosted.org/packages/b8/a5/e958674354b329917300ad57be27fc953516e541d05d5e723855af6f9ac9/databricks_sdk-0.109.0-py3-none-any.whl", hash = "sha256:46745a25324a5b36f01236760e44fc6e2bce3f051224e6f8aef7633477fcbec8", size = 891530, upload-time = "2026-05-18T09:18:42.272Z" },
 ]
 
 [[package]]
