@@ -43,9 +43,12 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "flask==3.1.0",
+    "pre-commit==3.8.0",
+]
+test = [
+    "flask==3.1.0",
     "flask-cors>=4.0.2",
     "moto==4.2.14",
-    "pre-commit==3.8.0",
     "pylint==3.3.5",
     "pytest==8.1.2",
     "pytest-asyncio==0.21.1",
