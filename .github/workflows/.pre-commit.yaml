@@ -29,6 +29,6 @@ jobs:
 
     - name: Linting-Testing
       run: |
-        pip install -r aioradio/requirements.txt
+        pip install -r aioradio/dev-requirements.txt
         pylint aioradio/*.py aioradio/tests/*.py --disable=similarities
         pytest -vss --github=true --cov=aioradio  --cov-config=.coveragerc --cov-report html --cov-fail-under=60
