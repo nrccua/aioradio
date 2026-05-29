@@ -2,6 +2,10 @@
 History
 =======
 
+v0.21.11 (2026-05-18)
+
+* Forced more recent sub-dependency versions (pyasn1, zipp, urllib3, requests, grpcio)
+* Implemented UV as package manager
 
 v0.21.10 (2025-03-20)
 
