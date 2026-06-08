@@ -7,7 +7,7 @@ from typing import Any, Dict, List
 
 from aioradio.aws.utils import AwsServiceManager
 
-AWS_SERVICE = AwsServiceManager(service='dynamodb', regions=['us-east-1'], module='aioboto3')
+AWS_SERVICE = AwsServiceManager(service='dynamodb', regions=['us-east-1', 'us-east-2'], module='aioboto3')
 DYNAMO = AWS_SERVICE.service_dict
 
 
