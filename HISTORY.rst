@@ -3,6 +3,12 @@ History
 =======
 
 
+v0.21.11 (2026-06-08)
+
+* Pre-initialize DynamoDB clients for us-east-2 (same pattern as SQS) so
+  services using DYNAMO_REGION=us-east-2 do not hang on the first scan/query.
+
+
 v0.21.10 (2025-03-20)
 
 * Fix issue with param name exclude_cols, should be except_cols.
