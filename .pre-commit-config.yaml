@@ -2,9 +2,10 @@ default_language_version:
     python: python3.12
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
     -   id: check-added-large-files
+        exclude: ^uv\.lock$
     -   id: check-ast
     -   id: check-docstring-first
     -   id: check-json
@@ -15,6 +16,14 @@ repos:
     -   id: requirements-txt-fixer
     -   id: trailing-whitespace
 -   repo: https://github.com/myint/docformatter
-    rev: v1.7.5
+    rev: v1.7.8
     hooks:
     -   id: docformatter
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.15.13
+    hooks:
+        # Run the linter.
+        -   id: ruff-check
+        # Run the formatter.
+        -   id: ruff-format
