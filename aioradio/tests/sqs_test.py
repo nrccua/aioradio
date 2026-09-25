@@ -18,6 +18,7 @@ from aioradio.aws.sqs import (
 
 QUEUE = 'pytest'
 REGION = 'us-east-2'
+TRACEPARENT = '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01'
 
 RECEIPT_HANDLES = []
 pytestmark = pytest.mark.asyncio
@@ -50,7 +51,11 @@ async def test_sqs_send_messages():
         {'Id': str(uuid4()), 'MessageBody': orjson.dumps({'data': 'Hello Austin!'}).decode()},
         {'Id': str(uuid4()), 'MessageBody': orjson.dumps({'data': 'Hello Kansas City!'}).decode()},
         {'Id': str(uuid4()), 'MessageBody': orjson.dumps({'data': 'Hello New York City!'}).decode()},
-        {'Id': str(uuid4()), 'MessageBody': orjson.dumps({'data': 'Hello Victoria, Canada!'}).decode()}
+        {
+            'Id': str(uuid4()),
+            'MessageBody': orjson.dumps({'data': 'Hello Victoria, Canada!'}).decode(),
+            'MessageAttributes': {'traceparent': {'DataType': 'String', 'StringValue': TRACEPARENT}}
+        }
     ]
     result = await send_messages(queue=QUEUE, region=REGION, entries=entries)
     assert len(result['Successful']) == 4
@@ -67,6 +72,8 @@ async def test_sqs_get_messages():
         body = orjson.loads(msg['Body'])
         assert 'data' in body
         assert 'Hello' in body['data']
+        if 'Victoria' in body['data']:
+            assert msg['MessageAttributes']['traceparent']['StringValue'] == TRACEPARENT
 
 
 async def test_sqs_delete_messages():

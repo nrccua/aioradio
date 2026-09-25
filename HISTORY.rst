@@ -7,6 +7,10 @@ v0.22.0 (2026-10-01)
 
 * Remove the tracing dependency, Datadog-specific log tags, and tracing log channel.
 * Keep JSON console logging through JsonLogger and a compatibility wrapper for existing callers.
+* get_messages returns SQS message attributes (new message_attribute_names
+  parameter, default ['All']). Previously receive_message was called without
+  MessageAttributeNames, so attributes such as a producer's W3C traceparent
+  were never delivered to consumers.
 
 
 v0.21.11 (2026-06-08)
