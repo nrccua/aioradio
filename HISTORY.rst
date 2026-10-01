@@ -5,7 +5,8 @@ History
 
 v0.21.12 (2026-10-01)
 
-* Remove the implicit tracing logger and dependency while retaining explicitly configured JSON logging.
+* Remove the tracing dependency, Datadog-specific log tags, and tracing log channel.
+* Keep JSON console logging through JsonLogger and a compatibility wrapper for existing callers.
 
 
 v0.21.11 (2026-06-08)

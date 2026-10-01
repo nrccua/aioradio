@@ -1,44 +1,52 @@
-"""Pytest logger."""
+"""Tests for JSON console logging."""
 
 import json
 import logging
 
-import pytest
-
-from aioradio.logger import DatadogLogger
-
-pytestmark = pytest.mark.asyncio
+from aioradio.logger import DatadogLogger, JsonLogger
 
 
-async def test_datadog_logger(capsys):
-    """Check if the logger has json formatted messages."""
-
-    configured_logger = DatadogLogger(
-        main_logger='pytest2',
-        datadog_loggers=['pytest', 'pytest2'],
-        log_level=logging.INFO,
-    )
-    logger = configured_logger.logger
-
-    assert configured_logger.datadog_loggers == {'pytest', 'pytest2'}
-    assert(logger.hasHandlers()) is True
-    assert logger.info('Hello Pytest', extra={"special": "value", "run": 12}) is None
-    log_entry = json.loads(capsys.readouterr().out.splitlines()[0])
-    assert log_entry['level'] == 'INFO'
-    assert log_entry['message'] == 'Hello Pytest'
+def test_json_logger_emits_structured_console_logs(capsys):
+    """Application metadata stays structured without Datadog-specific tags."""
+    configured = JsonLogger(main_logger='aioradio-test', logger_names=['aioradio-test'])
+    logger = configured.logger
 
     try:
-        5 / 'ten'
-    except TypeError as err:
-        assert logger.exception(err) is None
+        logger.info('Hello Pytest', extra={'special': 'value', 'run': 12})
+        log_entry = json.loads(capsys.readouterr().out)
+        assert log_entry['level'] == 'INFO'
+        assert log_entry['message'] == 'Hello Pytest'
+        assert log_entry['special'] == 'value'
+        assert log_entry['run'] == 12
+        assert 'timestamp' in log_entry
+        assert 'ddtags' not in log_entry
+    finally:
+        for handler in list(logger.handlers):
+            logger.removeHandler(handler)
 
-    for handler in logger.handlers:
-        logger.removeHandler(handler)
+
+def test_legacy_logger_ignores_tracing_channel(capsys):
+    """Old callers keep application console logs but not tracing logs."""
+    trace_logger = logging.getLogger('ddtrace')
+    existing_handlers = list(trace_logger.handlers)
+    configured = DatadogLogger(
+        main_logger='aioradio-legacy-test',
+        datadog_loggers=['aioradio-legacy-test', 'ddtrace'],
+    )
+
+    try:
+        assert configured.logger_names == {'aioradio-legacy-test'}
+        assert trace_logger.handlers == existing_handlers
+        configured.logger.info('Legacy caller')
+        assert json.loads(capsys.readouterr().out)['message'] == 'Legacy caller'
+    finally:
+        for handler in list(configured.logger.handlers):
+            configured.logger.removeHandler(handler)
 
 
-async def test_datadog_logger_has_no_implicit_loggers():
-    """Only explicitly configured loggers receive a handler."""
-    configured_logger = DatadogLogger(main_logger='pytest-default')
+def test_legacy_logger_has_no_implicit_handlers():
+    """No tracing or Datadog handler is installed by default."""
+    configured = DatadogLogger(main_logger='aioradio-default-test')
 
-    assert configured_logger.datadog_loggers == set()
-    assert configured_logger.logger.handlers == []
+    assert configured.logger_names == set()
+    assert configured.logger.handlers == []
