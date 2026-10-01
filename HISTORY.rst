@@ -3,6 +3,11 @@ History
 =======
 
 
+v0.21.12 (2026-10-01)
+
+* Remove the implicit tracing logger and dependency while retaining explicitly configured JSON logging.
+
+
 v0.21.11 (2026-06-08)
 
 * Pre-initialize DynamoDB clients for us-east-2 (same pattern as SQS) so

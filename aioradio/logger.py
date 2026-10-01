@@ -6,7 +6,7 @@ in docker for cleaner datadog logging."""
 import logging
 import sys
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from pythonjsonlogger import jsonlogger
 
@@ -53,7 +53,7 @@ class DatadogLogger():
     def __init__(
             self,
             main_logger='',
-            datadog_loggers=List[str],
+            datadog_loggers: Optional[List[str]] = None,
             log_level=logging.INFO,
             log_format="%(timestamp)d %(level)d %(name)d %(message)d"
     ):
@@ -61,7 +61,7 @@ class DatadogLogger():
         self.logger = logging.getLogger(main_logger)
         self.logger.setLevel(log_level)
         self.log_level = log_level
-        self.datadog_loggers = set(datadog_loggers + ['ddtrace']) if datadog_loggers else ['ddtrace']
+        self.datadog_loggers = set(datadog_loggers or [])
         self.format = log_format
         self.add_handlers()
 
