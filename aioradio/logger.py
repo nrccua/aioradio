@@ -1,12 +1,11 @@
-"""Generic logger logging to console or using json_log_formatter when logging
-in docker for cleaner datadog logging."""
+"""JSON-formatted console logging for applications."""
 
 # pylint: disable=too-few-public-methods
 
 import logging
 import sys
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from pythonjsonlogger import jsonlogger
 
@@ -23,37 +22,19 @@ class CustomJsonFormatter(jsonlogger.JsonFormatter):
             message_dict (Dict[str, Any]): message dict
         """
 
-        ddtags = self.get_ddtags(record, reserved=self._skip_fields)
-        if ddtags:
-            log_record['ddtags'] = ddtags
         super().add_fields(log_record, record, message_dict)
         if not log_record.get("timestamp"):
             now = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
             log_record["timestamp"] = now
         log_record["level"] = log_record["level"].upper() if log_record.get("level") else record.levelname
 
-    @staticmethod
-    def get_ddtags(record: logging.LogRecord, reserved: Dict[str, Any]) -> str:
-        """Add datadog tags in the format datadog expects.
-
-        Args:
-            record (logging.LogRecord): contains all the info pertinent to the event being logged
-            reserved (dict[str, Any]): reserved logging keys
-
-        Returns:
-            str: concatenated string of k-v pairs
-        """
-
-        tags = {k: v for k, v in record.__dict__.items() if k not in reserved}
-        return ','.join([f"{k}:{v}" for k, v in tags.items()])
-
-class DatadogLogger():
-    """Custom class for JSON Formatter to include level and name."""
+class JsonLogger:
+    """Attach JSON stdout handlers to the named application loggers."""
 
     def __init__(
             self,
             main_logger='',
-            datadog_loggers=List[str],
+            logger_names: Optional[List[str]] = None,
             log_level=logging.INFO,
             log_format="%(timestamp)d %(level)d %(name)d %(message)d"
     ):
@@ -61,14 +42,14 @@ class DatadogLogger():
         self.logger = logging.getLogger(main_logger)
         self.logger.setLevel(log_level)
         self.log_level = log_level
-        self.datadog_loggers = set(datadog_loggers + ['ddtrace']) if datadog_loggers else ['ddtrace']
+        self.logger_names = set(logger_names or [])
         self.format = log_format
         self.add_handlers()
 
     def add_handlers(self):
         """Create log handlers."""
 
-        for name in self.datadog_loggers:
+        for name in self.logger_names:
             logger = logging.getLogger(name)
             formatter = CustomJsonFormatter(self.format)
             handler = logging.StreamHandler(sys.stdout)
@@ -76,3 +57,18 @@ class DatadogLogger():
             handler.setFormatter(formatter)
             logger.addHandler(handler)
             logger.propagate = False
+
+
+class DatadogLogger(JsonLogger):
+    """Compatibility wrapper for existing callers; no Datadog output is configured."""
+
+    def __init__(
+            self,
+            main_logger='',
+            datadog_loggers: Optional[List[str]] = None,
+            log_level=logging.INFO,
+            log_format="%(timestamp)d %(level)d %(name)d %(message)d"
+    ):
+        # Existing applications may still pass the tracing logger explicitly.
+        logger_names = [name for name in datadog_loggers or [] if name != 'ddtrace']
+        super().__init__(main_logger, logger_names, log_level, log_format)

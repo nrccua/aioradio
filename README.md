@@ -1,6 +1,19 @@
 # aioradio
 Generic asynchronous i/o python utilities for AWS services (SQS, S3, DynamoDB, Secrets Manager), Redis, MSSQL (pyodbc), JIRA and more.
 
+## JSON console logging
+
+Use `JsonLogger` to attach JSON stdout handlers to application loggers:
+
+```python
+from aioradio.logger import JsonLogger
+
+log = JsonLogger(main_logger='app', logger_names=['app']).logger
+log.info('Application started')
+```
+
+`DatadogLogger` remains as a compatibility wrapper for existing callers, but it does not configure a Datadog sink, emit Datadog-specific tags, or attach a handler to the `ddtrace` logger. New code should use `JsonLogger`.
+
 ## AWS S3 example code
 aioradio abstracts using aiobotocore and aioboto3 making async AWS funtion calls simple one liners.
 Besides what is shown below in the examples, there is also support for SQS, DynamoDB and Secrets Manager.
