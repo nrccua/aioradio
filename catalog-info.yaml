@@ -14,10 +14,8 @@ metadata:
     backstage.io/techdocs-ref: dir:.
   tags:
     - python
-    - asyncio
-    - aws
     - redis
-    - mssql
+    - sql-server
     - postgres
     - databricks
     - polars
