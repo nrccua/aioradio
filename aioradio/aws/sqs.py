@@ -55,7 +55,8 @@ async def get_messages(
         wait_time: int=20,
         max_messages: int=10,
         visibility_timeout: int=30,
-        attribute_names: List[str]=[]) -> List[dict]:
+        attribute_names: List[str]=[],
+        message_attribute_names: List[str]=['All']) -> List[dict]:
     """Get up to 10 messages from an SQS queue.
 
     Args:
@@ -66,6 +67,7 @@ async def get_messages(
         max_messages (int, optional): max messages polled. Defaults to 10.
         visibility_timeout (int, optional): timeout for when message will return to queue if not deleted. Defaults to 30.
         attribute_names (List[str], optional): list of attributes for which to retrieve information. Defaults to [].
+        message_attribute_names (List[str], optional): message attributes to return, e.g. traceparent for trace context propagation. Defaults to ['All'].
 
     Returns:
         List[dict]: list of dicts where each dict contains the message information
@@ -82,7 +84,8 @@ async def get_messages(
         WaitTimeSeconds=wait_time,
         MaxNumberOfMessages=max_messages,
         VisibilityTimeout=visibility_timeout,
-        AttributeNames=attribute_names)
+        AttributeNames=attribute_names,
+        MessageAttributeNames=message_attribute_names)
     if 'Messages' in resp:
         messages = resp['Messages']
 
