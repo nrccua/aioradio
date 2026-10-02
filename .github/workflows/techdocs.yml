@@ -1,0 +1,33 @@
+name: Publish TechDocs
+
+# Builds this repo's docs (mkdocs.yml + docs/) and publishes the static site straight to S3.
+# The Backstage backend (techdocs.builder: 'external' in app-config.yaml) only ever reads
+# from that bucket - it never builds docs itself.
+#
+# Runs automatically whenever docs-related files change on main, so the published site
+# can't drift out of sync with source the way a manual-only trigger allows. Delegates the
+# actual build/publish steps to the shared techdocs-publish action so every repo that adopts
+# TechDocs uses the same pipeline instead of copy-pasting these steps.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "catalog-info.yaml"
+      - ".github/workflows/techdocs.yml"
+  workflow_dispatch: {}
+
+jobs:
+  publish-techdocs:
+    if: github.ref == 'refs/heads/main'
+    runs-on: gha-myencoura-dnd-amd-set
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: nrccua/reusable-workflows/actions/techdocs-publish@v1.18
+        with:
+          entity: default/component/aioradio
+          s3_bucket_name: tf-techdocs-storage
+          tech_docs_aws_role: ${{ vars.TECH_DOCS_BUCKET_AWS_ROLE_ARN }}
+          s3_bucket_region: ${{ vars.TECH_DOCS_BUCKET_AWS_REGION }}
