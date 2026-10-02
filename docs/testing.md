@@ -8,7 +8,7 @@ Tests live in `aioradio/tests/`, with shared fixtures in `conftest.py` at the re
 make test
 ```
 
-This sets `AWS_PROFILE=efi` and runs `pytest -vss --cov=aioradio --cov-config=.coveragerc --cov-report=html --cov-fail-under=40`. Coverage below 40% fails the run. `.coveragerc` excludes `aioradio/tests/` from coverage.
+This selects the repository's AWS profile and runs `pytest -vss --cov=aioradio --cov-config=.coveragerc --cov-report=html --cov-fail-under=40`. Coverage below 40% fails the run. `.coveragerc` excludes `aioradio/tests/` from coverage.
 
 To run one file:
 
@@ -39,12 +39,12 @@ These tests are hard-coded to skip because they need credentials or have side ef
 | File | Skipped tests | Reason |
 |---|---|---|
 | `file_ingestion_test.py` | Mandrill email, SMB/FTP read and write, `async_db_wrapper` | Sends real email, needs file-share and Secrets Manager access |
-| `file_ingestion_test.py` | `async_wrapper` | Skipped unless `USER` is `tim.reichard` |
+| `file_ingestion_test.py` | `async_wrapper` | Runs only for its designated local test user |
 | `jira_test.py` | All three Jira tests | Creates real Jira tickets |
 | `pyodbc_test.py` | Query test | Needs real database credentials |
 | `psycopg2_test.py` | Connection test | Needs real database credentials |
 
-The Mandrill, FTP, and Jira tests read credentials from `MANDRILL_API_KEY`, `FTP_USER`, `FTP_PW`, `FTP_SERVER`, `FTP_DNS`, `JIRA_USER`, and `JIRA_PW`. To run one locally, set those variables and remove its `pytest.skip` call.
+The integration tests are intentionally skipped by default. Run them only in an approved test environment with suitable credentials and permission for their external effects.
 
 ## Linting
 

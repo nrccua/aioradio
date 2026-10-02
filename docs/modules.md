@@ -60,7 +60,7 @@ Jira REST calls over `httpx` with basic auth.
 
 ## aioradio.file_ingestion
 
-Helpers for enrollment file processing.
+Helpers for file processing.
 
 - Decorators: `async_wrapper` runs an async function from sync code, such as a DAG task. `async_wrapper_using_new_loop` does the same on a fresh event loop. `async_db_wrapper` opens database connections from Secrets Manager credentials, passes them to the wrapped function, and closes them afterward.
 - Archives: `unzip_file`, `unzip_file_get_filepaths`
@@ -68,7 +68,7 @@ Helpers for enrollment file processing.
 - Detection: `detect_encoding` (uses `cchardet`), `detect_delimiter`
 - SMB file shares: `establish_ftp_connection`, `list_ftp_objects`, `get_ftp_file_attributes`, `write_file_to_ftp`, `delete_ftp_file`
 - Email: `send_emails_via_mandrill`
-- `get_efi_excel_sheet_filter` fetches per-institution Excel sheet filters from the Enrollment File Ingestion API at `/filter/excel-sheet`. It returns an empty dict on any error.
+- `get_efi_excel_sheet_filter` fetches Excel sheet filters and returns an empty dict on any error.
 - `get_current_datetime_from_timestamp`
 
 ## aioradio.ds_utils
@@ -76,7 +76,7 @@ Helpers for enrollment file processing.
 Synchronous helpers for data-science jobs that run against Databricks. Importing the module starts a Spark session.
 
 - Unity Catalog: `scan_db_table`, `merge_polars_in_db`, `merge_spark_df_in_db`, `merge_pandas_df_in_db`, `does_db_table_exists`, `alter_db_table_column`
-- Catalog names: `db_catalog(env)` returns `dsc_sbx` or `dsc_prd`. `ese_db_catalog(env)` returns `ese_dev`, `ese_stg`, or `ese_prd`.
+- Catalog names: `db_catalog(env)` and `ese_db_catalog(env)` select a catalog for the requested environment.
 - Conversion: `sql_to_polars`, `sql_to_polars_df`, `polars_to_spark`, `convert_pyspark_dtypes_to_pandas`, `remove_pyarrow_dtypes`
 - Constants tables: `write_constants_to_db`, `read_constants_from_db`
 - MLflow: `promote_model_to_production`
@@ -86,7 +86,7 @@ Synchronous helpers for data-science jobs that run against Databricks. Importing
 - `get_fice_institutions_map`, `get_ftp_connection`
 - `DB_CONNECT` and `DbInfo` are context managers that open a database connection. On exit they roll back or commit depending on `config['rollback']`. `DB_CONNECT` reads credentials from environment variables. `DbInfo` reads them from the Secrets Manager secret named in `config['secret']`.
 
-`get_aws_creds(env)` reads `AWS_ACCESS_KEY_ID_<SUFFIX>`, `AWS_SECRET_ACCESS_KEY_<SUFFIX>`, and `AWS_SESSION_TOKEN_<SUFFIX>` from the environment, where the suffix is `PROD` when `env` is `prod` and `SAND` otherwise.
+`get_aws_creds(env)` reads the AWS credentials for the requested environment from environment variables.
 
 ## aioradio.long_running_jobs
 
