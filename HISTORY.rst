@@ -3,7 +3,7 @@ History
 =======
 
 
-v0.21.12 (2026-10-01)
+v0.22.0 (2026-10-01)
 
 * Remove the tracing dependency, Datadog-specific log tags, and tracing log channel.
 * Keep JSON console logging through JsonLogger and a compatibility wrapper for existing callers.
