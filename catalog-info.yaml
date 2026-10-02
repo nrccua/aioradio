@@ -1,0 +1,33 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: aioradio
+  title: aioradio
+  description: >-
+    Python library of async I/O helpers for AWS (S3, SQS, DynamoDB, Secrets
+    Manager), Redis, MSSQL, Postgres, Jira, SMB file shares, and Databricks,
+    imported as a shared dependency by other services.
+  links:
+    - url: https://github.com/nrccua/aioradio
+      title: Source
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - python
+    - asyncio
+    - aws
+    - redis
+    - mssql
+    - postgres
+    - databricks
+    - polars
+spec:
+  type: library
+  lifecycle: production
+  owner: group:myencoura
+  system: system:libraries
+  consumesApis:
+    - enrollment-file-ingestion
+  dependsOn:
+    - resource:mandrill
+    - resource:databricks

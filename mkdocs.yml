@@ -1,0 +1,9 @@
+site_name: 'aioradio'
+site_description: 'Async I/O helpers for AWS, Redis, SQL databases, Jira, SMB, and Databricks.'
+nav:
+  - Home: index.md
+  - Module reference: modules.md
+  - AWS client lifecycle: aws-clients.md
+  - Testing: testing.md
+plugins:
+  - techdocs-core
